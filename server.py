@@ -9,7 +9,6 @@ from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
 async_mode = None
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 
@@ -91,4 +90,4 @@ class MyNamespace(Namespace):
 socketio.on_namespace(MyNamespace('/test'))
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, keyfile='certs/key.pem', certfile='certs/cert.pem')
+    socketio.run(app, debug=True)
