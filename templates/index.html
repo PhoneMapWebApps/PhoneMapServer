@@ -120,7 +120,7 @@
 
 
     <!-- Upload zip files + JS code -->
-    <p>Upload files</p>
+    <h2>Upload files</h2>
     <form id="upload" action="" method="POST" enctype="multipart/form-data">
       <p> JS Code:<input type="file" name="JS_file">
       </br>
@@ -128,6 +128,16 @@
       </br>
          <input type="submit" value="Upload files"> </p>
     </form>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
     <h2>Receive:</h2>
     <div id="log"></div>

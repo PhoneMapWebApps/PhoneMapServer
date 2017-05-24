@@ -1,17 +1,19 @@
 #!/usr/bin/env python
+import os
+import zipfile
 from flask import Flask, flash, render_template, session, request, redirect
 from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
-import os
 from werkzeug.utils import secure_filename
+
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
 async_mode = None
 
-JS_UPLOAD_FOLDER = "data/js"
-ZIP_UPLOAD_FOLDER = "data/zip"
+JS_UPLOAD_FOLDER = "data/js/"
+ZIP_UPLOAD_FOLDER = "data/zip/"
 ALLOWED_EXTENSIONS = set(["zip", "js"])
 
 app = Flask(__name__)
@@ -24,13 +26,14 @@ thread = None
 
 def background_thread():
     """Example of how to send server generated events to clients."""
-    count = 0
-    while True:
-        socketio.sleep(10)
-        count += 1
-        socketio.emit('my_response',
-                      {'data': 'Server generated event', 'count': count},
-                      namespace='/test')
+    pass
+    # count = 0
+    # while True:
+    #     socketio.sleep(10)
+    #     count += 1
+    #     socketio.emit('my_response',
+    #                   {'data': 'Server generated event', 'count': count},
+    #                   namespace='/test')
 
 
 @app.route('/')
@@ -123,26 +126,24 @@ def upload_file():
             ZIP_file.save(os.path.join(app.config['ZIP_UPLOAD_FOLDER'], ZIP_filename))
 
             flash("successfully uploaded " + JS_filename + " and " + ZIP_filename )
-            return render_template("suc_upload.html")
+            print("successfully uploaded " + JS_filename + " and " + ZIP_filename )
 
-    # in case the request was made with GET instead of POST
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+            extract(ZIP_filename)
 
+            return redirect(request.url)
+
+    flash("Error; perhaps you used incorrect file types?")
+    return redirect(request.url)
+
+def extract(filename):
+    with zipfile.ZipFile(ZIP_UPLOAD_FOLDER + filename,"r") as zip_ref:
+        zip_ref.extractall(ZIP_UPLOAD_FOLDER + "extracted_" + filename + "/")
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 socketio.on_namespace(MyNamespace('/test'))
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, host="0.0.0.0")
