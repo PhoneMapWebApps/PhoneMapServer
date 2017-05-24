@@ -10,12 +10,14 @@ from werkzeug.utils import secure_filename
 # the best option based on installed packages.
 async_mode = None
 
-UPLOAD_FOLDER = "data/"
+JS_UPLOAD_FOLDER = "data/js"
+ZIP_UPLOAD_FOLDER = "data/zip"
 ALLOWED_EXTENSIONS = set(["zip", "js"])
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['JS_UPLOAD_FOLDER'] = JS_UPLOAD_FOLDER
+app.config['ZIP_UPLOAD_FOLDER'] = ZIP_UPLOAD_FOLDER
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 
@@ -117,8 +119,8 @@ def upload_file():
             JS_filename = secure_filename(JS_file.filename)
             ZIP_filename = secure_filename(ZIP_file.filename)
 
-            JS_file.save(os.path.join(app.config['UPLOAD_FOLDER'], JS_filename))
-            ZIP_file.save(os.path.join(app.config['UPLOAD_FOLDER'], ZIP_filename))
+            JS_file.save(os.path.join(app.config['JS_UPLOAD_FOLDER'], JS_filename))
+            ZIP_file.save(os.path.join(app.config['ZIP_UPLOAD_FOLDER'], ZIP_filename))
 
             flash("successfully uploaded " + JS_filename + " and " + ZIP_filename )
             return render_template("suc_upload.html")
