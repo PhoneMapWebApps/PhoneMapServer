@@ -92,9 +92,9 @@ class PhoneMap(Namespace):
         emit('my_response',
             {'data': "someone asked for code", 'count': session['receive_count']},
             broadcast=True)
-        with open(JS_UPLOAD_FOLDER + "lol.js", 'rb') as file:
+        with open(JS_UPLOAD_FOLDER + "lol.js", "r") as file:
             js=file.read()
-        with open(ZIP_UPLOAD_FOLDER + "extracted_test.zip/file1.txt") as file:
+        with open(ZIP_UPLOAD_FOLDER + "extracted_test.zip/file1.txt" , "r") as file:
             data=file.read()
         emit('set_code',{'code': js, 'data': data} )
 
