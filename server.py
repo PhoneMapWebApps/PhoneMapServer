@@ -83,11 +83,26 @@ class PhoneMap(Namespace):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-        emit('my_response', {'data': 'Connected', 'count': 0})
+        emit('set_id', {'data': 'Connected', 'count': 0, 'id': get_bs_id()})
+
+    # this is hardcoded stuff for testing purposes
+    # need to make a queue of which data to send
+    def on_get_code(self):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        emit('my_response',
+            {'data': "someone asked for code", 'count': session['receive_count']},
+            broadcast=True)
+        with open(JS_UPLOAD_FOLDER + "lol.js", 'rb') as file:
+            js=file.read()
+        with open(ZIP_UPLOAD_FOLDER + "extracted_test.zip/file1.txt") as file:
+            data=file.read()
+        emit('set_code',{'code': js, 'data': data} )
 
     def on_disconnect(self):
         print('Client disconnected', request.sid)
 
+def get_bs_id():
+    return 42
 
 def check_empty(requestResult, filetype):
     if requestResult.filename == '':

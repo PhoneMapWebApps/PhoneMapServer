@@ -29,6 +29,15 @@
             socket.on('my_response', function(msg) {
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
             });
+
+            socket.on('set_id', function(msg) {
+                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data + " with assigned ID: " + msg.id).html());
+            });
+
+            socket.on('set_code', function(msg) {
+              $('#log').append('<br>' + $('<div/>').text('Received some code bs').html());
+            });
+
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
             // round trip time is measured.
@@ -81,6 +90,10 @@
                 socket.emit('disconnect_request');
                 return false;
             });
+            $('form#get_code').submit(function(event) {
+                socket.emit('get_code');
+                return false;
+            });
         });
     </script>
 </head>
@@ -116,6 +129,9 @@
     </form>
     <form id="disconnect" method="POST" action="#">
         <input type="submit" value="Disconnect">
+    </form>
+    <form id="get_code" method="POST" action="#">
+        <input type="submit" value="Get Code">
     </form>
 
 
