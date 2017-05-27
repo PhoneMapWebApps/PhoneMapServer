@@ -1,1 +1,1 @@
-pip3 install flask flask_socketio eventlet
+pip3 install flask flask_socketio eventlet unittest shutil
