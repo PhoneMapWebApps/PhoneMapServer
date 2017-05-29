@@ -4,14 +4,18 @@ import zipfile
 from flask import Flask, flash, render_template, session, request, redirect
 from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
-from werkzeug.utils import secure_filename
+import psycopg2
+
+import sql_func
+import files
+
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
 
 if not os.path.isfile("config.py"):
-    print("Please setup your config.py file")
+    print("Please setup your config.py file. See sampleconfig.py for info.")
     quit()
 
 async_mode = None
@@ -21,12 +25,24 @@ app.config.from_object('config.Development')
 
 thread = None
 
+# connect to db and setup cursor
+try:
+    conn = psycopg2.connect(dbname = app.config["PSQL_DB"],
+                            user = app.config["PSQL_USER"],
+                            password = app.config["PSQL_PASSWORD"],
+                            host = app.config["PSQL_SERVER"],
+                            port = app.config["PSQL_PORT"])
+    cursor = conn.cursor()
+except Exception as e:
+    print("Error during database connection.")
+    print(e)
+    quit()
+
+socketio = SocketIO(app, async_mode=async_mode)
+
 
 def background_thread():
     pass
-
-
-socketio = SocketIO(app, async_mode=async_mode)
 
 
 @app.route('/')
@@ -86,9 +102,9 @@ class PhoneMap(Namespace):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-        emit('set_id', {'data': 'Connected', 'count': 0, 'id': get_bs_id()})
+        emit('set_id', {'data': 'Connected', 'count': 0, 'id': get_some_id()})
 
-    # this is hardcoded stuff for testing purposes
+    # TODO this is hardcoded stuff for testing purposes
     # need to make a queue of which data to send
     def on_get_code(self):
         session['receive_count'] = session.get('receive_count', 0) + 1
@@ -106,39 +122,13 @@ class PhoneMap(Namespace):
 
 
 def flashprint(s):
-    # flash(s)
+    flash(s)
     print(s)
 
 
-def get_bs_id():
+# TODO: actually get a real proper non-joke ID
+def get_some_id():
     return 42
-
-
-def request_files_empty(request_result, filetype):
-    if request_result.filename == '' or request_result.filename is None:
-        flashprint('Empty in submission: ' + filetype)
-        return True
-    return False
-
-
-def request_files_missing(request_files, filetype):
-    if filetype not in request_files:
-        flashprint('Missing from submission: ' + filetype)
-        return True
-    return False
-
-
-def request_file_exists(request_files, file_tag):
-    return not (
-    request_files_missing(request_files, file_tag) or request_files_empty(request_files[file_tag], file_tag))
-
-
-def file_extension_okay(filename, required_file_extension):
-    file_extension = filename.rsplit('.', 1)[1].lower()
-    if '.' in filename and file_extension == required_file_extension:
-        return True
-    flashprint('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
-    return False
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -148,38 +138,25 @@ def upload_file():
         zip_file_tag = 'ZIP_FILE'
 
         flashprint('Checking file existence')
-        if not request_file_exists(request.files, js_file_tag): return redirect(request.url)
-        if not request_file_exists(request.files, zip_file_tag): return redirect(request.url)
+        if not files.request_file_exists(request.files, js_file_tag): return redirect(request.url)
+        if not files.request_file_exists(request.files, zip_file_tag): return redirect(request.url)
 
         js_file = request.files[js_file_tag]
         zip_file = request.files[zip_file_tag]
 
         flashprint('Checking file extensions')
-        if not file_extension_okay(js_file.filename, 'js'): return redirect(request.url)
-        if not file_extension_okay(zip_file.filename, 'zip'): return redirect(request.url)
+        if not files.file_extension_okay(js_file.filename, 'js'): return redirect(request.url)
+        if not files.file_extension_okay(zip_file.filename, 'zip'): return redirect(request.url)
 
         flashprint('Saving and extracting...')
-        save_and_extract_files(js_file, zip_file)
+        files.save_and_extract_files(app, js_file, zip_file)
+
+        sql_func.add_to_db(conn, cursor, get_some_id(), js_file, zip_file)
+
         return redirect(request.url)
 
     flashprint("Error; perhaps you used incorrect file types?")
     return redirect(request.url)
-
-
-def save_and_extract_files(js_file, zip_file):
-    # Gonna want to use custom file_names. Append user_id and put it in a folder for the user/task.
-    js_filename = secure_filename(js_file.filename)
-    zip_filename = secure_filename(zip_file.filename)
-    flashprint('Uploading...')
-    js_file.save(os.path.join(app.config['JS_UPLOAD_FOLDER'], js_filename))
-    zip_file.save(os.path.join(app.config['ZIP_UPLOAD_FOLDER'], zip_filename))
-    flashprint("successfully uploaded " + js_filename + " and " + zip_filename)
-    extract(zip_filename)
-
-
-def extract(filename):
-    with zipfile.ZipFile(app.config['ZIP_UPLOAD_FOLDER'] + filename, "r") as zip_ref:
-        zip_ref.extractall(app.config['ZIP_UPLOAD_FOLDER'] + "extracted_" + filename + "/")
 
 
 socketio.on_namespace(PhoneMap('/test'))

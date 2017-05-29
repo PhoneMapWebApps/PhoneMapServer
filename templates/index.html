@@ -35,7 +35,7 @@
             });
 
             socket.on('set_code', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received some code bs' + msg.code + " and " + msg.data ).html());
+              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
             });
 
             // Interval function that tests message latency by sending a "ping"
