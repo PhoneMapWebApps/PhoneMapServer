@@ -6,13 +6,15 @@ from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
 from web.webapp import app
 from database.adapter import db
 import database.functions as sql
-import files
+from misc.files import EXTRACTED_PREFIX
+from misc.helper import get_some_id
 
 
 async_mode = None
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
+
 
 def background_thread():
     pass
@@ -86,7 +88,7 @@ class PhoneMap(Namespace):
 
         with open(app.config['JS_UPLOAD_FOLDER'] + res.js_file, "r") as file:
             js = file.read()
-        with open(app.config['ZIP_UPLOAD_FOLDER'] + files.EXTRACTED_PREFIX + res.zip_file + "/file1.txt", "r") as file:
+        with open(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + res.zip_file + "/file1.txt", "r") as file:
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
 
@@ -104,10 +106,6 @@ class PhoneMap(Namespace):
 
     def on_disconnect(self):
         print('Client disconnected', request.sid)
-
-# TODO: actually get a real proper non-joke ID
-def get_some_id():
-    return 42
 
 
 socketio.on_namespace(PhoneMap('/test'))
