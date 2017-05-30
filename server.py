@@ -118,7 +118,6 @@ class PhoneMap(Namespace):
         emit('set_code', {'code': js, 'data': data})
 
     def on_execution_failed(self, message):
-        print("EXECUTION FAILED MSG\n")
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': "Client failed executing with stack trace: " + message['exception'], 'count': session['receive_count']},
