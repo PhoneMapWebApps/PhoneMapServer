@@ -40,7 +40,7 @@ def save_and_extract_files(app, js_file, zip_file):
     flashprint('Uploading...')
     js_file.save(os.path.join(app.config['JS_UPLOAD_FOLDER'], js_filename))
     zip_file.save(os.path.join(app.config['ZIP_UPLOAD_FOLDER'], zip_filename))
-    flashprint("successfully uploaded " + js_filename + " and " + zip_filename)
+    flashprint("Successfully uploaded " + js_filename + " and " + zip_filename)
     extract(app, zip_filename)
 
 

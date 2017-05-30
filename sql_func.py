@@ -1,7 +1,24 @@
 from werkzeug.utils import secure_filename
+import psycopg2
 
 
-def get_todo_by_id(cursor, id_val):
+def db_connect(app):
+    global conn
+    global cursor
+    try:
+        conn = psycopg2.connect(dbname = app.config["PSQL_DB"],
+                                user = app.config["PSQL_USER"],
+                                password = app.config["PSQL_PASSWORD"],
+                                host = app.config["PSQL_SERVER"],
+                                port = app.config["PSQL_PORT"])
+        cursor = conn.cursor()
+    except Exception as e:
+        print("Error during database connection.")
+        print(e)
+        quit()
+
+
+def get_todo_by_id(id_val):
     if isinstance(id_val, int):
         cursor.execute("""SELECT todo from test where id=%d;""".format(id_val))
         rows = cursor.fetchall()
@@ -12,7 +29,7 @@ def get_todo_by_id(cursor, id_val):
         return None
 
 # doesnt do conn.commit() so wont publish changes
-def test_db(cursor):
+def test_db():
     try:
         cursor.execute("""CREATE TABLE test_table (name char(40));""")
         cursor.execute("""SELECT * FROM test_table;""")
@@ -24,7 +41,7 @@ def test_db(cursor):
         print(e)
 
 
-def add_to_db(conn, cursor, id_val, js_file, zip_file):
+def add_to_db(id_val, js_file, zip_file):
 
     js_filename = secure_filename(js_file.filename)
     zip_filename = secure_filename(zip_file.filename)

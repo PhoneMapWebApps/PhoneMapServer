@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import zipfile
 from flask import Flask, flash, render_template, session, request, redirect
 from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
-import psycopg2
 
 import sql_func
 import files
@@ -26,17 +25,7 @@ app.config.from_object('config.Development')
 thread = None
 
 # connect to db and setup cursor
-try:
-    conn = psycopg2.connect(dbname = app.config["PSQL_DB"],
-                            user = app.config["PSQL_USER"],
-                            password = app.config["PSQL_PASSWORD"],
-                            host = app.config["PSQL_SERVER"],
-                            port = app.config["PSQL_PORT"])
-    cursor = conn.cursor()
-except Exception as e:
-    print("Error during database connection.")
-    print(e)
-    quit()
+sql_func.db_connect(app)
 
 socketio = SocketIO(app, async_mode=async_mode)
 
@@ -169,7 +158,7 @@ def upload_file():
         flashprint('Saving and extracting...')
         files.save_and_extract_files(app, js_file, zip_file)
 
-        sql_func.add_to_db(conn, cursor, get_some_id(), js_file, zip_file)
+        sql_func.add_to_db(get_some_id(), js_file, zip_file)
 
         last_uploaded_code = js_file.filename
         last_uploaded_data = zip_file.filename
