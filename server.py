@@ -123,6 +123,12 @@ class PhoneMap(Namespace):
              {'data': "Client failed executing with stack trace: " + message['exception'], 'count': session['receive_count']},
              broadcast = True)
 
+    def on_return(self, message):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        emit('my_response',
+             {'data': "Client returns following data: " + message['return'], 'count': session['receive_count']},
+             broadcast = True)
+
     def on_disconnect(self):
         print('Client disconnected', request.sid)
 
