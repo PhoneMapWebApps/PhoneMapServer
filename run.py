@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 from web.sockets import socketio
 from web.sockets import app
