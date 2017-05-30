@@ -1,1 +1,1 @@
-pip3 install flask flask_socketio eventlet unittest shutil psycopg2 --user
+pip3 install flask flask_socketio eventlet unittest shutil flask_sqlalchemy --user

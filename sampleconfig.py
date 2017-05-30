@@ -6,8 +6,6 @@ class Development(object):
     JS_UPLOAD_FOLDER = '/path/to/dir/PhoneMapServer/data/js/'
     ZIP_UPLOAD_FOLDER = '/path/to/dir/PhoneMapServer/data/zip/'
 
-    PSQL_USER = 'I_am_a_user'
-    PSQL_PASSWORD = 'this_is_a_password'
-    PSQL_DB = 'this_is_a_DB'
-    PSQL_SERVER = 'db.this.is.where.com'
-    PSQL_PORT = 6666
+    # SQLALCHEMY_DATABASE_URI = postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+    SQLALCHEMY_DATABASE_URI = 'sqltype://username:password@location:port/databasename'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

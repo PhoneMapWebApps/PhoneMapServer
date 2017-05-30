@@ -4,10 +4,11 @@ import zipfile
 from flask import Flask, flash, render_template, session, request, redirect
 from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
+from flask_sqlalchemy import SQLAlchemy
 
-import sql_func
 import files
-
+from database.adapter import db
+import database.functions as sql
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -24,8 +25,12 @@ app.config.from_object('config.Development')
 
 thread = None
 
-# connect to db and setup cursor
-sql_func.db_connect(app)
+# initialise with vals
+db.init_app(app)
+
+# use correct app context
+with app.app_context():
+    db.create_all()
 
 socketio = SocketIO(app, async_mode=async_mode)
 
@@ -100,9 +105,14 @@ class PhoneMap(Namespace):
         emit('my_response',
              {'data': "someone asked for code", 'count': session['receive_count']},
              broadcast=True)
-        with open(app.config['JS_UPLOAD_FOLDER'] + last_uploaded_code, "r") as file:
+
+        # TODO: probably want to specify which task to run, as opposed to just latest task
+        # res = sql.get_from_db_by_id(1)
+        res = sql.get_latest()
+
+        with open(app.config['JS_UPLOAD_FOLDER'] + res.js_file, "r") as file:
             js = file.read()
-        with open(app.config['ZIP_UPLOAD_FOLDER'] + files.EXTRACTED_PREFIX + last_uploaded_data + "/file1.txt", "r") as file:
+        with open(app.config['ZIP_UPLOAD_FOLDER'] + files.EXTRACTED_PREFIX + res.zip_file + "/file1.txt", "r") as file:
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
 
@@ -137,8 +147,6 @@ def upload_file():
     # TODO - these hold whatever code/data files were uploaded thorugh the browser
     #        interface last - but there should really be connection between client
     #        id and the code/file pair that belong to it.
-    global last_uploaded_code
-    global last_uploaded_data
 
     if request.method == 'POST':
         js_file_tag = 'JS_FILE'
@@ -158,10 +166,7 @@ def upload_file():
         flashprint('Saving and extracting...')
         files.save_and_extract_files(app, js_file, zip_file)
 
-        sql_func.add_to_db(get_some_id(), js_file, zip_file)
-
-        last_uploaded_code = js_file.filename
-        last_uploaded_data = zip_file.filename
+        task_id = sql.add_to_db(js_file, zip_file)
 
         return redirect(request.url)
 
