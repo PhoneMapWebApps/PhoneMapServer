@@ -1,7 +1,7 @@
 import os
 import zipfile
 from werkzeug.utils import secure_filename
-from server import flashprint
+from misc.helper import flashprint
 
 EXTRACTED_PREFIX = "extracted_"
 
