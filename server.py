@@ -111,9 +111,9 @@ class PhoneMap(Namespace):
         emit('my_response',
              {'data': "someone asked for code", 'count': session['receive_count']},
              broadcast=True)
-        with open(app.config['JS_UPLOAD_FOLDER'] + "lol.js", "r") as file:
+        with open(app.config['JS_UPLOAD_FOLDER'] + last_uploaded_code, "r") as file:
             js = file.read()
-        with open(app.config['ZIP_UPLOAD_FOLDER'] + "extracted_test.zip/file1.txt", "r") as file:
+        with open(app.config['ZIP_UPLOAD_FOLDER'] + files.EXTRACTED_PREFIX + last_uploaded_data + "/file1.txt", "r") as file:
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
 
@@ -133,6 +133,12 @@ def get_some_id():
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    # TODO - these hold whatever code/data files were uploaded thorugh the browser
+    #        interface last - but there should really be connection between client
+    #        id and the code/file pair that belong to it.
+    global last_uploaded_code
+    global last_uploaded_data
+
     if request.method == 'POST':
         js_file_tag = 'JS_FILE'
         zip_file_tag = 'ZIP_FILE'
@@ -152,6 +158,9 @@ def upload_file():
         files.save_and_extract_files(app, js_file, zip_file)
 
         sql_func.add_to_db(conn, cursor, get_some_id(), js_file, zip_file)
+
+        last_uploaded_code = js_file.filename
+        last_uploaded_data = zip_file.filename
 
         return redirect(request.url)
 

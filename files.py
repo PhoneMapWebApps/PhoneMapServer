@@ -3,6 +3,8 @@ import zipfile
 from werkzeug.utils import secure_filename
 from server import flashprint
 
+EXTRACTED_PREFIX = "extracted_"
+
 
 def request_files_empty(request_result, filetype):
     if request_result.filename == '' or request_result.filename is None:
@@ -44,4 +46,4 @@ def save_and_extract_files(app, js_file, zip_file):
 
 def extract(app, filename):
     with zipfile.ZipFile(app.config['ZIP_UPLOAD_FOLDER'] + filename, "r") as zip_ref:
-        zip_ref.extractall(app.config['ZIP_UPLOAD_FOLDER'] + "extracted_" + filename + "/")
+        zip_ref.extractall(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + filename + "/")
