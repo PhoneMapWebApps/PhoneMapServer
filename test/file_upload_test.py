@@ -2,7 +2,9 @@ import unittest
 import requests
 import os.path
 import shutil
-from server import file_extension_okay
+import sys
+sys.path.insert(0,'..')
+from misc import files
 
 class TestFileUpload(unittest.TestCase):
     def allows_valid_extensions(self):
