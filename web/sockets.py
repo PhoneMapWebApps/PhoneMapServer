@@ -7,7 +7,7 @@ from web.webapp import app
 from database.adapter import db
 import database.functions as sql
 from misc.files import EXTRACTED_PREFIX
-from misc.helper import get_some_id
+from misc.helper import get_some_id, flashprint
 
 
 async_mode = None
@@ -82,13 +82,16 @@ class PhoneMap(Namespace):
              {'data': "someone asked for code", 'count': session['receive_count']},
              broadcast=True)
 
-        # TODO: probably want to specify which task to run, as opposed to just latest task
-        # res = sql.get_from_db_by_id(1)
-        res = sql.get_latest()
+        data_file, zip_file, js_file = sql.get_next()
 
-        with open(app.config['JS_UPLOAD_FOLDER'] + res.js_file, "r") as file:
+        if not (data_file and zip_file and js_file):
+            flashprint("Tasks all gone")
+            emit('no_tasks')
+            return
+
+        with open(app.config['JS_UPLOAD_FOLDER'] + js_file, "r") as file:
             js = file.read()
-        with open(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + res.zip_file + "/file1.txt", "r") as file:
+        with open(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + zip_file + "/" + data_file, "r") as file:
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
 
