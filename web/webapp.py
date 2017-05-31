@@ -45,6 +45,6 @@ def upload_file():
     save_and_extract_files(app, js_file, zip_file)
 
     # TODO: idk, we probably want the task ID for something at some point
-    task_id = sql.add_to_db(js_file, zip_file)
+    task_id = sql.add_to_db(app, js_file, zip_file)
 
     return redirect(request.url)
