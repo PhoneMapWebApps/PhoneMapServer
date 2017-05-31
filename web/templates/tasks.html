@@ -9,18 +9,6 @@
             background-color: #7c9bad;
             color: #ffffff;
         }
-        .serverconsole {
-            background-color: #44464a;
-            color: #ffffff;
-            position: absolute;
-            left: 0;
-            top: 10%;
-            right: 0;
-            bottom: 10%;
-            overflow-y: auto;
-            border: 1px solid #333;
-            text-align: left;
-        }
         .footer {
             position: absolute;
             left: 0;
@@ -55,21 +43,6 @@
             socket.on('connect', function() {
                 socket.emit('my_event', {data: 'I\'m connected!'});
             });
-            // Event handler for server sent data.
-            // The callback function is invoked whenever the server emits data
-            // to the client. The data is then displayed in the "Received"
-            // section of the page.
-            socket.on('my_response', function(msg) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
-            });
-
-            socket.on('set_id', function(msg) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data + " with assigned ID: " + msg.id).html());
-            });
-
-            socket.on('set_code', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
-            });
 
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
@@ -92,13 +65,6 @@
                     sum += ping_pong_times[i];
                 $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
             });
-            // Handlers for the different forms in the page.
-            // These accept data from the user and send it to the server in a
-            // variety of ways
-           // $('form#emit').submit(function(event) {
-           //     socket.emit('my_event', {data: $('#emit_data').val()});
-           //     return false;
-           // });
         });
     </script>
 </head>
@@ -109,8 +75,8 @@
           <a class="navbar-brand" href="#">PhoneMapServer internal alpha</a>
         </div>
         <ul class="nav navbar-nav">
-          <li class="active"><a href="#">Server monitor</a></li>
-          <li><a href="tasks">Task manager</a></li>
+          <li><a href="/">Server monitor</a></li>
+          <li class="active"><a href="#">Task manager</a></li>
           <li><a href="#">About</a></li>
         </ul>
       </div>
@@ -118,9 +84,27 @@
 
     <br/><br/>
 
-    <div class="serverconsole">
-        <h3>CONSOLE</h3>
-        <div id="log"></div>
+    <div class="serverui">
+
+    <!-- Upload zip files + JS code -->
+    <h2>Upload files</h2>
+    <form id="upload"  action="" method="POST" enctype="multipart/form-data">
+        <p align="center">
+            JS Code:<input type="file" name="JS_FILE"> Data File:<input type=file name="ZIP_FILE">
+        </p>
+        <p align="center">
+            <input class="btn-default" type="submit" value="Upload files">
+        </p>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          {% for message in messages %}
+          <p>{{ message }}</p>
+          {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     </div>
     <div class="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>

@@ -25,11 +25,12 @@ def request_file_exists(request_files, file_tag):
     request_files_missing(request_files, file_tag) or request_files_empty(request_files[file_tag], file_tag))
 
 
-def file_extension_okay(filename, required_file_extension):
+def file_extension_okay(filename, required_file_extension, shouldflashprint=True):
     file_extension = filename.rsplit('.', 1)[1].lower()
     if '.' in filename and file_extension == required_file_extension:
         return True
-    flashprint('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
+    if(shouldflashprint):
+        flashprint('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
     return False
 
 

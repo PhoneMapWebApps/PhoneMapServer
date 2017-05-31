@@ -20,30 +20,30 @@ with app.app_context():
 def index():
     return render_template('index.html')
 
+@app.route('/tasks')
+def tasks():
+    return render_template('tasks.html')
 
-@app.route('/', methods=['GET', 'POST'])
+
+@app.route('/tasks', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        js_file_tag = 'JS_FILE'
-        zip_file_tag = 'ZIP_FILE'
+    js_file_tag = 'JS_FILE'
+    zip_file_tag = 'ZIP_FILE'
 
-        flashprint('Checking file existence')
-        if not request_file_exists(request.files, js_file_tag): return redirect(request.url)
-        if not request_file_exists(request.files, zip_file_tag): return redirect(request.url)
+    flashprint('Checking file existence')
+    if not request_file_exists(request.files, js_file_tag): return redirect(request.url)
+    if not request_file_exists(request.files, zip_file_tag): return redirect(request.url)
 
-        js_file = request.files[js_file_tag]
-        zip_file = request.files[zip_file_tag]
+    js_file = request.files[js_file_tag]
+    zip_file = request.files[zip_file_tag]
 
-        flashprint('Checking file extensions')
-        if not file_extension_okay(js_file.filename, 'js'): return redirect(request.url)
-        if not file_extension_okay(zip_file.filename, 'zip'): return redirect(request.url)
+    flashprint('Checking file extensions')
+    if not file_extension_okay(js_file.filename, 'js'): return redirect(request.url)
+    if not file_extension_okay(zip_file.filename, 'zip'): return redirect(request.url)
 
-        flashprint('Saving and extracting...')
-        save_and_extract_files(app, js_file, zip_file)
+    flashprint('Saving and extracting...')
+    save_and_extract_files(app, js_file, zip_file)
 
-        task_id = sql.add_to_db(js_file, zip_file)
+    task_id = sql.add_to_db(js_file, zip_file)
 
-        return redirect(request.url)
-
-    flashprint("Error; perhaps you used incorrect file types?")
     return redirect(request.url)
