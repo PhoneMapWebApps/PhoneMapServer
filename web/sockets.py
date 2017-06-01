@@ -72,14 +72,15 @@ class PhoneMap(Namespace):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-        if message:
-            print("got Android ID of" + message["id"])
         emit('my_response', {'data': 'Connected', 'count': 0})
 
     # TODO this is hardcoded stuff for testing purposes
     # need to make a queue of which data to send
     def on_get_code(self, message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
+        # NOTE: receiving ID at message["id"]
+        # Add this to DB to ensure only one task running on device
+
         emit('my_response',
              {'data': "someone asked for code", 'count': session['receive_count']},
              broadcast=True)
@@ -96,6 +97,12 @@ class PhoneMap(Namespace):
         with open(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + zip_file + "/" + data_file, "r") as file:
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
+
+    def on_start_code(self, message=None):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        # TODO: set start time and processing here, not in get_code
+        flashprint("Starting code...")
+
 
     def on_execution_failed(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
