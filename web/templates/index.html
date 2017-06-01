@@ -63,10 +63,6 @@
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
             });
 
-            socket.on('set_id', function(msg) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data + " with assigned ID: " + msg.id).html());
-            });
-
             socket.on('set_code', function(msg) {
               $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
             });
@@ -74,7 +70,7 @@
             socket.on('no_tasks', function() {
               $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
             });
-            
+
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
             // round trip time is measured.
