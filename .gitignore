@@ -1,5 +1,7 @@
 # Config files
 config.py
+test/config.py.bak
+config.py.bkp
 
 # IntelliJ
 /.idea

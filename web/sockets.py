@@ -74,8 +74,6 @@ class PhoneMap(Namespace):
             thread = socketio.start_background_task(target=background_thread)
         emit('my_response', {'data': 'Connected', 'count': 0})
 
-    # TODO this is hardcoded stuff for testing purposes
-    # need to make a queue of which data to send
     def on_get_code(self, message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
@@ -99,12 +97,15 @@ class PhoneMap(Namespace):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         flashprint("Starting code...")
-        sql.start_task(message["id"])
-        flashprint("Code marked as started.")
-
-        emit('my_response',
-             {'data': "Code started", 'count': session['receive_count']},
-             broadcast = True)
+        status = sql.start_task(message["id"])
+        if status:
+            flashprint("Code marked as started.")
+            emit('my_response',
+                 {'data': "Code started", 'count': session['receive_count']},
+                 broadcast = True)
+        else:
+            flashprint("Code already running or unknown subtask_id, please stop.")
+            emit('stop_executing')
 
 
     def on_execution_failed(self, message):
@@ -122,7 +123,7 @@ class PhoneMap(Namespace):
         sql.execution_complete(message["id"])
 
         emit('my_response',
-             {'data': "Client returns following data: " + message['return'], 'count': session['receive_count']},
+             {'data': "Client returned following data: " + message['return'], 'count': session['receive_count']},
              broadcast = True)
 
     def on_disconnect(self, message=None):
