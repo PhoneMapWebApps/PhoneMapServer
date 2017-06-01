@@ -36,6 +36,7 @@ def file_extension_okay(filename, required_file_extension, shouldflashprint=True
 
 def save_and_extract_files(app, js_file, zip_file):
     # TODO Gonna want to use custom file_names. Append user_id and put it in a folder for the user/task.
+    # using task ID could be good enough given theyre unique
     js_filename = secure_filename(js_file.filename)
     zip_filename = secure_filename(zip_file.filename)
     flashprint('Uploading...')

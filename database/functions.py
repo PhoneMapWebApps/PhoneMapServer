@@ -1,17 +1,18 @@
 import os
 from database.adapter import db
-from database.models import Tasks, SubTasks
+from database.models import Tasks, SubTasks, Android_IDs
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from misc.files import EXTRACTED_PREFIX
 from misc.helper import flashprint
 
+# TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
 
 def add_to_db(app, js_file, zip_file):
     js_filename = secure_filename(js_file.filename)
     zip_filename = secure_filename(zip_file.filename)
 
-    task = Tasks(zip_filename, datetime.utcnow())
+    task = Tasks(js_filename, zip_filename, datetime.utcnow())
 
     db.session.add(task)
 
@@ -20,46 +21,50 @@ def add_to_db(app, js_file, zip_file):
     directory = app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + zip_filename
     # NOTE: NO SUBDIRECTORIES (YET?)
     for filename in os.listdir(directory):
-        subtask = SubTasks(task.task_id, js_filename, filename, datetime.utcnow())
+        subtask = SubTasks(task.task_id, filename, datetime.utcnow())
         db.session.add(subtask)
 
     # make persistent
     db.session.commit()
     return task.task_id
 
-
-def get_by_task_id(id_val):
-    # NOTE: task query only required for the start_task func
-    task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
-    if not task:
-        flashprint("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
-        return None, None, None
-
-    subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
-    if not subtask:
-        flashprint("Selected task " + id_val + " already has all tasks in progress.")
-        return None, None, None
-
-    start_task(task, subtask)
-
-    return subtask.data_file, task.zip_file, subtask.js_file
-
-# order reverse -> run latest submissions first
-def get_latest():
-    subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
-    if not subtask:
-            flashprint("No more tasks!")
-            return None, None, None
-
-    # by foreign key magic, this has to exist so no point checking for None
-    task = Tasks.query.filter_by(task_id=subtask.task_id).first()
-
-    start_task(task, subtask)
-
-    return subtask.data_file, task.zip_file, subtask.js_file
+# TODO: UPDATE THESE TO WORK WITH Android_ID AND Session_ID
+# def get_by_task_id(id_val):
+#     # NOTE: task query only required for the start_task func
+#     task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
+#     if not task:
+#         flashprint("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
+#         return None, None, None
+#
+#     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
+#     if not subtask:
+#         flashprint("Selected task " + id_val + " already has all tasks in progress.")
+#         return None, None, None
+#
+#
+#     return subtask.data_file, task.zip_file, task.js_file
+#
+# # order reverse -> run latest submissions first
+# def get_latest():
+#     subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
+#     if not subtask:
+#             flashprint("No more tasks!")
+#             return None, None, None
+#
+#     # by foreign key magic, this has to exist so no point checking for None
+#     task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+#
+#
+#     return subtask.data_file, task.zip_file, task.js_file
 
 # oldest submissions first
-def get_next():
+def get_next(android_id, session_id):
+    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    if not phone:
+        print("phone has never been seen before, adding phone to DB.")
+        phone = Android_IDs(android_id, session_id)
+        db.session.add(phone)
+        db.session.commit()
     # get next task which isnt finished already -> it CAN be in progress!
     # just means one of its subtasks has/is run(ning)
     tasks = Tasks.query.filter_by(is_complete=False).all()
@@ -80,14 +85,75 @@ def get_next():
         flashprint("No more subtasks to allocate!")
         return None, None, None
 
-    start_task(task, subtask)
+    # set correct values of session id and subtask_id in phone DB
+    phone.session_id = session_id
+    phone.subtask_id = subtask.subtask_id
+    db.session.commit()
 
-    return subtask.data_file, task.zip_file, subtask.js_file
+    return subtask.data_file, task.zip_file, task.js_file
 
-def start_task(task, subtask):
+
+def start_task(android_id):
+    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    if not phone:
+        flashprint("Phone not found.")
+        return
+
+    subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
+    task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+
+    phone.is_processing = True
+    # NOTE: handle concurrent execution? aka if already in progress, say no?
     task.in_progress = True
     subtask.in_progress = True
     if task.time_started == None:
         task.time_started = datetime.utcnow()
     subtask.time_started = datetime.utcnow()
+
     db.session.commit()
+
+
+def stop_execution(android_id):
+    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    if phone.is_processing:
+        subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
+        task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+
+        phone.is_processing = False
+        subtask.in_progress = False
+        subtask.time_started = None
+        # TODO: update task process + start time (loop?)
+        db.session.commit()
+
+def execution_complete(android_id):
+    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    if phone.is_processing:
+        subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
+        task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+
+        phone.is_processing = False
+        subtask.in_progress = False
+        subtask.is_complete = True
+        subtask.time_completed = datetime.utcnow()
+
+        subtasks = SubTasks.query.filter_by(subtask_id=phone.subtask_id).all()
+        for sub in subtasks:
+            if not sub.is_complete:
+                # dont set task as complete, return now
+                db.session.commit()
+                return
+
+        task.in_progress = False
+        task.is_complete = True
+        task.time_completed = datetime.utcnow()
+
+        db.session.commit()
+
+
+def disconnected(session_id):
+    phone = Android_IDs.query.filter_by(session_id=session_id).first()
+    if phone:
+        phone.is_connected = False
+        phone.session_id = None # NOTE: SQL implementation dependent
+
+        db.session.commit()

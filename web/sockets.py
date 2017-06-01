@@ -78,14 +78,11 @@ class PhoneMap(Namespace):
     # need to make a queue of which data to send
     def on_get_code(self, message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
-        # NOTE: receiving ID at message["id"]
-        # Add this to DB to ensure only one task running on device
-
         emit('my_response',
-             {'data': "someone asked for code", 'count': session['receive_count']},
+             {'data': "Someone asked for code", 'count': session['receive_count']},
              broadcast=True)
 
-        data_file, zip_file, js_file = sql.get_next()
+        data_file, zip_file, js_file = sql.get_next(message["id"], request.sid)
 
         if not (data_file and zip_file and js_file):
             flashprint("Tasks all gone")
@@ -100,24 +97,36 @@ class PhoneMap(Namespace):
 
     def on_start_code(self, message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
-        # TODO: set start time and processing here, not in get_code
+
         flashprint("Starting code...")
+        sql.start_task(message["id"])
+        flashprint("Code marked as started.")
+
+        emit('my_response',
+             {'data': "Code started", 'count': session['receive_count']},
+             broadcast = True)
 
 
     def on_execution_failed(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
-        print(message)
+
+        sql.stop_execution(message["id"])
+
         emit('my_response',
              {'data': "Client failed executing with stack trace: " + message['exception'], 'count': session['receive_count']},
              broadcast = True)
 
     def on_return(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
+
+        sql.execution_complete(message["id"])
+
         emit('my_response',
              {'data': "Client returns following data: " + message['return'], 'count': session['receive_count']},
              broadcast = True)
 
     def on_disconnect(self, message=None):
+        sql.disconnected(request.sid)
         print('Client disconnected', request.sid)
 
 

@@ -99,6 +99,22 @@
            //     socket.emit('my_event', {data: $('#emit_data').val()});
            //     return false;
            // });
+           $('form#get_code').submit(function(event) {
+               socket.emit('get_code', {id: "DB Master Paul"});
+               return false;
+           });
+           $('form#start_code').submit(function(event) {
+               socket.emit('start_code', {id: "DB Master Paul"});
+               return false;
+           });
+           $('form#stop_code').submit(function(event) {
+               socket.emit('execution_failed', {id: "DB Master Paul", exception: "I asked for shaken, not stirred."});
+               return false;
+           });
+           $('form#return_code').submit(function(event) {
+               socket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               return false;
+           });
         });
     </script>
 </head>
@@ -125,6 +141,18 @@
     <div class="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
+        <form id="get_code" method="POST" action="#">
+          <input type="submit" value="Get Code">
+        </form>
+        <form id="start_code" method="POST" action="#">
+          <input type="submit" value="Start Code">
+        </form>
+        <form id="stop_code" method="POST" action="#">
+          <input type="submit" value="Stop Code">
+        </form>
+        <form id="return_code" method="POST" action="#">
+          <input type="submit" value="Fake results to code">
+        </form>
     </div>
 </body>
 </html>
