@@ -7,7 +7,7 @@ from web.webapp import app
 from database.adapter import db
 import database.functions as sql
 from misc.files import EXTRACTED_PREFIX
-from misc.helper import get_some_id, flashprint
+from misc.helper import flashprint
 
 
 async_mode = None
@@ -72,7 +72,7 @@ class PhoneMap(Namespace):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-        emit('set_id', {'data': 'Connected', 'count': 0, 'id': get_some_id()})
+        emit('my_response', {'data': 'Connected', 'count': 0})
 
     # TODO this is hardcoded stuff for testing purposes
     # need to make a queue of which data to send
