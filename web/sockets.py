@@ -59,24 +59,25 @@ class PhoneMap(Namespace):
              {'data': message['data'], 'count': session['receive_count']},
              room=message['room'])
 
-    def on_disconnect_request(self):
+    def on_disconnect_request(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': 'Disconnected!', 'count': session['receive_count']})
         disconnect()
 
-    def on_my_ping(self):
+    def on_my_ping(self, message):
         emit('my_pong')
 
-    def on_connect(self):
+    def on_connect(self, message):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
+        print("got Android ID of" + message["id"])
         emit('my_response', {'data': 'Connected', 'count': 0})
 
     # TODO this is hardcoded stuff for testing purposes
     # need to make a queue of which data to send
-    def on_get_code(self):
+    def on_get_code(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': "someone asked for code", 'count': session['receive_count']},
@@ -97,6 +98,7 @@ class PhoneMap(Namespace):
 
     def on_execution_failed(self, message):
         session['receive_count'] = session.get('receive_count', 0) + 1
+        print(message)
         emit('my_response',
              {'data': "Client failed executing with stack trace: " + message['exception'], 'count': session['receive_count']},
              broadcast = True)
@@ -107,7 +109,7 @@ class PhoneMap(Namespace):
              {'data': "Client returns following data: " + message['return'], 'count': session['receive_count']},
              broadcast = True)
 
-    def on_disconnect(self):
+    def on_disconnect(self, message):
         print('Client disconnected', request.sid)
 
 
