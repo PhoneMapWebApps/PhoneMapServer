@@ -8,6 +8,7 @@ sys.path.insert(0,'..')
 from misc.files import *
 from test.local_test_server import *
 
+WAIT_FOR_SERVER = 2.0
 
 class TestFileUpload(unittest.TestCase):
     def test_valid_extensions(self):
@@ -17,8 +18,6 @@ class TestFileUpload(unittest.TestCase):
         self.assertFalse(file_extension_okay('ayy/lmao.tar.gz', 'zip', False))
 
     def test_file_upload(self):
-        test_server = start_local_test_server()
-
         # Requires server to be started
         js_file = open('test/resources/test.js', 'rb')
         zip_file = open('test/resources/test.zip', 'rb')
@@ -35,11 +34,14 @@ class TestFileUpload(unittest.TestCase):
             os.remove('test/upload/data/zip/test.zip')
             shutil.rmtree('test/upload/data/zip/extracted_test.zip')
 
-        stop_local_test_server(test_server)
+    @classmethod
+    def setUpClass(self):
+        self.test_server = start_local_test_server()
+        time.sleep(WAIT_FOR_SERVER)
+
+    @classmethod
+    def tearDownClass(self):
+        stop_local_test_server(self.test_server)
 
 if __name__ == '__main__':
-    test_server = start_local_test_server()
-
     unittest.main()
-
-    stop_local_test_server(test_server)
