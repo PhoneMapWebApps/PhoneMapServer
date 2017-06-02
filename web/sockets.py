@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-from flask import Flask, flash, render_template, session, request, redirect
+from flask import session, request
 from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
-from web.webapp import app
-from database.adapter import db
 import database.functions as sql
 from misc.files import EXTRACTED_PREFIX
-from misc.helper import flashprint
-
+from misc.logger import log
+from web.webapp import app
 
 async_mode = None
 app.config['SECRET_KEY'] = 'secret!'
@@ -83,7 +81,7 @@ class PhoneMap(Namespace):
         data_file, zip_file, js_file = sql.get_next(message["id"], request.sid)
 
         if not (data_file and zip_file and js_file):
-            flashprint("Tasks all gone")
+            log("Tasks all gone")
             emit('no_tasks')
             return
 
@@ -96,15 +94,15 @@ class PhoneMap(Namespace):
     def on_start_code(self, message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
-        flashprint("Starting code...")
+        log("Starting code...")
         status = sql.start_task(message["id"])
         if status:
-            flashprint("Code marked as started.")
+            log("Code marked as started.")
             emit('my_response',
                  {'data': "Code started", 'count': session['receive_count']},
                  broadcast = True)
         else:
-            flashprint("Code already running or unknown subtask_id, please stop.")
+            log("Code already running or unknown subtask_id, please stop.")
             emit('stop_executing')
 
 

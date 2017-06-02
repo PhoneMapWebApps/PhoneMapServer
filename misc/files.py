@@ -1,21 +1,23 @@
 import os
 import zipfile
+
 from werkzeug.utils import secure_filename
-from misc.helper import flashprint
+
+from misc.logger import log
 
 EXTRACTED_PREFIX = "extracted_"
 
 
 def request_files_empty(request_result, filetype):
     if request_result.filename == '' or request_result.filename is None:
-        flashprint('Empty in submission: ' + filetype)
+        log('Empty in submission: ' + filetype)
         return True
     return False
 
 
 def request_files_missing(request_files, filetype):
     if filetype not in request_files:
-        flashprint('Missing from submission: ' + filetype)
+        log('Missing from submission: ' + filetype)
         return True
     return False
 
@@ -30,7 +32,7 @@ def file_extension_okay(filename, required_file_extension, shouldflashprint=True
     if '.' in filename and file_extension == required_file_extension:
         return True
     if(shouldflashprint):
-        flashprint('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
+        log('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
     return False
 
 
@@ -39,10 +41,10 @@ def save_and_extract_files(app, js_file, zip_file):
     # using task ID could be good enough given theyre unique
     js_filename = secure_filename(js_file.filename)
     zip_filename = secure_filename(zip_file.filename)
-    flashprint('Uploading...')
+    log('Uploading...')
     js_file.save(os.path.join(app.config['JS_UPLOAD_FOLDER'], js_filename))
     zip_file.save(os.path.join(app.config['ZIP_UPLOAD_FOLDER'], zip_filename))
-    flashprint("Successfully uploaded " + js_filename + " and " + zip_filename)
+    log("Successfully uploaded " + js_filename + " and " + zip_filename)
     extract(app, zip_filename)
 
 

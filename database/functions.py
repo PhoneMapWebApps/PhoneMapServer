@@ -1,10 +1,13 @@
 import os
+from datetime import datetime
+
+from werkzeug.utils import secure_filename
+
 from database.adapter import db
 from database.models import Tasks, SubTasks, Android_IDs
-from werkzeug.utils import secure_filename
-from datetime import datetime
 from misc.files import EXTRACTED_PREFIX
-from misc.helper import flashprint
+from misc.logger import log
+
 
 # TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
 
@@ -44,12 +47,12 @@ def get_by_task_id(android_id, session_id, id_val):
     # NOTE: task query only required for the start_task func
     task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
     if not task:
-        flashprint("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
+        log("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
         return None, None, None
 
     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
     if not subtask:
-        flashprint("Selected task " + id_val + " already has all tasks in progress.")
+        log("Selected task " + id_val + " already has all tasks in progress.")
         return None, None, None
 
     # set correct values of session id and subtask_id in phone DB
@@ -65,7 +68,7 @@ def get_latest(android_id, session_id):
 
     subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
     if not subtask:
-            flashprint("No more tasks!")
+            log("No more tasks!")
             return None, None, None
 
     # by foreign key magic, this has to exist so no point checking for None
@@ -87,7 +90,7 @@ def get_next(android_id, session_id):
     if not tasks:
         # list is empty.
         # NOTE: maybe these errors should be handled some other way than flash
-        flashprint("No more tasks!")
+        log("No more tasks!")
         return None, None, None
     # here though, dont double book subtasks, so make sure you dont queue an unfinished task
     for task in tasks:
@@ -98,7 +101,7 @@ def get_next(android_id, session_id):
 
     # check if loop ended unsuccessfuly
     if not subtask:
-        flashprint("No more subtasks to allocate!")
+        log("No more subtasks to allocate!")
         return None, None, None
 
     # set correct values of session id and subtask_id in phone DB
@@ -112,12 +115,12 @@ def get_next(android_id, session_id):
 def start_task(android_id):
     phone = Android_IDs.query.filter_by(android_id=android_id).first()
     if not phone:
-        flashprint("Phone not found.")
+        log("Phone not found.")
         return
 
     subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
     if not subtask:
-        flashprint("No subtask found at: " + str(phone.subtask_id))
+        log("No subtask found at: " + str(phone.subtask_id))
         return False
     task = Tasks.query.filter_by(task_id=subtask.task_id).first()
 

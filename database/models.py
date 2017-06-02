@@ -1,4 +1,3 @@
-from flask_sqlalchemy import SQLAlchemy
 from database.adapter import db
 
 class Tasks(db.Model):
