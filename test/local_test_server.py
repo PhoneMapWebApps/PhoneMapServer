@@ -1,11 +1,17 @@
 import os
 import subprocess
-import time
 
 from nose.tools import nottest
 
 CONFIG_FILE = "config.py"
 BACKUP_EXT = ".bak"
+
+
+@nottest
+def backup_current_config():
+    if os.path.isfile(CONFIG_FILE):
+        os.rename(CONFIG_FILE, CONFIG_FILE + BACKUP_EXT)
+
 
 @nottest
 def create_test_config_file():
@@ -20,22 +26,15 @@ def create_test_config_file():
 
 
 @nottest
-def start_local_test_server():
-    # backup current config file
-    if(os.path.isfile(CONFIG_FILE)):
-        os.rename(CONFIG_FILE, CONFIG_FILE + BACKUP_EXT)
-
-    create_test_config_file()
-
-    proc = subprocess.Popen("FLASK_APP=./run.py flask run", shell = True)
-    time.sleep(1.0)
-    return proc
-
-@nottest
-def stop_local_test_server(test_server):
-    test_server.kill()
-
-    # restore original config file
-    if (os.path.isfile(CONFIG_FILE + BACKUP_EXT)):
+def restore_previous_config():
+    if os.path.isfile(CONFIG_FILE + BACKUP_EXT):
         os.remove(CONFIG_FILE)
         os.rename(CONFIG_FILE + BACKUP_EXT, CONFIG_FILE)
+
+
+@nottest
+def start_local_test_server():
+    backup_current_config()
+    create_test_config_file()
+    subprocess.call("FLASK_APP=./run.py flask run", shell=True)
+    return
