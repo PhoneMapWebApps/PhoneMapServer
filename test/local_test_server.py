@@ -18,6 +18,7 @@ def create_test_config_file():
     file = open(CONFIG_FILE, "w")
     file.write("class Development(object):\n")
     file.write("    DEBUG = True\n")
+    file.write("    SECRET_KEY = 'secret!'\n")
     file.write("    SQLALCHEMY_DATABASE_URI = \"sqlite:///:memory:\"\n")
     file.write("    SQLALCHEMY_TRACK_MODIFICATIONS = False\n")
     file.write("    JS_UPLOAD_FOLDER = \"test/upload/data/js/\"\n")

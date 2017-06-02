@@ -1,15 +1,18 @@
-from database.adapter import db
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+
+from app import db
+
 
 class Tasks(db.Model):
     __tablename__ = "tasks"
-    task_id = db.Column(db.Integer, primary_key=True)
-    js_file = db.Column(db.String(255), nullable=False)
-    zip_file = db.Column(db.String(255), nullable=False)
-    time_submitted = db.Column(db.DateTime, nullable=False)
-    time_started = db.Column(db.DateTime)
-    time_completed = db.Column(db.DateTime)
-    in_progress = db.Column(db.Boolean)
-    is_complete = db.Column(db.Boolean)
+    task_id = Column(Integer, primary_key=True)
+    js_file = Column(String(255), nullable=False)
+    zip_file = Column(String(255), nullable=False)
+    time_submitted = Column(DateTime, nullable=False)
+    time_started = Column(DateTime)
+    time_completed = Column(DateTime)
+    in_progress = Column(Boolean)
+    is_complete = Column(Boolean)
 
     # task_id is autoincremented
     def __init__(self, js_file, zip_file, time_submitted):
@@ -31,19 +34,18 @@ class Tasks(db.Model):
 # Currently, all subtasks have unique ID's
 class SubTasks(db.Model):
     __tablename__ = "sub_tasks"
-    subtask_id = db.Column(db.Integer, primary_key=True)
-    task_id = db.Column(db.Integer,
-                        db.ForeignKey("tasks.task_id",
-                                      onupdate="CASCADE",
-                                      ondelete="CASCADE"),
-                        index=True)
-    data_file = db.Column(db.String(255), nullable=False)
-    time_submitted = db.Column(db.DateTime, nullable=False)
-    time_started = db.Column(db.DateTime)
-    time_completed = db.Column(db.DateTime)
-    in_progress = db.Column(db.Boolean)
-    is_complete = db.Column(db.Boolean)
-
+    subtask_id = Column(Integer, primary_key=True)
+    task_id = Column(Integer,
+                     ForeignKey("tasks.task_id",
+                                onupdate="CASCADE",
+                                ondelete="CASCADE"),
+                     index=True)
+    data_file = Column(String(255), nullable=False)
+    time_submitted = Column(DateTime, nullable=False)
+    time_started = Column(DateTime)
+    time_completed = Column(DateTime)
+    in_progress = Column(Boolean)
+    is_complete = Column(Boolean)
 
     # subtask_id is autoincremented
     def __init__(self, task_id, data_file, time_submitted):
@@ -58,13 +60,14 @@ class SubTasks(db.Model):
     def __repr__(self):
         return '<SubTask %r>' % self.subtask_id
 
-class Android_IDs(db.Model):
+
+class AndroidIDs(db.Model):
     __tablename__ = "android_ids"
-    android_id = db.Column(db.String(64), primary_key=True)
-    session_id = db.Column(db.String(32), unique=True)
-    is_connected = db.Column(db.Boolean, nullable=False)
-    is_processing = db.Column(db.Boolean, nullable=False)
-    subtask_id = db.Column(db.Integer)
+    android_id = Column(String(64), primary_key=True)
+    session_id = Column(String(32), unique=True)
+    is_connected = Column(Boolean, nullable=False)
+    is_processing = Column(Boolean, nullable=False)
+    subtask_id = Column(Integer)
 
     # NOTE always use session.merge to avoid key fuck ups
     def __init__(self, android_id, session_id):

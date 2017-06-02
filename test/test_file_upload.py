@@ -6,9 +6,11 @@ import unittest
 import requests
 import time
 
-sys.path.insert(0, '..')
-from misc.files import *
+from app.main.files import file_extension_okay
+
 from test.local_test_server import *
+
+sys.path.insert(0, '..')
 
 WAIT_FOR_SERVER = 3.0
 

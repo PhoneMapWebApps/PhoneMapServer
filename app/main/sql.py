@@ -1,17 +1,17 @@
+# TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
 import os
 from datetime import datetime
+from flask import current_app as app
 
 from werkzeug.utils import secure_filename
 
-from database.adapter import db
-from database.models import Tasks, SubTasks, Android_IDs
-from misc.files import EXTRACTED_PREFIX
-from misc.logger import log
+from app import db
+from app.main.files import EXTRACTED_PREFIX
+from app.main.logger import log
+from app.main.models import Tasks, SubTasks, AndroidIDs
 
 
-# TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
-
-def add_to_db(app, js_file, zip_file):
+def add_to_db(js_file, zip_file):
     js_filename = secure_filename(js_file.filename)
     zip_filename = secure_filename(zip_file.filename)
 
@@ -31,11 +31,12 @@ def add_to_db(app, js_file, zip_file):
     db.session.commit()
     return task.task_id
 
+
 def get_phone(android_id, session_id):
-    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if not phone:
         print("phone has never been seen before, adding phone to DB.")
-        phone = Android_IDs(android_id, session_id)
+        phone = AndroidIDs(android_id, session_id)
         db.session.add(phone)
         db.session.commit()
     return phone
@@ -62,14 +63,15 @@ def get_by_task_id(android_id, session_id, id_val):
 
     return subtask.data_file, task.zip_file, task.js_file
 
+
 # order reverse -> run latest submissions first
 def get_latest(android_id, session_id):
     phone = get_phone(android_id, session_id)
 
     subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
     if not subtask:
-            log("No more tasks!")
-            return None, None, None
+        log("No more tasks!")
+        return None, None, None
 
     # by foreign key magic, this has to exist so no point checking for None
     task = Tasks.query.filter_by(task_id=subtask.task_id).first()
@@ -80,6 +82,7 @@ def get_latest(android_id, session_id):
     db.session.commit()
 
     return subtask.data_file, task.zip_file, task.js_file
+
 
 # oldest submissions first
 def get_next(android_id, session_id):
@@ -113,7 +116,7 @@ def get_next(android_id, session_id):
 
 
 def start_task(android_id):
-    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if not phone:
         log("Phone not found.")
         return
@@ -140,7 +143,7 @@ def start_task(android_id):
 
 
 def stop_execution(android_id):
-    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if phone and phone.is_processing:
         subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
         task = Tasks.query.filter_by(task_id=subtask.task_id).first()
@@ -151,8 +154,9 @@ def stop_execution(android_id):
         # TODO: update task process + start time if no other processes running it (loop?)
         db.session.commit()
 
+
 def execution_complete(android_id):
-    phone = Android_IDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if phone and phone.is_processing:
         subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
         if not subtask.is_complete:
@@ -178,9 +182,9 @@ def execution_complete(android_id):
 
 
 def disconnected(session_id):
-    phone = Android_IDs.query.filter_by(session_id=session_id).first()
+    phone = AndroidIDs.query.filter_by(session_id=session_id).first()
     if phone:
         phone.is_connected = False
-        phone.session_id = None # NOTE: SQL implementation dependent. OK with PostGreSQL
+        phone.session_id = None  # NOTE: SQL implementation dependent. OK with PostGreSQL
 
         db.session.commit()

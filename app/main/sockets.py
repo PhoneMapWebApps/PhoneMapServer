@@ -1,78 +1,86 @@
-#!/usr/bin/env python
 from flask import session, request
-from flask_socketio import SocketIO, Namespace, emit, join_room, leave_room, \
+from flask import current_app as app
+from flask_socketio import Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
-import database.functions as sql
-from misc.files import EXTRACTED_PREFIX
-from misc.logger import log
-from web.webapp import app
-
-async_mode = None
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode)
-thread = None
+from app.main import sql
+from app.main.files import EXTRACTED_PREFIX
+from app.main.logger import log
+from .. import socketio
 
 
 def background_thread():
     pass
 
 
+thread = None
+
+
 class PhoneMap(Namespace):
-    def on_my_event(self, message):
+    @staticmethod
+    def on_my_event(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': message['data'], 'count': session['receive_count']})
 
-    def on_my_broadcast_event(self, message):
+    @staticmethod
+    def on_my_broadcast_event(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': message['data'], 'count': session['receive_count']},
              broadcast=True)
 
-    def on_join(self, message):
+    @staticmethod
+    def on_join(message):
         join_room(message['room'])
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': 'In rooms: ' + ', '.join(rooms()),
               'count': session['receive_count']})
 
-    def on_leave(self, message):
+    @staticmethod
+    def on_leave(message):
         leave_room(message['room'])
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': 'In rooms: ' + ', '.join(rooms()),
               'count': session['receive_count']})
 
-    def on_close_room(self, message):
+    @staticmethod
+    def on_close_room(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response', {'data': 'Room ' + message['room'] + ' is closing.',
                              'count': session['receive_count']},
              room=message['room'])
         close_room(message['room'])
 
-    def on_my_room_event(self, message):
+    @staticmethod
+    def on_my_room_event(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': message['data'], 'count': session['receive_count']},
              room=message['room'])
 
-    def on_disconnect_request(self, message=None):
+    @staticmethod
+    def on_disconnect_request(message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': 'Disconnected!', 'count': session['receive_count']})
         disconnect()
 
-    def on_my_ping(self, message=None):
+    @staticmethod
+    def on_my_ping(message=None):
         emit('my_pong')
 
-    def on_connect(self, message=None):
+    @staticmethod
+    def on_connect(message=None):
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
         emit('my_response', {'data': 'Connected', 'count': 0})
 
-    def on_get_code(self, message=None):
+    @staticmethod
+    def on_get_code(message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': "Someone asked for code", 'count': session['receive_count']},
@@ -91,7 +99,8 @@ class PhoneMap(Namespace):
             data = file.read()
         emit('set_code', {'code': js, 'data': data})
 
-    def on_start_code(self, message=None):
+    @staticmethod
+    def on_start_code(message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         log("Starting code...")
@@ -100,31 +109,34 @@ class PhoneMap(Namespace):
             log("Code marked as started.")
             emit('my_response',
                  {'data': "Code started", 'count': session['receive_count']},
-                 broadcast = True)
+                 broadcast=True)
         else:
             log("Code already running or unknown subtask_id, please stop.")
             emit('stop_executing')
 
-
-    def on_execution_failed(self, message):
+    @staticmethod
+    def on_execution_failed(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         sql.stop_execution(message["id"])
 
         emit('my_response',
-             {'data': "Client failed executing with stack trace: " + message['exception'], 'count': session['receive_count']},
-             broadcast = True)
+             {'data': "Client failed executing with stack trace: " + message['exception'],
+              'count': session['receive_count']},
+             broadcast=True)
 
-    def on_return(self, message):
+    @staticmethod
+    def on_return(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         sql.execution_complete(message["id"])
 
         emit('my_response',
              {'data': "Client returned following data: " + message['return'], 'count': session['receive_count']},
-             broadcast = True)
+             broadcast=True)
 
-    def on_disconnect(self, message=None):
+    @staticmethod
+    def on_disconnect(message=None):
         sql.disconnected(request.sid)
         print('Client disconnected', request.sid)
 
