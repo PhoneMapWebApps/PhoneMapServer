@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import os
-from app import create_app, socketio
 
+from app import create_app, socketio
 
 if not os.path.isfile("config.py"):
     print("Please setup your config.py file. See sampleconfig.py for info.")

@@ -6,6 +6,7 @@ test/config.py.bak
 # IntelliJ
 /.idea
 *.iml
+*.pyc
 
 # Certs
 *.pem
@@ -14,5 +15,4 @@ test/config.py.bak
 /logs
 
 # Generated in tests
-/__pycache__
-*/__pycache__
+__pycache__/

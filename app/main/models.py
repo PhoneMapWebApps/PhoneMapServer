@@ -6,8 +6,6 @@ from app import db
 class Tasks(db.Model):
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
-    js_file = Column(String(255), nullable=False)
-    zip_file = Column(String(255), nullable=False)
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -15,9 +13,7 @@ class Tasks(db.Model):
     is_complete = Column(Boolean)
 
     # task_id is autoincremented
-    def __init__(self, js_file, zip_file, time_submitted):
-        self.js_file = js_file
-        self.zip_file = zip_file
+    def __init__(self, time_submitted):
         self.time_submitted = time_submitted
         self.time_started = None
         self.time_completed = None

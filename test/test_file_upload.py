@@ -1,13 +1,12 @@
 import os.path
+import requests
 import shutil
 import sys
 import threading
-import unittest
-import requests
 import time
+import unittest
 
 from app.main.files import file_extension_okay
-
 from test.local_test_server import *
 
 sys.path.insert(0, '..')

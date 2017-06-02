@@ -7,11 +7,6 @@ from app.main.logger import log
 from . import main as app
 
 
-# import database.functions as sql
-# from misc.files import EXTRACTED_PREFIX
-
-# from misc.logger import log
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -42,10 +37,7 @@ def upload_file():
     if not file_extension_okay(zip_file.filename, 'zip'):
         return redirect(request.url)
 
-    log('Saving and extracting...')
-    save_and_extract_files(js_file, zip_file)
-
-    # TODO: idk, we probably want the task ID for something at some point
-    task_id = sql.add_to_db(js_file, zip_file)
+    # adds to DB and extracts
+    sql.add_to_db(js_file, zip_file)
 
     return redirect(request.url)

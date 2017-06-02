@@ -1,27 +1,27 @@
 # TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
 import os
 from datetime import datetime
+
 from flask import current_app as app
 
-from werkzeug.utils import secure_filename
-
 from app import db
-from app.main.files import EXTRACTED_PREFIX
+from app.main.files import save_and_extract_files
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs
 
 
 def add_to_db(js_file, zip_file):
-    js_filename = secure_filename(js_file.filename)
-    zip_filename = secure_filename(zip_file.filename)
-
-    task = Tasks(js_filename, zip_filename, datetime.utcnow())
+    task = Tasks(datetime.utcnow())
 
     db.session.add(task)
 
     # flush to set a task_id for task.
     db.session.flush()
-    directory = app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + zip_filename
+
+    log('Saving and extracting...')
+    save_and_extract_files(js_file, zip_file, task.task_id)
+
+    directory = app.config['ZIP_UPLOAD_FOLDER'] + str(task.task_id)
     # NOTE: NO SUBDIRECTORIES (YET?)
     for filename in os.listdir(directory):
         subtask = SubTasks(task.task_id, filename, datetime.utcnow())
@@ -49,19 +49,19 @@ def get_by_task_id(android_id, session_id, id_val):
     task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
     if not task:
         log("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
-        return None, None, None
+        return None, None
 
     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
     if not subtask:
         log("Selected task " + id_val + " already has all tasks in progress.")
-        return None, None, None
+        return None, None
 
     # set correct values of session id and subtask_id in phone DB
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, task.zip_file, task.js_file
+    return subtask.data_file, task.task_id
 
 
 # order reverse -> run latest submissions first
@@ -71,19 +71,17 @@ def get_latest(android_id, session_id):
     subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
     if not subtask:
         log("No more tasks!")
-        return None, None, None
-
-    # by foreign key magic, this has to exist so no point checking for None
-    task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+        return None, None
 
     # set correct values of session id and subtask_id in phone DB
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, task.zip_file, task.js_file
+    return subtask.data_file, subtask.task_id
 
 
+# TODO: cleanup logic here
 # oldest submissions first
 def get_next(android_id, session_id):
     phone = get_phone(android_id, session_id)
@@ -94,7 +92,7 @@ def get_next(android_id, session_id):
         # list is empty.
         # NOTE: maybe these errors should be handled some other way than flash
         log("No more tasks!")
-        return None, None, None
+        return None, None
     # here though, dont double book subtasks, so make sure you dont queue an unfinished task
     for task in tasks:
         subtask = SubTasks.query.filter_by(task_id=task.task_id, is_complete=False, in_progress=False).first()
@@ -103,16 +101,16 @@ def get_next(android_id, session_id):
             break
 
     # check if loop ended unsuccessfuly
-    if not subtask:
+    if not (subtask and task):
         log("No more subtasks to allocate!")
-        return None, None, None
+        return None, None
 
     # set correct values of session id and subtask_id in phone DB
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, task.zip_file, task.js_file
+    return subtask.data_file, task.task_id
 
 
 def start_task(android_id):

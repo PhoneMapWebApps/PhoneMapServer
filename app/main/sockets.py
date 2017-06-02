@@ -1,10 +1,9 @@
-from flask import session, request
 from flask import current_app as app
+from flask import session, request
 from flask_socketio import Namespace, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
 from app.main import sql
-from app.main.files import EXTRACTED_PREFIX
 from app.main.logger import log
 from .. import socketio
 
@@ -86,17 +85,17 @@ class PhoneMap(Namespace):
              {'data': "Someone asked for code", 'count': session['receive_count']},
              broadcast=True)
 
-        data_file, zip_file, js_file = sql.get_next(message["id"], request.sid)
+        data_filename, task_id = sql.get_next(message["id"], request.sid)
 
-        if not (data_file and zip_file and js_file):
+        if not (data_filename and task_id):
             log("Tasks all gone")
             emit('no_tasks')
             return
 
-        with open(app.config['JS_UPLOAD_FOLDER'] + js_file, "r") as file:
-            js = file.read()
-        with open(app.config['ZIP_UPLOAD_FOLDER'] + EXTRACTED_PREFIX + zip_file + "/" + data_file, "r") as file:
-            data = file.read()
+        with open(app.config['JS_UPLOAD_FOLDER'] + str(task_id) + ".js", "r") as js_file:
+            js = js_file.read()
+        with open(app.config['ZIP_UPLOAD_FOLDER'] + str(task_id) + "/" + data_filename, "r") as data_file:
+            data = data_file.read()
         emit('set_code', {'code': js, 'data': data})
 
     @staticmethod
