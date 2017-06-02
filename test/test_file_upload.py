@@ -27,16 +27,18 @@ class TestFileUpload(unittest.TestCase):
         js_file = open('test/resources/test.js', 'rb')
         zip_file = open('test/resources/test.zip', 'rb')
         response = requests.post('http://0.0.0.0:5000/tasks', files=dict(JS_FILE=js_file, ZIP_FILE=zip_file))
+        # new database so task will be 1
         try:
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(os.path.isfile('test/upload/data/js/test.js'))
-            self.assertTrue(os.path.isdir('test/upload/data/zip/extracted_test.zip'))
+            self.assertTrue(os.path.isfile('test/upload/data/js/1.js'))
+            self.assertTrue(os.path.isfile('test/upload/data/zip/1.zip'))
+            self.assertTrue(os.path.isdir('test/upload/data/zip/1'))
         finally:
             js_file.close()
             zip_file.close()
-            os.remove('test/upload/data/js/test.js')
-            os.remove('test/upload/data/zip/test.zip')
-            shutil.rmtree('test/upload/data/zip/extracted_test.zip')
+            os.remove('test/upload/data/js/1.js')
+            os.remove('test/upload/data/zip/1.zip')
+            shutil.rmtree('test/upload/data/zip/1')
 
     @classmethod
     def setUpClass(cls):
