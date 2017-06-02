@@ -1,4 +1,5 @@
 import os
+from flask import flash
 
 logs_dir = 'logs'
 log_filename = 'logs/log.txt'
@@ -13,5 +14,6 @@ log_file = open(log_filename, 'a+')
 
 
 def log(s):
+    flash(s)
     log_file.write(s + '\n')
     log_file.flush()
