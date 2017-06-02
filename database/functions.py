@@ -163,7 +163,7 @@ def execution_complete(android_id):
             subtask.is_complete = True
             subtask.time_completed = datetime.utcnow()
 
-            subtasks = SubTasks.query.filter_by(subtask_id=phone.subtask_id).all()
+            subtasks = SubTasks.query.filter_by(task_id=subtask.task_id).all()
             for sub in subtasks:
                 if not sub.is_complete:
                     # dont set task as complete, return now instead
