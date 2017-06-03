@@ -13,11 +13,11 @@ def create_app(debug=False, testing=False):
     if testing:
         if os.path.isfile("config.py"):
             print("using custom config")
-            app.config.from_object("config.TestingConfig")
+            app.config.from_object("config.Testing")
         else:
-            app.config.from_object("sampleconfig.TestingConfig")
+            app.config.from_object("sampleconfig.Testing")
     else:
-        app.config.from_object("config.DevelopmentConfig")
+        app.config.from_object("config.Development")
 
     app.debug = debug
 

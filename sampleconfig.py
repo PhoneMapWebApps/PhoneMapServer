@@ -9,18 +9,18 @@ class Config(object):
     ZIP_FOLDER = 'data/zip/'
 
 
-class ProductionConfig(Config):
+class Production(Config):
     DEBUG = False
 
 
-class DevelopmentConfig(Config):
+class Development(Config):
     # SECRET_KEY = "should set this"
     DEBUG = True
     # SQLALCHEMY_DATABASE_URI = postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
     SQLALCHEMY_DATABASE_URI = 'sqltype://username:password@location:port/databasename'
 
 
-class TestingConfig(Config):
+class Testing(Config):
     TESTING = True
     DEBUG = False
     JS_FOLDER = "test/upload/data/js/"
