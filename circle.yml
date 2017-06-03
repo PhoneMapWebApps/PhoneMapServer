@@ -1,3 +1,12 @@
+machine:
+  python:
+    version: 3.5.3
+
+test:
+  override:
+    - python3 -m "nose"
+
+
 deployment:
   production:
     branch: master
