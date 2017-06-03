@@ -12,7 +12,7 @@ test/config.py.bak
 *.pem
 
 # Logs
-/logs
+logs/
 
 # Generated in tests
 __pycache__/
