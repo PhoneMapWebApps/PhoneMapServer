@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
@@ -9,8 +11,11 @@ app = Flask(__name__)
 
 def create_app(debug=False, testing=False):
     if testing:
-        print("using test config")
-        app.config.from_object("config.TestingConfig")
+        if os.path.isfile("config.py"):
+            print("using custom config")
+            app.config.from_object("config.TestingConfig")
+        else:
+            app.config.from_object("sampleconfig.TestingConfig")
     else:
         app.config.from_object("config.DevelopmentConfig")
 
