@@ -5,7 +5,7 @@ import unittest
 from app import create_app, app, db
 
 
-class TestUpload(unittest.TestCase):
+class TestRoutes(unittest.TestCase):
     def setUp(self):
         create_app(debug=False, testing=True)
 
@@ -37,6 +37,12 @@ class TestUpload(unittest.TestCase):
         finally:
             js_file.close()
             zip_file.close()
+
+    def test_successful_start(self):
+        with app.app_context():
+            with app.test_client() as client:
+                resp = client.get('/')
+                print(resp.status_code)
 
     def tearDown(self):
         with app.app_context():
