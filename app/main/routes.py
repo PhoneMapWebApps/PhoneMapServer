@@ -2,7 +2,7 @@
 from flask import request, render_template, redirect
 
 from app.main import sql
-from app.main.files import request_file_exists, file_extension_okay, save_and_extract_files
+from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log
 from . import main as app
 

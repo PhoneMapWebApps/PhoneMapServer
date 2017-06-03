@@ -19,7 +19,9 @@ def add_to_db(js_file, zip_file):
     db.session.flush()
 
     log('Saving and extracting...')
-    save_and_extract_files(js_file, zip_file, task.task_id)
+    save_and_extract_files(app.config['JS_UPLOAD_FOLDER'],
+                           app.config['ZIP_UPLOAD_FOLDER'],
+                           js_file, zip_file, task.task_id)
 
     directory = app.config['ZIP_UPLOAD_FOLDER'] + str(task.task_id)
     # NOTE: NO SUBDIRECTORIES (YET?)

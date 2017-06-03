@@ -4,11 +4,16 @@ from flask_sqlalchemy import SQLAlchemy
 
 socketio = SocketIO()
 db = SQLAlchemy()
+app = Flask(__name__)
 
 
-def create_app(debug=False):
-    app = Flask(__name__)
-    app.config.from_object("config.Development")
+def create_app(debug=False, testing=False):
+    if testing:
+        print("using test config")
+        app.config.from_object("config.TestingConfig")
+    else:
+        app.config.from_object("config.DevelopmentConfig")
+
     app.debug = debug
 
     from .main import main as main_blueprint
@@ -21,5 +26,3 @@ def create_app(debug=False):
     # use correct app context
     with app.app_context():
         db.create_all()
-
-    return app

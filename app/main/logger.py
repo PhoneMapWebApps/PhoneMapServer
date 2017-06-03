@@ -15,6 +15,10 @@ log_file = open(log_filename, 'a+')
 
 
 def log(s):
-    flash(s)
+    # ignore flash if not testing
+    try:
+        flash(s)
+    except RuntimeError:
+        pass
     log_file.write(s + '\n')
     log_file.flush()
