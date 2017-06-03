@@ -5,8 +5,8 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET_KEY = 'secret!'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JS_UPLOAD_FOLDER = 'data/js/'
-    ZIP_UPLOAD_FOLDER = 'data/zip/'
+    JS_FOLDER = 'data/js/'
+    ZIP_FOLDER = 'data/zip/'
 
 
 class ProductionConfig(Config):
@@ -23,7 +23,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     DEBUG = False
-    JS_UPLOAD_FOLDER = "test/upload/data/js/"
-    ZIP_UPLOAD_FOLDER = "test/upload/data/zip/"
+    JS_FOLDER = "test/upload/data/js/"
+    ZIP_FOLDER = "test/upload/data/zip/"
     # setup to work with circleCI
     SQLALCHEMY_DATABASE_URI = 'postgresql://ubuntu@localhost:5432/circle_test'

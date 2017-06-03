@@ -19,8 +19,8 @@ def request_files_missing(request_files, filetype):
 
 
 def request_file_exists(request_files, file_tag):
-    return not (
-        request_files_missing(request_files, file_tag) or request_files_empty(request_files[file_tag], file_tag))
+    return not (request_files_missing(request_files, file_tag)
+                or request_files_empty(request_files[file_tag], file_tag))
 
 
 def file_extension_okay(filename, required_file_extension):

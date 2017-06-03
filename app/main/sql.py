@@ -19,11 +19,11 @@ def add_to_db(js_file, zip_file):
     db.session.flush()
 
     log('Saving and extracting...')
-    save_and_extract_files(app.config['JS_UPLOAD_FOLDER'],
-                           app.config['ZIP_UPLOAD_FOLDER'],
+    save_and_extract_files(app.config['JS_FOLDER'],
+                           app.config['ZIP_FOLDER'],
                            js_file, zip_file, task.task_id)
 
-    directory = app.config['ZIP_UPLOAD_FOLDER'] + str(task.task_id)
+    directory = app.config['ZIP_FOLDER'] + str(task.task_id)
     # NOTE: NO SUBDIRECTORIES (YET?)
     for filename in os.listdir(directory):
         subtask = SubTasks(task.task_id, filename, datetime.utcnow())
@@ -50,7 +50,8 @@ def get_by_task_id(android_id, session_id, id_val):
     # NOTE: task query only required for the start_task func
     task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
     if not task:
-        log("Selected task " + id_val + " is unavailable! Either it is already finished, or it doesnt exist.")
+        log("Selected task " + id_val + " is unavailable! Either it is already finished, or \
+            it doesnt exist.")
         return None, None
 
     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
@@ -70,7 +71,8 @@ def get_by_task_id(android_id, session_id, id_val):
 def get_latest(android_id, session_id):
     phone = get_phone(android_id, session_id)
 
-    subtask = SubTasks.query.filter_by(is_complete=False, in_progress=False).first()
+    subtask = SubTasks.query.order_by(SubTasks.subtask_id.desc()).\
+        filter_by(is_complete=False, in_progress=False).first()
     if not subtask:
         log("No more tasks!")
         return None, None
@@ -97,7 +99,9 @@ def get_next(android_id, session_id):
         return None, None
     # here though, dont double book subtasks, so make sure you dont queue an unfinished task
     for task in tasks:
-        subtask = SubTasks.query.filter_by(task_id=task.task_id, is_complete=False, in_progress=False).first()
+        subtask = SubTasks.query.\
+                    filter_by(task_id=task.task_id, is_complete=False, in_progress=False).\
+                    order_by(SubTasks.subtask_id).first()
         if subtask:
             # if there are tasks left, continue as usual
             break
@@ -146,7 +150,7 @@ def stop_execution(android_id):
     phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if phone and phone.is_processing:
         subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
-        task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+        # task = Tasks.query.filter_by(task_id=subtask.task_id).first()
 
         phone.is_processing = False
         subtask.in_progress = False

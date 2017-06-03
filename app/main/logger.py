@@ -2,6 +2,7 @@ import os
 
 from flask import flash
 
+# TODO: cleanup
 logs_dir = 'logs'
 log_filename = 'logs/log.txt'
 
@@ -14,11 +15,11 @@ if os.path.isfile(log_filename):
 log_file = open(log_filename, 'a+')
 
 
-def log(s):
+def log(msg):
     # ignore flash if not testing
     try:
-        flash(s)
+        flash(msg)
     except RuntimeError:
         pass
-    log_file.write(s + '\n')
+    log_file.write(msg + '\n')
     log_file.flush()
