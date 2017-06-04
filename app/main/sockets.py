@@ -1,5 +1,4 @@
-from flask import current_app as app
-from flask import session, request
+from flask import session, request, current_app as app
 from flask_socketio import Namespace, emit
 
 from app.main import sql
@@ -16,6 +15,23 @@ thread = None
 
 class PhoneMap(Namespace):
     @staticmethod
+    def on_connect():
+        global thread
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+        print("Client connected", request.sid)
+        emit('my_response', {'data': 'Connected', 'count': 0})
+
+    @staticmethod
+    def on_disconnect():
+        sql.disconnected(request.sid)
+        print('Client disconnected', request.sid)
+
+    @staticmethod
+    def on_my_ping():
+        emit('my_pong')
+
+    @staticmethod
     def on_my_event(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
@@ -27,17 +43,6 @@ class PhoneMap(Namespace):
         emit('my_response',
              {'data': message['data'], 'count': session['receive_count']},
              broadcast=True)
-
-    @staticmethod
-    def on_my_ping():
-        emit('my_pong')
-
-    @staticmethod
-    def on_connect():
-        global thread
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
-        emit('my_response', {'data': 'Connected', 'count': 0})
 
     @staticmethod
     def on_get_code(message=None):
@@ -95,11 +100,6 @@ class PhoneMap(Namespace):
              {'data': "Client returned following data: " + message['return'],
               'count': session['receive_count']},
              broadcast=True)
-
-    @staticmethod
-    def on_disconnect():
-        sql.disconnected(request.sid)
-        print('Client disconnected', request.sid)
 
 
 socketio.on_namespace(PhoneMap('/test'))
