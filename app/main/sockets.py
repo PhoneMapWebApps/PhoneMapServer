@@ -19,8 +19,8 @@ def on_error(value):
         print("Error caught")
         emit("error", {'error': "A KeyError has occured. The required data "
                                 "was not passed, or passed with the wrong names"})
-        # assert False
-
+    else:
+        raise value
 
 class PhoneMap(Namespace):
     @staticmethod
@@ -54,7 +54,7 @@ class PhoneMap(Namespace):
              broadcast=True)
 
     @staticmethod
-    def on_get_code(message=None):
+    def on_get_code(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
         emit('my_response',
              {'data': "Someone asked for code", 'count': session['receive_count']},
@@ -74,12 +74,12 @@ class PhoneMap(Namespace):
         emit('set_code', {'code': js_data, 'data': data})
 
     @staticmethod
-    def on_start_code(message=None):
+    def on_start_code(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         log("Starting code...")
-        status = sql.start_task(message["id"])
-        if status:
+
+        if sql.start_task(message["id"]):
             log("Code marked as started.")
             emit('my_response',
                  {'data': "Code started", 'count': session['receive_count']},

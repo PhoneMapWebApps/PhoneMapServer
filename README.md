@@ -41,12 +41,39 @@ followed by ctrl-D to stop being the postgres user.
 
 From there you'll want to edit your config.py so it has a line such as:
 
-SQLALCHEMY_DATABASE_URI = `postgresql://YOUR_PASS:YOUR_PW@YOUR_HOST:YOUR_PORT/YOUR_DB_NAME`
+SQLALCHEMY_DATABASE_URI = `postgresql://YOUR_USER:YOUR_PW@YOUR_HOST:YOUR_PORT/YOUR_DB_NAME`
 
 Mine for example is:
 
 SQLALCHEMY_DATABASE_URI = `postgresql://rob:[topsecretpw]@127.0.0.1:5432/phonemap`
 
-# Running tests
+# Running Tests
 
 Go into the PhoneMapServer directory and in terminal run `python3 -m "nose"`
+
+# Current API endpoints:
+
+`connect`: The usual socketio call; required to initiate . Emits a `my_response` with `data` saying `Connected`.
+
+`disconnect`: What is a connection without a disconnection?
+
+`my_ping`: Used by the JS front end to calculate the response time. Responds with `my_pong`.
+
+`my_event`: A standard call. Not used for anything, echos whatever you send it under `my_response`. Useful for the JS frontend.
+
+`my_broadcast_event`: Similar to `my_event`, but echos the message over all devices. Still uses `my_response`.
+
+`get_code`: Responds a `set_code` with some `code` and `data` as args, which consists of the JS code to be executed and the data to be crunched.
+May also respond with a `no_tasks` in the event that no more tasks are available.
+
+`start_code`: Marks the code as started in the database. required for submission, and should follow a successful `get_code` call.
+May respond with a `stop_executing` in unexpected scenarios; eg the code you have just started has already been 
+completed, or if you haven't requested code to execute yet (which would be very confusing indeed).
+
+`execution_failed`: Informs the server the currently running code has failed to execute.
+
+`return`: Marks the completed crunching of a piece of data, updating the database appropriately. 
+Also broadcasts the result under `my_response`, as usual.
+
+_Note_: In the event of an error, `error` may be emitted, which means the server has attempted to gracefully recover 
+and tried to inform you of the error under the `error` argument.

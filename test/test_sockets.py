@@ -21,10 +21,6 @@ def upload_data():
                         ),
                         content_type='multipart/form-data'
                     )
-    assert resp.status_code == 302
-    assert os.path.isfile(app.config['JS_FOLDER'] + '1.js')
-    assert os.path.isfile(app.config['ZIP_FOLDER'] + '1.zip')
-    assert os.path.isdir(app.config['ZIP_FOLDER'] + '1')
 
 
 @nottest
@@ -42,7 +38,7 @@ class TestVanillaSockets(unittest.TestCase):
     def test_connect(self):
         client = socketio.test_client(app, "/test")
         received = client.get_received("/test")
-        
+
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]["args"][0]["data"], "Connected")
         client.disconnect("/test")
@@ -55,13 +51,13 @@ class TestVanillaSockets(unittest.TestCase):
         client.disconnect("/test")
         client.connect("/test")
         received = client.get_received("/test")
-        
+
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]["args"][0]["data"], "Connected")
 
         client.emit("my_event", {"data": "junk"}, namespace="/test")
         snd_received = client.get_received("/test")
-        
+
         self.assertEqual(len(snd_received), 1)
         self.assertEqual(len(snd_received[0]["args"]), 1)
         self.assertEqual(snd_received[0]["args"][0]["data"], "junk")
@@ -190,26 +186,32 @@ class TestAPISockets(unittest.TestCase):
         # clear received queue
         client.get_received("/test")
 
-        client.emit("execution_failed", {"id": "TestID", "exception": "you done goofed"}, namespace="/test")
+        client.emit("execution_failed",
+                    {"id": "TestID", "exception": "you done goofed"},
+                    namespace="/test")
 
         received = client.get_received("/test")
 
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]['name'], "my_response")
-        self.assertEqual(received[0]['args'][0]["data"], "Client failed executing with stack trace: you done goofed")
+        self.assertEqual(received[0]['args'][0]["data"],
+                         "Client failed executing with stack trace: you done goofed")
 
     def test_return(self):
         client = socketio.test_client(app, "/test")
         # clear received queue
         client.get_received("/test")
 
-        client.emit("return", {"id": "TestID", "return": "It's bigger on the inside!"}, namespace="/test")
+        client.emit("return",
+                    {"id": "TestID", "return": "It's bigger on the inside!"},
+                    namespace="/test")
 
         received = client.get_received("/test")
 
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]['name'], "my_response")
-        self.assertEqual(received[0]['args'][0]["data"], "Client returned following data: It's bigger on the inside!")
+        self.assertEqual(received[0]['args'][0]["data"],
+                         "Client returned following data: It's bigger on the inside!")
 
     def test_bad_return(self):
         client = socketio.test_client(app, "/test")
