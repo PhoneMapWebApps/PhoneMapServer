@@ -6,7 +6,8 @@ from app import create_app, app, db
 
 
 class TestRoutes(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(debug=False, testing=True)
 
     def test_upload(self):
@@ -44,6 +45,7 @@ class TestRoutes(unittest.TestCase):
                 resp = client.get('/')
                 print(resp.status_code)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()

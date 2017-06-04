@@ -8,7 +8,8 @@ from app.main.models import Tasks, SubTasks, AndroidIDs
 
 
 class TestTasks(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(False, True)
 
     def test_single_task(self):
@@ -33,19 +34,22 @@ class TestTasks(unittest.TestCase):
             assert task in tasks and task2 in tasks
             print("Number of tasks should be 2, is " + str(len(tasks)))
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()
 
 
 class TestSubTasks(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(False, True)
 
     def test_foreign_key(self):
         with app.app_context():
             with self.assertRaises(IntegrityError):
-                subtask = SubTasks(1, "somefile.js", datetime.utcnow())
+                # 0 is never valid task_id, given SQL starts to increment at 1
+                subtask = SubTasks(0, "somefile.js", datetime.utcnow())
                 db.session.add(subtask)
                 db.session.commit()
 
@@ -77,13 +81,15 @@ class TestSubTasks(unittest.TestCase):
             assert subtask in subtasks and subtask2 in subtasks
             print("Number of subtasks should be 2, is " + str(len(subtasks)))
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()
 
 
 class TestAndroidIDs(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(False, True)
 
     def test_single_id(self):
@@ -108,6 +114,7 @@ class TestAndroidIDs(unittest.TestCase):
             assert id1 in ids and id2 in ids
             print("Number of tasks should be 2, is " + str(len(ids)))
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()

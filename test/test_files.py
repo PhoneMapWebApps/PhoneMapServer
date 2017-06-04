@@ -1,6 +1,6 @@
 import unittest
 
-from app.main.files import file_extension_okay, request_file_exists, request_files_missing
+from app.main.files import file_extension_okay, request_files_missing
 
 
 class TestFiles(unittest.TestCase):

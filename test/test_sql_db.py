@@ -8,12 +8,13 @@ from app.main.sql import add_to_db
 
 
 class TestSQLdb(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(False, True)
 
     @classmethod
-    def millis_within_range(self, t1, t2, max_seperation):
-        return (0.001 * abs(t1 - t2).microseconds) < max_seperation
+    def millis_within_range(cls, t1, t2, max_separation):
+        return (0.001 * abs(t1 - t2).microseconds) < max_separation
 
     def test_add_to_db(self):
         with app.app_context():
@@ -43,15 +44,16 @@ class TestSQLdb(unittest.TestCase):
             assert phone.is_connected
             assert not phone.is_processing
 
-    def test_get_phone_NOT_in_db(self):
+    def test_get_phone_not_in_db(self):
         with app.app_context():
-            phone = sql.get_phone("Sherlock", "Holmes")
+            phone = sql.get_phone("Dr John", "Watson")
 
-            assert phone.android_id == "Sherlock"
-            assert phone.session_id == "Holmes"
+            assert phone.android_id == "Dr John"
+            assert phone.session_id == "Watson"
             assert phone.is_connected
             assert not phone.is_processing
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()
