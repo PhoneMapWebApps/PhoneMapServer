@@ -25,10 +25,10 @@ class TestRoutes(unittest.TestCase):
                     content_type='multipart/form-data'
 
                 )
-        assert resp.status_code == 302
-        assert os.path.isfile('test/upload/data/js/1.js')
-        assert os.path.isfile('test/upload/data/zip/1.zip')
-        assert os.path.isdir('test/upload/data/zip/1')
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(os.path.isfile('test/upload/data/js/1.js'))
+        self.assertTrue(os.path.isfile('test/upload/data/zip/1.zip'))
+        self.assertTrue(os.path.isdir('test/upload/data/zip/1'))
         try:
             os.remove('test/upload/data/js/1.js')
             os.remove('test/upload/data/zip/1.zip')

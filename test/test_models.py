@@ -19,7 +19,7 @@ class TestTasks(unittest.TestCase):
             db.session.commit()
 
             tasks = Tasks.query.all()
-            assert task in tasks
+            self.assertTrue(task in tasks)
             print("Number of tasks should be 1, is " + str(len(tasks)))
 
     def test_double_task(self):
@@ -31,7 +31,7 @@ class TestTasks(unittest.TestCase):
             db.session.commit()
 
             tasks = Tasks.query.all()
-            assert task in tasks and task2 in tasks
+            self.assertTrue(task in tasks and task2 in tasks)
             print("Number of tasks should be 2, is " + str(len(tasks)))
 
     @classmethod
@@ -63,7 +63,7 @@ class TestSubTasks(unittest.TestCase):
             db.session.commit()
 
             subtasks = SubTasks.query.all()
-            assert subtask in subtasks
+            self.assertTrue(subtask in subtasks)
             print("Number of subtasks should be 1, is " + str(len(subtasks)))
 
     def test_double_subtask(self):
@@ -78,7 +78,7 @@ class TestSubTasks(unittest.TestCase):
             db.session.commit()
 
             subtasks = SubTasks.query.all()
-            assert subtask in subtasks and subtask2 in subtasks
+            self.assertTrue(subtask in subtasks and subtask2 in subtasks)
             print("Number of subtasks should be 2, is " + str(len(subtasks)))
 
     @classmethod
@@ -99,7 +99,7 @@ class TestAndroidIDs(unittest.TestCase):
             db.session.commit()
 
             ids = AndroidIDs.query.all()
-            assert id1 in ids
+            self.assertTrue(id1 in ids)
             print("Number of tasks should be 1, is " + str(len(ids)))
 
     def test_double_id(self):
@@ -111,7 +111,7 @@ class TestAndroidIDs(unittest.TestCase):
             db.session.commit()
 
             ids = AndroidIDs.query.all()
-            assert id1 in ids and id2 in ids
+            self.assertTrue(id1 in ids and id2 in ids)
             print("Number of tasks should be 2, is " + str(len(ids)))
 
     @classmethod

@@ -29,7 +29,7 @@ class TestSQLdb(unittest.TestCase):
             self.assertEqual(new_nTasks, old_nTasks + 1)
 
             subtask = SubTasks.query.one()
-            assert self.millis_within_range(subtask.time_submitted, submission_time, 20.0)
+            self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 20.0))
 
     def test_get_phone_in_db(self):
         with app.app_context():
@@ -39,19 +39,19 @@ class TestSQLdb(unittest.TestCase):
 
             phone = sql.get_phone("Sherlock", "Holmes")
 
-            assert phone.android_id == "Sherlock"
-            assert phone.session_id == "Holmes"
-            assert phone.is_connected
-            assert not phone.is_processing
+            self.assertEqual(phone.android_id, "Sherlock")
+            self.assertEqual(phone.session_id, "Holmes")
+            self.assertTrue(phone.is_connected)
+            self.assertFalse(phone.is_processing)
 
     def test_get_phone_not_in_db(self):
         with app.app_context():
             phone = sql.get_phone("Dr John", "Watson")
 
-            assert phone.android_id == "Dr John"
-            assert phone.session_id == "Watson"
-            assert phone.is_connected
-            assert not phone.is_processing
+            self.assertEqual(phone.android_id, "Dr John")
+            self.assertEqual(phone.session_id, "Watson")
+            self.assertTrue(phone.is_connected)
+            self.assertFalse(phone.is_processing)
 
     @classmethod
     def tearDownClass(cls):

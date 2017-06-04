@@ -42,8 +42,9 @@ class TestVanillaSockets(unittest.TestCase):
     def test_connect(self):
         client = socketio.test_client(app, "/test")
         received = client.get_received("/test")
-        assert len(received) == 1
-        assert received[0]["args"][0]["data"] == "Connected"
+        
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]["args"][0]["data"], "Connected")
         client.disconnect("/test")
 
     def test_disconnect_reconnect(self):
@@ -54,14 +55,16 @@ class TestVanillaSockets(unittest.TestCase):
         client.disconnect("/test")
         client.connect("/test")
         received = client.get_received("/test")
-        assert len(received) == 1
-        assert received[0]["args"][0]["data"] == "Connected"
+        
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]["args"][0]["data"], "Connected")
 
         client.emit("my_event", {"data": "junk"}, namespace="/test")
         snd_received = client.get_received("/test")
-        assert len(snd_received) == 1
-        assert len(snd_received[0]["args"]) == 1
-        assert snd_received[0]["args"][0]["data"] == "junk"
+        
+        self.assertEqual(len(snd_received), 1)
+        self.assertEqual(len(snd_received[0]["args"]), 1)
+        self.assertEqual(snd_received[0]["args"][0]["data"], "junk")
         client.disconnect("/test")
 
     def test_emit(self):
@@ -70,10 +73,10 @@ class TestVanillaSockets(unittest.TestCase):
         client.emit("my_event", {"data": "this is good data"}, namespace="/test")
         received = client.get_received("/test")
 
-        assert len(received) == 1
-        assert len(received[0]["args"])
-        assert received[0]["name"] == "my_response"
-        assert received[0]["args"][0]["data"] == "this is good data"
+        self.assertEqual(len(received), 1)
+        self.assertEqual(len(received[0]["args"]), 1)
+        self.assertEqual(received[0]["name"], "my_response")
+        self.assertEqual(received[0]["args"][0]["data"], "this is good data")
 
     def test_broadcast(self):
         client1 = socketio.test_client(app, "/test")
@@ -88,13 +91,13 @@ class TestVanillaSockets(unittest.TestCase):
         received_1 = client1.get_received("/test")
         received_2 = client2.get_received("/test")
 
-        assert not client3.get_received()
-        assert len(received_1) == 1
-        assert len(received_2) == 1
-        assert received_1[0]['name'] == "my_response"
-        assert received_1[0]["args"][0]["data"] == "42"
-        assert received_2[0]['name'] == "my_response"
-        assert received_2[0]["args"][0]["data"] == "42"
+        self.assertFalse(client3.get_received())
+        self.assertEqual(len(received_1), 1)
+        self.assertEqual(len(received_2), 1)
+        self.assertEqual(received_1[0]['name'], "my_response")
+        self.assertEqual(received_1[0]["args"][0]["data"], "42")
+        self.assertEqual(received_2[0]['name'], "my_response")
+        self.assertEqual(received_2[0]["args"][0]["data"], "42")
 
     @classmethod
     def tearDownClass(cls):
@@ -116,19 +119,19 @@ class TestGetAndStartSockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 2  # broadcast + confirmation
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Someone asked for code"
+        self.assertEqual(len(received), 2)  # broadcast + confirmation
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
-        assert received[1]['name'] == "set_code"
+        self.assertEqual(received[1]['name'], "set_code")
 
         client.emit("start_code", {"id": "TestID"}, namespace="/test")
 
         received = client.get_received("/test")
 
-        assert len(received) == 1
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Code started"
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Code started")
 
     def test_get_code(self):
         client = socketio.test_client(app, "/test")
@@ -139,11 +142,11 @@ class TestGetAndStartSockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 2  # broadcast + confirmation
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Someone asked for code"
+        self.assertEqual(len(received), 2)  # broadcast + confirmation
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
-        assert received[1]['name'] == "set_code"
+        self.assertEqual(received[1]['name'], "set_code")
 
     def tearDown(self):
         delete_data()
@@ -165,10 +168,10 @@ class TestAPISockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 2  # broadcast + confirmation
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Someone asked for code"
-        assert received[1]['name'] == "no_tasks"
+        self.assertEqual(len(received), 2)  # broadcast + confirmation
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+        self.assertEqual(received[1]['name'], "no_tasks")
 
     def test_start_code_stop_executing(self):
         client = socketio.test_client(app, "/test")
@@ -178,9 +181,9 @@ class TestAPISockets(unittest.TestCase):
         client.emit("start_code", {"id": "TestID"}, namespace="/test")
 
         received = client.get_received("/test")
-        assert len(received) == 1
-        assert received[0]["name"] == "stop_executing"
-        assert received[0]["args"] == [None]
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]["name"], "stop_executing")
+        self.assertEqual(received[0]["args"], [None])
 
     def test_execution_failed(self):
         client = socketio.test_client(app, "/test")
@@ -191,9 +194,9 @@ class TestAPISockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 1
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Client failed executing with stack trace: you done goofed"
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Client failed executing with stack trace: you done goofed")
 
     def test_return(self):
         client = socketio.test_client(app, "/test")
@@ -204,9 +207,9 @@ class TestAPISockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 1
-        assert received[0]['name'] == "my_response"
-        assert received[0]['args'][0]["data"] == "Client returned following data: It's bigger on the inside!"
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[0]['args'][0]["data"], "Client returned following data: It's bigger on the inside!")
 
     def test_bad_return(self):
         client = socketio.test_client(app, "/test")
@@ -217,8 +220,8 @@ class TestAPISockets(unittest.TestCase):
 
         received = client.get_received("/test")
 
-        assert len(received) == 1
-        assert received[0]['name'] == "error"
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0]['name'], "error")
 
     @classmethod
     def tearDownClass(cls):
