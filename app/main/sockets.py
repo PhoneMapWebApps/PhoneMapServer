@@ -13,6 +13,15 @@ def background_thread():
 thread = None
 
 
+@socketio.on_error("/test")
+def on_error(value):
+    if isinstance(value, KeyError):
+        print("Error caught")
+        emit("error", {'error': "A KeyError has occured. The required data "
+                                "was not passed, or passed with the wrong names"})
+        # assert False
+
+
 class PhoneMap(Namespace):
     @staticmethod
     def on_connect():

@@ -208,6 +208,18 @@ class TestAPISockets(unittest.TestCase):
         assert received[0]['name'] == "my_response"
         assert received[0]['args'][0]["data"] == "Client returned following data: It's bigger on the inside!"
 
+    def test_bad_return(self):
+        client = socketio.test_client(app, "/test")
+        # clear received queue
+        client.get_received("/test")
+
+        client.emit("return", {"id": "TestID"}, namespace="/test")
+
+        received = client.get_received("/test")
+
+        assert len(received) == 1
+        assert received[0]['name'] == "error"
+
     @classmethod
     def tearDownClass(cls):
         with app.app_context():
