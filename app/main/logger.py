@@ -21,5 +21,6 @@ def log(msg):
         flash(msg)
     except RuntimeError:
         pass
+    print(msg)
     log_file.write(msg + '\n')
     log_file.flush()
