@@ -75,5 +75,7 @@ completed, or if you haven't requested code to execute yet (which would be very 
 `return`: Marks the completed crunching of a piece of data, updating the database appropriately. 
 Also broadcasts the result under `my_response`, as usual.
 
+`get_task_list`: Returns a `task_list` with arg `list` containing a list of JSON data for each task.
+
 _Note_: In the event of an error, `error` may be emitted, which means the server has attempted to gracefully recover 
 and tried to inform you of the error under the `error` argument.

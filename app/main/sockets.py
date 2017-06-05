@@ -1,9 +1,9 @@
-from flask import session, request, current_app as app
+from flask import session, request
 from flask_socketio import Namespace, emit
 
 from app.main import sql
 from app.main.logger import log
-from .. import socketio
+from .. import socketio, app
 
 
 def background_thread():
@@ -21,6 +21,7 @@ def on_error(value):
                                 "was not passed, or passed with the wrong names"})
     else:
         raise value
+
 
 class PhoneMap(Namespace):
     @staticmethod
@@ -110,6 +111,21 @@ class PhoneMap(Namespace):
              {'data': "Client returned following data: " + message['return'],
               'count': session['receive_count']},
              broadcast=True)
+
+    @staticmethod
+    def on_get_task_list(message):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+
+        task_list = sql.get_task_list(message["id"], request.sid)
+
+        emit('my_response',
+             {'data': "Sending a task list",
+              'count': session['receive_count']},
+             broadcast=True)
+
+        emit('task_list',
+             {'list': task_list,
+              'count': session['receive_count']})
 
 
 socketio.on_namespace(PhoneMap('/test'))

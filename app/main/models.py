@@ -20,6 +20,11 @@ class Tasks(db.Model):
         self.in_progress = False
         self.is_complete = False
 
+    def to_json(self):
+        return {"task_id": self.task_id,
+                "date_submitted": str(self.time_submitted.date()),
+                "time_submitted": str(self.time_submitted.time())}
+
     def __repr__(self):
         return '<Task %r>' % self.task_id
 
