@@ -91,8 +91,8 @@ class TestGetCodeFail(unittest.TestCase):
 
 
 class TestGetCode(unittest.TestCase):
-
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_app(False, True)
         with app.app_context():
             with open('test/resources/test.js', 'rb') as js_file:
@@ -102,7 +102,8 @@ class TestGetCode(unittest.TestCase):
                     sql.add_to_db(js_file, zip_file)
                     sql.add_to_db(js_file, zip_file)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         with app.app_context():
             db.drop_all()
 

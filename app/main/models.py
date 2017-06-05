@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY
 
 from app import db
 
@@ -63,14 +63,15 @@ class AndroidIDs(db.Model):
     session_id = Column(String(32), unique=True)
     is_connected = Column(Boolean, nullable=False)
     is_processing = Column(Boolean, nullable=False)
+    endorsed_tasks = Column(ARRAY(Integer))
     subtask_id = Column(Integer)
 
-    # NOTE always use session.merge to avoid key fuck ups
     def __init__(self, android_id, session_id):
         self.android_id = android_id
         self.session_id = session_id
         self.is_connected = True
         self.is_processing = False
+        self.endorsed_tasks = []
         self.subtask_id = None
 
     def __repr__(self):

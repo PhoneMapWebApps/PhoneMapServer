@@ -97,13 +97,13 @@ def get_next_subtask(android_id, session_id):
         log("No more tasks!")
         return None, None
 
-    # Todo: Must add an "endorsed_task(s)" field (or equivalent) to AndroidIDs table.
+    # TODO: Must add an "endorsed_task(s)" field (or equivalent) to AndroidIDs table.
     endorsed_task_id = incomplete_tasks[0].task_id
 
     subtask = fetch_incomplete_subtask(endorsed_task_id)
 
     if not subtask:
-        # Todo: Send a "task(s) complete" message, which causes "All tasks done!" to be displayed on phone UI.
+        # TODO: Send a "task(s) complete" message, which causes "All tasks done!" to be displayed on phone UI.
         log("No more subtasks to allocate!")
         return None, None
 
