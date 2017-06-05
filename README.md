@@ -53,7 +53,7 @@ Go into the PhoneMapServer directory and in terminal run `python3 -m "nose"`
 
 # Current API endpoints:
 
-`connect`: The usual socketio call; required to initiate . Emits a `my_response` with `data` saying `Connected`.
+`connect`: The usual socketio call; required to initiate . Emits a `my_response` with `data` saying `CON_OK`.
 
 `disconnect`: What is a connection without a disconnection?
 
