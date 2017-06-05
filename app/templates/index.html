@@ -4,47 +4,49 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask-SocketIO Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <style>
-        .serverui {
-            background-color: #7c9bad;
-            color: #ffffff;
-        }
         .consolemenu {
             background-color: #44464a;
             color: #ffffff;
             text-align: left;
+            margin-left: 5px;
+            margin-right: 5px;
         }
         #log {
             background-color: #44464a;
             color: #ffffff;
             position: relative;
             overflow-y: scroll;
-            height: 300px;
-            margin-top: 10px;
+            height: 400px;
             text-align: left;
+            margin-left: 5px;
+            margin-right: 5px;
+            border-top-width: 15px;
+            border: solid #999999;
+            border-width: 5px;
         }
-        .footer {
+        #footer {
             position: absolute;
             left: 0;
-            top: 91%;
+            top: 90%;
             right: 0;
-            bottom: 0;
+            bottom: 0%;
             text-align: center;
+            color: #000000;
+            background-color: #ffffff;
         }
         body {
             text-align: center;
-            width: 100%;
-            height: 100%;
         }
         form {
             display: inline;
         }
 
     </style>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
 
@@ -179,16 +181,18 @@
         <form id="get_task_list" method="POST" action="#">
           <input class="btn btn-info" type="submit" value="Simulate get list of tasks">
         </form>
-
-        <div id="log">
-            <br/>
-            {% for line in console_old %}
-            {{ line }}<br/>
-            {% endfor %}
-        </div>
+        <br/>
+        <br/>
     </div>
 
-    <div class="footer">
+    <div id="log">
+        <br/>
+        {% for line in console_old %}
+        {{ line }}<br/>
+        {% endfor %}
+    </div>
+
+    <div id="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
     </div>
