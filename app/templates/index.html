@@ -9,6 +9,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <style>
+        #serverui {
+            width: 100%;
+            height: 100%;
+        }
         .consolemenu {
             background-color: #44464a;
             color: #ffffff;
@@ -21,7 +25,7 @@
             color: #ffffff;
             position: relative;
             overflow-y: scroll;
-            height: 400px;
+            max-height: 65vh;
             text-align: left;
             margin-left: 5px;
             margin-right: 5px;
@@ -30,11 +34,7 @@
             border-width: 5px;
         }
         #footer {
-            position: absolute;
-            left: 0;
-            top: 90%;
-            right: 0;
-            bottom: 0%;
+            position: relative;
             text-align: center;
             color: #000000;
             background-color: #ffffff;
@@ -72,17 +72,17 @@
             // section of the page.
             socket.on('my_response', function(msg) {
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
-                $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
+                $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
             socket.on('set_code', function(msg) {
               $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
-              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
+              $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
             socket.on('no_tasks', function() {
               $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
-              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
+              $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
             socket.on('task_list', function(msg) {
@@ -91,10 +91,10 @@
               for(var i = 0, size = list.length; i < size ; i++){
                    $('#log').append('<br>' + $('<div/>').text(JSON.stringify(list[i]) ).html());
               }
-              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
+              $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
-            $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
+            $("#log").scrollTop($("#log")[0].scrollHeight);
 
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
@@ -149,6 +149,7 @@
     </script>
 </head>
 <body>
+    <div id="serverui">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -195,6 +196,7 @@
     <div id="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
+    </div>
     </div>
 </body>
 </html>
