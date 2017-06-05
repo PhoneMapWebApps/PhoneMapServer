@@ -4,7 +4,6 @@ from datetime import datetime
 from app import create_app, app, db
 from app.main import sql
 from app.main.models import AndroidIDs, SubTasks
-from app.main.sql import add_to_db
 
 
 class TestSQLdb(unittest.TestCase):
@@ -18,17 +17,17 @@ class TestSQLdb(unittest.TestCase):
 
     def test_add_to_db(self):
         with app.app_context():
-            js_file = open('test/resources/test.js', 'rb')
-            zip_file = open('test/resources/test.zip', 'rb')
-
             old_nTasks = SubTasks.query.count()
-            submission_time = datetime.utcnow()
-            add_to_db(js_file, zip_file)
+            with open('test/resources/test.js', 'rb') as js_file:
+                with open('test/resources/test.zip', 'rb') as zip_file:
+                    submission_time = datetime.utcnow()
+                    val = sql.add_to_db(js_file, zip_file)
+
+            self.assertIsNotNone(val)
             new_nTasks = SubTasks.query.count()
+            self.assertEqual(new_nTasks, old_nTasks + 3) # 3 subtasks added from test.zip
 
-            self.assertEqual(new_nTasks, old_nTasks + 1)
-
-            subtask = SubTasks.query.one()
+            subtask = SubTasks.query.first()
             self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 20.0))
 
     def test_get_phone_in_db(self):
@@ -78,14 +77,14 @@ class TestGetCodeFail(unittest.TestCase):
     def test_get_by_task_id_fail(self):
         with app.app_context():
             # task 0 is never present
-            data_file, task_id = sql.get_by_task_id("TestPhone", "TestSessionID", 1)
+            data_file, task_id = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
 
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
 
     def test_get_latest_fail(self):
         with app.app_context():
-            data_file, task_id = sql.get_latest("TestPhone", "TestSessionID")
+            data_file, task_id = sql.get_latest_subtask("TestPhone", "TestSessionID")
 
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
@@ -95,16 +94,45 @@ class TestGetCode(unittest.TestCase):
 
     def setUp(self):
         create_app(False, True)
+        with app.app_context():
+            with open('test/resources/test.js', 'rb') as js_file:
+                with open('test/resources/test.zip', 'rb') as zip_file:
+                    # add twice for 2 tasks (1, 2)
+                    # test.zip has 3 files = 3 subtasks -> 6 subtasks total (numbered 1-6)
+                    sql.add_to_db(js_file, zip_file)
+                    sql.add_to_db(js_file, zip_file)
 
     def tearDown(self):
         with app.app_context():
             db.drop_all()
 
     def test_get_next(self):
-        pass
+        with app.app_context():
+            data_file, task_id = sql.get_next_subtask("TestPhone", "TestSessionID")
+
+        self.assertIsNotNone(data_file)
+        self.assertIsNotNone(task_id)
+        self.assertEqual(task_id, 1)
 
     def test_get_by_task_id(self):
-        pass
+        with app.app_context():
+            data_file, task_id = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
+            data_file_2, task_id_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 2)
+
+        self.assertIsNotNone(data_file)
+        self.assertIsNotNone(data_file_2)
+        self.assertIsNotNone(task_id)
+        self.assertIsNotNone(task_id_2)
+        self.assertEqual(task_id, 1)
+        self.assertEqual(task_id_2, 2)
 
     def test_get_latest(self):
-        pass
+        with app.app_context():
+            data_file, task_id = sql.get_latest_subtask("TestPhone", "TestSessionID")
+            data_file_2, task_id_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
+
+        self.assertIsNotNone(data_file)
+        self.assertIsNotNone(data_file_2)
+        self.assertIsNotNone(task_id)
+        self.assertIsNotNone(task_id_2)
+        self.assertLess(task_id_2, task_id)

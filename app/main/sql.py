@@ -44,7 +44,7 @@ def get_phone(android_id, session_id):
     return phone
 
 
-def get_by_task_id(android_id, session_id, id_val):
+def get_subtask_by_task_id(android_id, session_id, id_val):
     phone = get_phone(android_id, session_id)
 
     # NOTE: task query only required for the start_task func
@@ -64,11 +64,11 @@ def get_by_task_id(android_id, session_id, id_val):
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, task.task_id
+    return subtask.data_file, subtask.task_id
 
 
 # order reverse -> run latest submissions first
-def get_latest(android_id, session_id):
+def get_latest_subtask(android_id, session_id):
     phone = get_phone(android_id, session_id)
 
     subtask = SubTasks.query.order_by(SubTasks.subtask_id.desc()).\
@@ -97,7 +97,7 @@ def get_next_subtask(android_id, session_id):
         log("No more tasks!")
         return None, None
 
-    # Todo: Must add an "endorsed_task(s)" field (or equivilant) to AndroidIDs table.
+    # Todo: Must add an "endorsed_task(s)" field (or equivalent) to AndroidIDs table.
     endorsed_task_id = incomplete_tasks[0].task_id
 
     subtask = fetch_incomplete_subtask(endorsed_task_id)
