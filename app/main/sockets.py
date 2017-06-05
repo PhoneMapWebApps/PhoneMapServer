@@ -1,9 +1,9 @@
-from flask import session, request, current_app as app
+from flask import session, request
 from flask_socketio import Namespace, emit
 
 from app.main import sql
 from app.main.logger import log
-from .. import socketio
+from .. import socketio, app
 
 
 def background_thread():
@@ -28,6 +28,18 @@ def log_and_emit(session, data, broadcast):
          {'data': data, 'count': session['receive_count']},
         broadcast=broadcast)
     log(data)
+
+def send_code(data_file, task_id, phone_id):
+    if not (data_file and task_id):
+        emit('no_tasks')
+        log_and_emit(session, PhoneMap.SERVER_NO_TASKS + phone_id, True)
+        return
+
+    with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
+        js_data = js_file.read()
+    with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
+        data = data_file.read()
+    emit('set_code', {'code': js_data, 'data': data})
 
 class PhoneMap(Namespace):
     CLIENT_CONNECT_MSG = "New agent has connected with request ID: "
@@ -73,18 +85,26 @@ class PhoneMap(Namespace):
     def on_get_code(message):
         phone_id = message["id"]
         log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
+
         data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
+        send_code(data_file, task_id, phone_id)
 
-        if not (data_file and task_id):
-            emit('no_tasks')
-            log_and_emit(session, PhoneMap.SERVER_NO_TASKS + phone_id, True)
-            return
+    @staticmethod
+    def on_get_latest_code(message):
+        phone_id = message["id"]
+        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
 
-        with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
-            js_data = js_file.read()
-        with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
-            data = data_file.read()
-        emit('set_code', {'code': js_data, 'data': data})
+        data_file, task_id = sql.get_latest_subtask(phone_id, request.sid)
+        send_code(data_file, task_id, phone_id)
+
+    @staticmethod
+    def on_get_code_by_id(message):
+        phone_id = message["id"]
+        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        requested_task_id = message["task_id"]
+
+        data_file, task_id = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
+        send_code(data_file, task_id, phone_id)
 
     @staticmethod
     def on_start_code(message):
@@ -107,6 +127,21 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
         sql.execution_complete(phone_id)
         log_and_emit(session, phone_id + PhoneMap.CLIENT_FINISHED + message['return'], True)
+
+    @staticmethod
+    def on_get_task_list(message):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+
+        task_list = sql.get_task_list(message["id"], request.sid)
+
+        emit('my_response',
+             {'data': "Sending a task list",
+              'count': session['receive_count']},
+             broadcast=True)
+
+        emit('task_list',
+             {'list': task_list,
+              'count': session['receive_count']})
 
 
 socketio.on_namespace(PhoneMap('/test'))

@@ -1,4 +1,5 @@
 import os
+import shutil
 import zipfile
 from shutil import copyfile
 
@@ -49,5 +50,7 @@ def save_and_extract_files(js_path, zip_path, js_file, zip_file, task_id):
 
 
 def extract(zip_path, task_id):
+    if os.path.isdir(zip_path + str(task_id)):
+        shutil.rmtree(zip_path + str(task_id))
     with zipfile.ZipFile(zip_path + str(task_id) + ".zip", "r") as zip_ref:
         zip_ref.extractall(zip_path + str(task_id) + "/")

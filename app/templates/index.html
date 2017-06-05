@@ -75,6 +75,14 @@
               $('#log').prepend('<br>' + $('<div/>').text('No more tasks available for you!').html());
             });
 
+            socket.on('task_list', function(msg) {
+              $('#log').prepend('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
+              list = msg.list;
+              for(var i = 0, size = list.length; i < size ; i++){
+                   $('#log').append('<br>' + $('<div/>').text(JSON.stringify(list[i]) ).html());
+              }
+            });
+
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
             // round trip time is measured.
@@ -119,6 +127,10 @@
                socket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
                return false;
            });
+          $('form#get_task_list').submit(function(event) {
+               socket.emit('get_task_list', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               return false;
+           });
         });
 
     </script>
@@ -153,13 +165,16 @@
         <form id="return_code" method="POST" action="#">
           <input class="btn btn-info" type="submit" value="Simulate results to code">
         </form>
+        <form id="get_task_list" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate get list of tasks">
+        </form>
+
         <div id="log">
               <br/>
               {% for line in console_old %}
               {{ line }}<br/>
               {% endfor %}
         </div>
-    </div>
     <div class="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
