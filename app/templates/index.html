@@ -9,16 +9,18 @@
             background-color: #7c9bad;
             color: #ffffff;
         }
-        .serverconsole {
+        .consolemenu {
             background-color: #44464a;
             color: #ffffff;
-            position: absolute;
-            left: 0;
-            top: 10%;
-            right: 0;
-            bottom: 10%;
-            overflow-y: auto;
-            border: 1px solid #333;
+            text-align: left;
+        }
+        #log {
+            background-color: #44464a;
+            color: #ffffff;
+            position: relative;
+            overflow-y: scroll;
+            height: 300px;
+            margin-top: 10px;
             text-align: left;
         }
         .footer {
@@ -31,6 +33,8 @@
         }
         body {
             text-align: center;
+            width: 100%;
+            height: 100%;
         }
         form {
             display: inline;
@@ -43,6 +47,7 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
+
             // Use a "/test" namespace.
             // An application can open a connection on multiple namespaces, and
             // Socket.IO will multiplex all those connections on a single
@@ -64,24 +69,30 @@
             // to the client. The data is then displayed in the "Received"
             // section of the page.
             socket.on('my_response', function(msg) {
-                $('#log').prepend('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+                $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
             });
 
             socket.on('set_code', function(msg) {
-              $('#log').prepend('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
+              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
+              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
             });
 
             socket.on('no_tasks', function() {
-              $('#log').prepend('<br>' + $('<div/>').text('No more tasks available for you!').html());
+              $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
+              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
             });
 
             socket.on('task_list', function(msg) {
-              $('#log').prepend('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
+              $('#log').append('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
               list = msg.list;
               for(var i = 0, size = list.length; i < size ; i++){
                    $('#log').append('<br>' + $('<div/>').text(JSON.stringify(list[i]) ).html());
               }
+              $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
             });
+
+            $("#log").animate({ scrollTop: $('#log').prop("scrollHeight")}, 1000);
 
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
@@ -151,7 +162,7 @@
 
     <br/><br/>
 
-    <div class="serverconsole">
+    <div class="consolemenu">
         <h3>CONSOLE</h3>
         <form id="get_code" method="POST" action="#">
           <input class="btn btn-info" type="submit" value="Simulate agent request job">
@@ -170,12 +181,13 @@
         </form>
 
         <div id="log">
-              <br/>
-              {% for line in console_old %}
-              {{ line }}<br/>
-              {% endfor %}
+            <br/>
+            {% for line in console_old %}
+            {{ line }}<br/>
+            {% endfor %}
         </div>
     </div>
+
     <div class="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>

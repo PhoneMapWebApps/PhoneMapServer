@@ -12,7 +12,6 @@ def index():
     try:
         log_file = open(log_filename, 'r')
         log_lines = log_file.readlines()
-        log_lines.reverse()
     except:
         log_lines = ""
 
