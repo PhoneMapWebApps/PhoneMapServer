@@ -57,22 +57,22 @@
             // The callback function is invoked when a connection with the
             // server is established.
             socket.on('connect', function() {
-                socket.emit('my_event', {data: 'I\'m connected!'});
+                socket.emit('my_event', {data: 'Browser is connected!'});
             });
             // Event handler for server sent data.
             // The callback function is invoked whenever the server emits data
             // to the client. The data is then displayed in the "Received"
             // section of the page.
             socket.on('my_response', function(msg) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+                $('#log').prepend('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
             });
 
             socket.on('set_code', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
+              $('#log').prepend('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
             });
 
             socket.on('no_tasks', function() {
-              $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
+              $('#log').prepend('<br>' + $('<div/>').text('No more tasks available for you!').html());
             });
 
             // Interval function that tests message latency by sending a "ping"
@@ -153,7 +153,12 @@
         <form id="return_code" method="POST" action="#">
           <input class="btn btn-info" type="submit" value="Simulate results to code">
         </form>
-        <div id="log"></div>
+        <div id="log">
+              <br/>
+              {% for line in console_old %}
+              {{ line }}<br/>
+              {% endfor %}
+        </div>
     </div>
     <div class="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>

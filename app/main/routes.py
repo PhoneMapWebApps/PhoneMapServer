@@ -3,13 +3,20 @@ from flask import request, render_template, redirect
 
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
-from app.main.logger import log
+from app.main.logger import log, log_filename
 from . import main as app
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        log_file = open(log_filename, 'r')
+        log_lines = log_file.readlines()
+        log_lines.reverse()
+    except:
+        log_lines = ""
+
+    return render_template('index.html', console_old=log_lines)
 
 
 @app.route('/tasks')

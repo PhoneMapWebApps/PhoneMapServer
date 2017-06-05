@@ -1,5 +1,6 @@
 import os
 
+from datetime import datetime
 from flask import flash
 
 # TODO: cleanup
@@ -12,9 +13,6 @@ if not os.path.exists(logs_dir):
 if os.path.isfile(log_filename):
     os.remove(log_filename)
 
-log_file = open(log_filename, 'a+')
-
-
 def log(msg):
     # ignore flash if not testing
     try:
@@ -22,5 +20,5 @@ def log(msg):
     except RuntimeError:
         pass
     print(msg)
-    log_file.write(msg + '\n')
-    log_file.flush()
+    log_file = open(log_filename, 'a+')
+    log_file.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + msg + '\n')

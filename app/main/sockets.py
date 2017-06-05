@@ -16,25 +16,46 @@ thread = None
 @socketio.on_error("/test")
 def on_error(value):
     if isinstance(value, KeyError):
-        print("Error caught")
+        log("KeyError caught")
         emit("error", {'error': "A KeyError has occured. The required data "
                                 "was not passed, or passed with the wrong names"})
     else:
         raise value
 
+def log_and_emit(session, data, broadcast):
+    session['receive_count'] = session.get('receive_count', 0) + 1
+    emit('my_response',
+         {'data': data, 'count': session['receive_count']},
+        broadcast=broadcast)
+    log(data)
+
 class PhoneMap(Namespace):
+    CLIENT_CONNECT_MSG = "New agent has connected with request ID: "
+    CLIENT_DISCNCT_MSG = "Agent has disconnected, request ID: "
+    CLIENT_GET_CODE = "Agent has asked for code, agent ID: "
+    CLIENT_CODE_START = "Agent has started executing the code, agent ID: "
+    CLIENT_WRONG_START = "Agent has tried to start wrong code, agent ID: "
+    CLIENT_ERROR_EXEC = " agent failed executing with the stack trace:\n "
+    CLIENT_FINISHED = " agent has finished with following return: "
+    SERVER_NO_TASKS = "Client requested code, but no tasks are available! Agent ID: "
+
+    SERVER_RESPONSE_CON_OK = "CON_OK"
+
     @staticmethod
     def on_connect():
         global thread
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-        print("Client connected", request.sid)
-        emit('my_response', {'data': 'Connected', 'count': 0})
+        log(PhoneMap.CLIENT_CONNECT_MSG + request.sid)
+        emit('my_response', {'data': PhoneMap.SERVER_RESPONSE_CON_OK,
+                             'count': 0})
 
     @staticmethod
     def on_disconnect():
         sql.disconnected(request.sid)
-        print('Client disconnected', request.sid)
+        log(PhoneMap.CLIENT_DISCNCT_MSG + request.sid)
+        emit('my_response', {'data': PhoneMap.CLIENT_DISCNCT_MSG + request.sid,
+                             'count': 0})
 
     @staticmethod
     def on_my_ping():
@@ -42,30 +63,21 @@ class PhoneMap(Namespace):
 
     @staticmethod
     def on_my_event(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-        emit('my_response',
-             {'data': message['data'], 'count': session['receive_count']})
+        log_and_emit(session, message['data'], False)
 
     @staticmethod
     def on_my_broadcast_event(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-        emit('my_response',
-             {'data': message['data'], 'count': session['receive_count']},
-             broadcast=True)
+        log_and_emit(session, message['data'], True)
 
     @staticmethod
     def on_get_code(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-        emit('my_response',
-             {'data': "Someone asked for code", 'count': session['receive_count']},
-             broadcast=True)
-
         phone_id = message["id"]
+        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
         data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
 
         if not (data_file and task_id):
-            log("Tasks all gone")
             emit('no_tasks')
+            log_and_emit(session, PhoneMap.SERVER_NO_TASKS + phone_id, True)
             return
 
         with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
@@ -76,40 +88,25 @@ class PhoneMap(Namespace):
 
     @staticmethod
     def on_start_code(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
+        phone_id = message["id"]
 
-        log("Starting code...")
-
-        if sql.start_task(message["id"]):
-            log("Code marked as started.")
-            emit('my_response',
-                 {'data': "Code started", 'count': session['receive_count']},
-                 broadcast=True)
+        if sql.start_task(phone_id):
+            log_and_emit(session, PhoneMap.CLIENT_CODE_START + phone_id, True)
         else:
-            log("Code already running or unknown subtask_id, please stop.")
+            log_and_emit(session, PhoneMap.CLIENT_WRONG_START + phone_id, True)
             emit('stop_executing')
 
     @staticmethod
     def on_execution_failed(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-
-        sql.stop_execution(message["id"])
-
-        emit('my_response',
-             {'data': "Client failed executing with stack trace: " + message['exception'],
-              'count': session['receive_count']},
-             broadcast=True)
+        phone_id = message["id"]
+        sql.stop_execution(phone_id)
+        log_and_emit(session, phone_id + PhoneMap.CLIENT_ERROR_EXEC + message['exception'], True)
 
     @staticmethod
     def on_return(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-
-        sql.execution_complete(message["id"])
-
-        emit('my_response',
-             {'data': "Client returned following data: " + message['return'],
-              'count': session['receive_count']},
-             broadcast=True)
+        phone_id = message["id"]
+        sql.execution_complete(phone_id)
+        log_and_emit(session, phone_id + PhoneMap.CLIENT_FINISHED + message['return'], True)
 
 
 socketio.on_namespace(PhoneMap('/test'))

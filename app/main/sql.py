@@ -37,7 +37,7 @@ def add_to_db(js_file, zip_file):
 def get_phone(android_id, session_id):
     phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if not phone:
-        print("phone has never been seen before, adding phone to DB.")
+        log("Phone has never been seen before, adding phone to DB " + android_id + " " + session_id)
         phone = AndroidIDs(android_id, session_id)
         db.session.add(phone)
         db.session.commit()
@@ -123,7 +123,7 @@ def fetch_incomplete_subtask(task_id):
 def start_task(android_id):
     phone = AndroidIDs.query.filter_by(android_id=android_id).first()
     if not phone:
-        log("Phone not found.")
+        log("Phone not found - " + android_id)
         return
 
     subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
