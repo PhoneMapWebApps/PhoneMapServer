@@ -60,7 +60,8 @@ class PhoneMap(Namespace):
              {'data': "Someone asked for code", 'count': session['receive_count']},
              broadcast=True)
 
-        data_file, task_id = sql.get_next(message["id"], request.sid)
+        phone_id = message["id"]
+        data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
 
         if not (data_file and task_id):
             log("Tasks all gone")

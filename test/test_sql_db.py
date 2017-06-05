@@ -33,8 +33,7 @@ class TestSQLdb(unittest.TestCase):
 
     def test_get_phone_in_db(self):
         with app.app_context():
-            id1 = AndroidIDs("Sherlock", "Holmes")
-            db.session.add(id1)
+            db.session.add(AndroidIDs("Sherlock", "Holmes"))
             db.session.commit()
 
             phone = sql.get_phone("Sherlock", "Holmes")
@@ -44,7 +43,7 @@ class TestSQLdb(unittest.TestCase):
             self.assertTrue(phone.is_connected)
             self.assertFalse(phone.is_processing)
 
-    def test_get_phone_not_in_db(self):
+    def test_phone_created_if_not_in_db(self):
         with app.app_context():
             phone = sql.get_phone("Dr John", "Watson")
 
