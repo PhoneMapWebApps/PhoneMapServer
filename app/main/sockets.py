@@ -23,6 +23,19 @@ def on_error(value):
         raise value
 
 
+def send_code(data_file, task_id):
+    if not (data_file and task_id):
+        log("Tasks all gone")
+        emit('no_tasks')
+        return
+
+    with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
+        js_data = js_file.read()
+    with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
+        data = data_file.read()
+    emit('set_code', {'code': js_data, 'data': data})
+
+
 class PhoneMap(Namespace):
     @staticmethod
     def on_connect():
@@ -64,16 +77,32 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
         data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
 
-        if not (data_file and task_id):
-            log("Tasks all gone")
-            emit('no_tasks')
-            return
+        send_code(data_file, task_id)
 
-        with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
-            js_data = js_file.read()
-        with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
-            data = data_file.read()
-        emit('set_code', {'code': js_data, 'data': data})
+    @staticmethod
+    def on_get_latest_code(message):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        emit('my_response',
+             {'data': "Someone asked for code", 'count': session['receive_count']},
+             broadcast=True)
+
+        phone_id = message["id"]
+        data_file, task_id = sql.get_latest_subtask(phone_id, request.sid)
+
+        send_code(data_file, task_id)
+
+    @staticmethod
+    def on_get_code_by_id(message):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        emit('my_response',
+             {'data': "Someone asked for code", 'count': session['receive_count']},
+             broadcast=True)
+
+        phone_id = message["id"]
+        requested_task_id = message["task_id"]
+        data_file, task_id = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
+
+        send_code(data_file, task_id)
 
     @staticmethod
     def on_start_code(message):
