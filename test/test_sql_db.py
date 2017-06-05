@@ -56,3 +56,55 @@ class TestSQLdb(unittest.TestCase):
     def tearDownClass(cls):
         with app.app_context():
             db.drop_all()
+
+
+class TestGetCodeFail(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        create_app(False, True)
+
+    @classmethod
+    def tearDownClass(cls):
+        with app.app_context():
+            db.drop_all()
+
+    def test_get_next_fail(self):
+        with app.app_context():
+            data_file, task_id = sql.get_next_subtask("TestPhone", "TestSessionID")
+
+        self.assertIsNone(data_file)
+        self.assertIsNone(task_id)
+
+    def test_get_by_task_id_fail(self):
+        with app.app_context():
+            # task 0 is never present
+            data_file, task_id = sql.get_by_task_id("TestPhone", "TestSessionID", 1)
+
+        self.assertIsNone(data_file)
+        self.assertIsNone(task_id)
+
+    def test_get_latest_fail(self):
+        with app.app_context():
+            data_file, task_id = sql.get_latest("TestPhone", "TestSessionID")
+
+        self.assertIsNone(data_file)
+        self.assertIsNone(task_id)
+
+
+class TestGetCode(unittest.TestCase):
+
+    def setUp(self):
+        create_app(False, True)
+
+    def tearDown(self):
+        with app.app_context():
+            db.drop_all()
+
+    def test_get_next(self):
+        pass
+
+    def test_get_by_task_id(self):
+        pass
+
+    def test_get_latest(self):
+        pass

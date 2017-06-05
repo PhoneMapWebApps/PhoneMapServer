@@ -50,13 +50,13 @@ def get_by_task_id(android_id, session_id, id_val):
     # NOTE: task query only required for the start_task func
     task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
     if not task:
-        log("Selected task " + id_val + " is unavailable! Either it is already finished, or \
+        log("Selected task " + str(id_val) + " is unavailable! Either it is already finished, or \
             it doesnt exist.")
         return None, None
 
     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
     if not subtask:
-        log("Selected task " + id_val + " already has all tasks in progress.")
+        log("Selected task " + str(id_val) + " already has all tasks in progress.")
         return None, None
 
     # set correct values of session id and subtask_id in phone DB
