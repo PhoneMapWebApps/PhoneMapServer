@@ -6,6 +6,7 @@ from app import db
 class Tasks(db.Model):
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
+    task_name = Column(String(255), nullable=False)
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -14,16 +15,21 @@ class Tasks(db.Model):
 
     # task_id is autoincremented
     def __init__(self, time_submitted):
+        self.task_name = "Paulus Maximus"
         self.time_submitted = time_submitted
         self.time_started = None
         self.time_completed = None
         self.in_progress = False
         self.is_complete = False
 
-    def to_json(self):
+    def to_json(self, js_path):
+        with open(js_path + str(self.task_id) + ".txt") as desc_file:
+            desc = desc_file.read()
         return {"task_id": self.task_id,
+                "task_name": self.task_name,
                 "date_submitted": str(self.time_submitted.date()),
-                "time_submitted": str(self.time_submitted.time())}
+                "time_submitted": str(self.time_submitted.time()),
+                "task_desc": desc}
 
     def __repr__(self):
         return '<Task %r>' % self.task_id

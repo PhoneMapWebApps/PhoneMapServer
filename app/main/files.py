@@ -36,6 +36,7 @@ def file_extension_okay(filename, required_file_extension):
 def save_and_extract_files(js_path, zip_path, js_file, zip_file, task_id):
     js_filename = str(task_id) + ".js"
     zip_filename = str(task_id) + ".zip"
+    desc_filename = str(task_id) + ".txt"
     log('Uploading...')
 
     if hasattr(js_file, 'save'):
@@ -45,6 +46,8 @@ def save_and_extract_files(js_path, zip_path, js_file, zip_file, task_id):
         copyfile(js_file.name, os.path.join(js_path, js_filename))
         copyfile(zip_file.name, os.path.join(zip_path, zip_filename))
 
+    with open(js_path + desc_filename, "w") as desc:
+        desc.write("Paul is my lord and saviour")
     log("Successfully uploaded JS and ZIP files")
     extract(zip_path, task_id)
 

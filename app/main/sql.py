@@ -15,7 +15,7 @@ def get_task_list():
 
     values = Tasks.query.filter_by(is_complete=False).all()
 
-    return [val.to_json() for val in values]
+    return [val.to_json(app.config["JS_FOLDER"]) for val in values]
 
 
 def add_to_db(js_file, zip_file):
