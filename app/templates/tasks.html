@@ -9,11 +9,33 @@
             background-color: #d3d3d3;
         }
 
-        #task_list {
+        .task_list {
             background-color: #7c9bad;
             margin-left: 2%;
             margin-right: 2%;
             text-align: left;
+        }
+
+        .new_task {
+            background-color: #7c9bad;
+            margin-left: 2%;
+            margin-right: 2%;
+            text-align: left;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        [id*=content] {
+            background-color: #7c9bad;
+            position: absolute;
+            display: none;
         }
 
         input[type=text], select {
@@ -30,11 +52,9 @@
             bottom: 0;
 
         }
-        body {
-            text-align: center;
-        }
-        form {
-            display: inline;
+
+        .upload_button {
+            display: inline-flex;
         }
 
     </style>
@@ -42,6 +62,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
             // Use a "/test" namespace.
@@ -84,8 +105,31 @@
             });
 
 
-            $("button").click(function() {
-            }
+            $(".expand_btn").button().click(function() {
+                var row = $(this).closest('tr');
+                var content = $(this).data("href")
+
+                if ($(content).is(":visible")) {
+                   $(row).css({"height" : "auto"});
+                   $(content).css({"display" : "none", "left": "auto", "top" : "auto"});
+               } else  {
+                   $("tr").css({"height" : "auto"});
+                   var conH = $(content).height();
+                   var rowH = $(row).height();
+                   var updatedHeight = conH + rowH;
+                   $(row).css({"height" : updatedHeight});
+                                   var left = $(row).position().left;
+                var top = $(row).position().top + rowH + 'px';
+                   $("[id*=content]").css({"display" : "none", "left": "auto", "top" : "auto"});
+                   $(content).css({"display" : "block", "auto": left, "top" : top});
+                   var newBg = $(row).css("background-color");
+                   $(content).css({"background-color" : newBg});
+               }
+            });
+
+            $( '.fileinput').change(function(){
+               $( 'span' ).text($( this ).val() );
+            });
         });
 
     </script>
@@ -106,7 +150,27 @@
 
     <br/><br/>
 
-    <div id="task_list">
+    <!-- Upload zip files + JS code -->
+    <div class="new_task">
+        <h3>NEW TASK</h3>
+        <form id="upload"  action="" method="POST" enctype="multipart/form-data">
+            <b>Task Name:</b> <input type="text" name="TASK_NAME" value="">
+            <b>Task Description:</b> <input type="text" name="TASK_DESC" value="">
+            <div class="upload_button"><b>JavaScript Code:&nbsp</b><input type="file" name="JS_FILE"></div>
+            <div class="upload_button"><b>Data Archive:&nbsp</b><input type="file" name="ZIP_FILE"></div>
+            <div class="upload_button"> <input type="submit" value="Upload files"></div>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              {% for message in messages %}
+              <p>{{ message }}</p>
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="task_list">
         <h3>TASK MANAGER</h3>
         <table class="table table-striped">
             <thead>
@@ -121,13 +185,13 @@
             <tbody>
                 {% for task in task_list %}
                     <tr id="{{ task.task_id }}">
-                        <td><button class="btn" name=""
-                                    value=" " data-href="#content{{ task.task_name }}">
+                        <td><button class="expand_btn" name=""
+                                    value=" " data-href="#content{{ task.task_id }}">
                             <img src="static/more.png" style="width:16px;height:16px;">
                         </button></td>
                         <td>{{ task.task_name }}</td>
                         {% if task.in_progress %}
-                            <td>Running . . .</td>
+                            <td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>
                         {% elif task.is_complete %}
                             <td>Complete!</td>
                         {% else %}
@@ -141,29 +205,19 @@
                 {% endfor %}
             </tbody>
         </table>
-        <!-- Upload zip files + JS code -->
-        <h2>Upload files</h2>
-        <form id="upload"  action="" method="POST" enctype="multipart/form-data">
-            <p align="center">
-                Task Name: (255 chars max)<br>
-                <input type="text" name="TASK_NAME" value="Lol"> <br></br>
-                Task Description: <br>
-                <input type="text" name="TASK_DESC" value="Lel"> <br></br>
-                JavaScript Code:<input class="btn btn-warning" type="file" name="JS_FILE"> <br>
-                Data Archive:<input class="btn btn-warning" type="file" name="ZIP_FILE"> <br>
-            </p>
-            <p align="center">
-                <input class="btn btn-danger" type="submit" value="Upload files">
-            </p>
-        </form>
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-              {% for message in messages %}
-              <p>{{ message }}</p>
-              {% endfor %}
-          {% endif %}
-        {% endwith %}
+        {% for task in task_list %}
+        <div class="task_list" id="content{{ task.task_id }}">
+            <p><b>Description:</b> {{ task.task_desc }}</p>
+            <p><b>Change file:</b>
+                <form id="upload"  action="" method="POST" enctype="multipart/form-data">
+                    <div class="upload_button"><b>JavaScript Code:&nbsp</b><input type="file" name="JS_FILE"></div>
+                    <div class="upload_button"><b>Data Archive:&nbsp</b><input type="file" name="ZIP_FILE"></div>
+                    <div class="upload_button"> <input type="submit" value="Upload files"></div>
+                </form>
+            </p>
+        </div>
+        {% endfor %}
     </div>
 
     <div id="footer">
