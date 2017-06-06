@@ -82,6 +82,10 @@
                     sum += ping_pong_times[i];
                 $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
             });
+
+
+            $("button").click(function() {
+            }
         });
 
     </script>
@@ -106,15 +110,21 @@
         <h3>TASK MANAGER</h3>
         <table class="table table-striped">
             <thead>
+                <th>Expand</th>
                 <th>Task name</th>
                 <th>Task status</th>
                 <th>Time submitted</th>
                 <th>Time started</th>
                 <th>Time completed</th>
+                <th>Remove task</th>
             </thead>
             <tbody>
                 {% for task in task_list %}
-                    <tr>
+                    <tr id="{{ task.task_id }}">
+                        <td><button class="btn" name=""
+                                    value=" " data-href="#content{{ task.task_name }}">
+                            <img src="static/more.png" style="width:16px;height:16px;">
+                        </button></td>
                         <td>{{ task.task_name }}</td>
                         {% if task.in_progress %}
                             <td>Running . . .</td>
@@ -126,6 +136,7 @@
                         <td>{{ task.time_submitted }}</td>
                         <td>{{ task.time_started }}</td>
                         <td>{{ task.time_completed }}</td>
+                        <td><img src="static/android-close.png" style="width:16px;height:16px;"></td>
                     </tr>
                 {% endfor %}
             </tbody>
