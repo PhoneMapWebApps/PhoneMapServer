@@ -7,6 +7,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JS_FOLDER = 'data/js/'
     ZIP_FOLDER = 'data/zip/'
+    DESC_FOLDER = 'data/desc/'
 
 
 class Production(Config):
@@ -25,5 +26,6 @@ class Testing(Config):
     DEBUG = False
     JS_FOLDER = "test/upload/data/js/"
     ZIP_FOLDER = "test/upload/data/zip/"
+    DESC_FOLDER = "test/upload/data/desc/"
     # setup to work with circleCI
     SQLALCHEMY_DATABASE_URI = 'postgresql://ubuntu@localhost:5432/circle_test'

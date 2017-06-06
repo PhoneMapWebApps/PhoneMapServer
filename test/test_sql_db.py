@@ -1,9 +1,21 @@
+import os
+import shutil
 import unittest
 from datetime import datetime
+
+from nose.tools import nottest
 
 from app import create_app, app, db
 from app.main import sql
 from app.main.models import AndroidIDs, SubTasks
+
+
+@nottest
+def delete_data():
+    os.remove(app.config['JS_FOLDER'] + '1.js')
+    os.remove(app.config['ZIP_FOLDER'] + '1.zip')
+    os.remove(app.config['DESC_FOLDER'] + '1.txt')
+    shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
 
 class TestSQLdb(unittest.TestCase):
@@ -21,7 +33,7 @@ class TestSQLdb(unittest.TestCase):
             with open('test/resources/test.js', 'rb') as js_file:
                 with open('test/resources/test.zip', 'rb') as zip_file:
                     submission_time = datetime.utcnow()
-                    val = sql.add_to_db(js_file, zip_file)
+                    val = sql.add_to_db(js_file, zip_file, "Task", "Desc")
 
             self.assertIsNotNone(val)
             new_nTasks = SubTasks.query.count()
@@ -53,6 +65,7 @@ class TestSQLdb(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        delete_data()
         with app.app_context():
             db.drop_all()
 
@@ -99,11 +112,19 @@ class TestGetCode(unittest.TestCase):
                 with open('test/resources/test.zip', 'rb') as zip_file:
                     # add twice for 2 tasks (1, 2)
                     # test.zip has 3 files = 3 subtasks -> 6 subtasks total (numbered 1-6)
-                    sql.add_to_db(js_file, zip_file)
-                    sql.add_to_db(js_file, zip_file)
+                    sql.add_to_db(js_file, zip_file, "A Task", "some stuff")
+                    sql.add_to_db(js_file, zip_file, "Another Task", "more stuff")
 
     @classmethod
     def tearDownClass(cls):
+        os.remove(app.config['JS_FOLDER'] + '1.js')
+        os.remove(app.config['ZIP_FOLDER'] + '1.zip')
+        os.remove(app.config['DESC_FOLDER'] + '1.txt')
+        shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
+        os.remove(app.config['JS_FOLDER'] + '2.js')
+        os.remove(app.config['ZIP_FOLDER'] + '2.zip')
+        os.remove(app.config['DESC_FOLDER'] + '2.txt')
+        shutil.rmtree(app.config['ZIP_FOLDER'] + '2')
         with app.app_context():
             db.drop_all()
 

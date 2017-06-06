@@ -14,8 +14,8 @@ class Tasks(db.Model):
     is_complete = Column(Boolean)
 
     # task_id is autoincremented
-    def __init__(self, time_submitted):
-        self.task_name = "Paulus Maximus"
+    def __init__(self, time_submitted, task_name="No Name Given"):
+        self.task_name = task_name
         self.time_submitted = time_submitted
         self.time_started = None
         self.time_completed = None

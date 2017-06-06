@@ -27,6 +27,8 @@ def tasks():
 def upload_file():
     js_file_tag = 'JS_FILE'
     zip_file_tag = 'ZIP_FILE'
+    task_name_tag = 'TASK_NAME'
+    task_desc_tag = 'TASK_DESC'
 
     log('Checking file existence')
     if not request_file_exists(request.files, js_file_tag):
@@ -36,7 +38,14 @@ def upload_file():
 
     js_file = request.files[js_file_tag]
     zip_file = request.files[zip_file_tag]
+    task_name = request.values[task_name_tag]
+    task_desc = request.values[task_desc_tag]
 
+    if not (len(task_name) and len(task_desc)):
+        log('Must have a task Name and task Desc!')
+    if len(task_name) > 255:
+        log('task name too long')
+        return redirect(request.url)
     log('Checking file extensions')
     if not file_extension_okay(js_file.filename, 'js'):
         return redirect(request.url)
@@ -44,7 +53,7 @@ def upload_file():
         return redirect(request.url)
 
     # adds to DB and extracts
-    sql.add_to_db(js_file, zip_file)
+    sql.add_to_db(js_file, zip_file, task_name, task_desc)
 
     return redirect(request.url)
 

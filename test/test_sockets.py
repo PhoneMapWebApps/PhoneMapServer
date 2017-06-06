@@ -18,7 +18,9 @@ def upload_data():
                         '/tasks',
                         data=dict(
                             JS_FILE=js_file,
-                            ZIP_FILE=zip_file
+                            ZIP_FILE=zip_file,
+                            TASK_NAME="Some Test Task",
+                            TASK_DESC="Interesting description"
                         ),
                         content_type='multipart/form-data'
                     )
@@ -28,6 +30,7 @@ def upload_data():
 def delete_data():
     os.remove(app.config['JS_FOLDER'] + '1.js')
     os.remove(app.config['ZIP_FOLDER'] + '1.zip')
+    os.remove(app.config['DESC_FOLDER'] + '1.txt')
     shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
 
@@ -139,6 +142,7 @@ class TestGetAndStartSockets(unittest.TestCase):
         client.emit("get_code", {"id": "TestID"}, namespace="/test")
 
         received = client.get_received("/test")
+        print(received)
 
         self.assertEqual(len(received), 2)  # broadcast + confirmation
         self.assertEqual(received[0]['name'], "my_response")

@@ -15,11 +15,11 @@ def get_task_list():
 
     values = Tasks.query.filter_by(is_complete=False).all()
 
-    return [val.to_json(app.config["JS_FOLDER"]) for val in values]
+    return [val.to_json(app.config["DESC_FOLDER"]) for val in values]
 
 
-def add_to_db(js_file, zip_file):
-    task = Tasks(datetime.utcnow())
+def add_to_db(js_file, zip_file, task_name, task_desc):
+    task = Tasks(datetime.utcnow(), task_name)
 
     db.session.add(task)
 
@@ -29,7 +29,8 @@ def add_to_db(js_file, zip_file):
     log('Saving and extracting...')
     save_and_extract_files(app.config['JS_FOLDER'],
                            app.config['ZIP_FOLDER'],
-                           js_file, zip_file, task.task_id)
+                           app.config['DESC_FOLDER'],
+                           js_file, zip_file, task_desc, task.task_id)
 
     directory = app.config['ZIP_FOLDER'] + str(task.task_id)
     # NOTE: NO SUBDIRECTORIES (YET?)
