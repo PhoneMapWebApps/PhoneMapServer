@@ -10,9 +10,8 @@ from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs
 
 
-def get_task_list(android_id, session_id):
+def get_task_list():
     # ensure some ID is obtained from phone
-    get_phone(android_id, session_id)
 
     values = Tasks.query.filter_by(is_complete=False).all()
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import request, render_template, redirect
+from flask import request, render_template, redirect, jsonify
 
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
@@ -47,3 +47,9 @@ def upload_file():
     sql.add_to_db(js_file, zip_file)
 
     return redirect(request.url)
+
+
+@app.route('/tasklist')
+def get_task_list():
+    task_list = sql.get_task_list()
+    return jsonify(task_list)

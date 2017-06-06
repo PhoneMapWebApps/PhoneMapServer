@@ -132,7 +132,7 @@ class PhoneMap(Namespace):
     def on_get_task_list(message):
         session['receive_count'] = session.get('receive_count', 0) + 1
 
-        task_list = sql.get_task_list(message["id"], request.sid)
+        task_list = sql.get_task_list()
 
         emit('my_response',
              {'data': "Sending a task list",
