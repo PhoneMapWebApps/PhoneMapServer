@@ -1,9 +1,12 @@
+from time import strftime
+
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY
 
 from app import db
 
 
 class Tasks(db.Model):
+    TIME_FORMAT = "%b %d %Y %H:%M:%S"
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
     task_name = Column(String(255), nullable=False)
@@ -27,8 +30,13 @@ class Tasks(db.Model):
             desc = desc_file.read()
         return {"task_id": self.task_id,
                 "task_name": self.task_name,
-                "date_submitted": str(self.time_submitted.date()),
-                "time_submitted": str(self.time_submitted.time()),
+                "time_submitted": strftime(self.TIME_FORMAT, self.time_submitted.timetuple()),
+                "time_started" : strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
+                    if self.time_started != None else "",
+                "time_completed" : strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
+                    if self.time_completed != None else "",
+                "in_progress" : self.in_progress,
+                "is_complete" : self.is_complete,
                 "task_desc": desc}
 
     def __repr__(self):

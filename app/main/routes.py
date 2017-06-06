@@ -20,7 +20,8 @@ def index():
 
 @app.route('/tasks')
 def tasks():
-    return render_template('tasks.html')
+    print(sql.get_all_tasks())
+    return render_template('tasks.html', task_list=sql.get_all_tasks())
 
 
 @app.route('/tasks', methods=['POST'])

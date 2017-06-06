@@ -17,6 +17,10 @@ def get_task_list():
 
     return [val.to_json(app.config["DESC_FOLDER"]) for val in values]
 
+def get_all_tasks():
+    values = Tasks.query.all()
+    return [val.to_json(app.config["DESC_FOLDER"]) for val in values]
+
 
 def add_to_db(js_file, zip_file, task_name, task_desc):
     task = Tasks(datetime.utcnow(), task_name)
