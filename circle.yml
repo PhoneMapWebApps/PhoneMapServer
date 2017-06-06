@@ -11,4 +11,4 @@ deployment:
   production:
     branch: master
     commands:
-      - ssh pn1315@shell2.doc.ic.ac.uk "ssh pn1315@146.169.45.121 \" cd ~/PhoneMapServer && git pull && touch run.py\""
+      - ssh pn1315@shell2.doc.ic.ac.uk "ssh pn1315@146.169.45.121 \" cd ~/PhoneMapServer && git pull && supervisorctl restart PhoneMap\""
