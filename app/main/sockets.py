@@ -12,17 +12,17 @@ def background_thread():
 
 thread = None
 
-
-@socketio.on_error("/test")
-def on_error(value):
-    if isinstance(value, KeyError):
-        log("KeyError caught")
-        print(value)
-        emit("error", {'error': "A KeyError has occured. The required data "
-                                "was not passed, or passed with the wrong names"})
-    else:
-        print(value)
-        raise value
+# TODO: reenable error handler later
+# @socketio.on_error("/test")
+# def on_error(value):
+#     if isinstance(value, KeyError):
+#         log("KeyError caught")
+#         print(value)
+#         emit("error", {'error': "A KeyError has occured. The required data "
+#                                 "was not passed, or passed with the wrong names"})
+#     else:
+#         print(value)
+#         raise value
 
 
 def log_and_emit(data, broadcast):

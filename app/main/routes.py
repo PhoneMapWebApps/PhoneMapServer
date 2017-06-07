@@ -95,6 +95,6 @@ def change_files(task_id):
 
 
 @app.route('/tasks/del/<task_id>', methods=['POST'])
-def remove_(task_id):
+def remove_task(task_id):
     sql.remove_from_db(task_id)
     return redirect(url_for('main.tasks'))
