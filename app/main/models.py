@@ -10,7 +10,7 @@ class Tasks(db.Model):
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
     task_name = Column(String(255), nullable=False)
-    task_desc = Column(Text, nullable=False) # is empty string null in SQL?
+    task_desc = Column(Text, nullable=False)  # is empty string null in SQL?
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -28,15 +28,20 @@ class Tasks(db.Model):
         self.is_complete = False
 
     def to_json(self):
+        submitted = strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
+        started = ""
+        if self.time_started:
+            started = strftime(self.TIME_FORMAT, self.time_started.timetuple())
+        completed = ""
+        if self.time_completed:
+            completed = strftime(self.TIME_FORMAT, self.time_completed.timetuple())
         return {"task_id": self.task_id,
                 "task_name": self.task_name,
-                "time_submitted": strftime(self.TIME_FORMAT, self.time_submitted.timetuple()),
-                "time_started" : strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
-                    if self.time_started != None else "",
-                "time_completed" : strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
-                    if self.time_completed != None else "",
-                "in_progress" : self.in_progress,
-                "is_complete" : self.is_complete,
+                "time_submitted": submitted,
+                "time_started": started,
+                "time_completed": completed,
+                "in_progress": self.in_progress,
+                "is_complete": self.is_complete,
                 "task_desc": self.task_desc}
 
     def __repr__(self):

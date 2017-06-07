@@ -13,6 +13,7 @@ if not os.path.exists(logs_dir):
 if os.path.isfile(log_filename):
     os.remove(log_filename)
 
+
 def log(msg):
     # ignore flash if not testing
     try:

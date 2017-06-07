@@ -12,9 +12,8 @@ from app.main.models import Tasks, SubTasks, AndroidIDs
 
 def get_task_list():
     # ensure some ID is obtained from phone
-
+    # get_phone(id, sess_id)
     values = Tasks.query.filter_by(is_complete=False).all()
-
     return [val.to_json() for val in values]
 
 

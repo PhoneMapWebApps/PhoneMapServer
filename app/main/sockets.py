@@ -24,17 +24,19 @@ def on_error(value):
         print(value)
         raise value
 
-def log_and_emit(session, data, broadcast):
+
+def log_and_emit(data, broadcast):
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': data, 'count': session['receive_count']},
-        broadcast=broadcast)
+         broadcast=broadcast)
     log(data)
+
 
 def send_code(data_file, task_id, phone_id):
     if not (data_file and task_id):
         emit('no_tasks')
-        log_and_emit(session, PhoneMap.SERVER_NO_TASKS + phone_id, True)
+        log_and_emit(PhoneMap.SERVER_NO_TASKS + phone_id, True)
         return
 
     with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
@@ -42,6 +44,7 @@ def send_code(data_file, task_id, phone_id):
     with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
         data = data_file.read()
     emit('set_code', {'code': js_data, 'data': data})
+
 
 class PhoneMap(Namespace):
     CLIENT_CONNECT_MSG = "New agent has connected with request ID: "
@@ -77,16 +80,16 @@ class PhoneMap(Namespace):
 
     @staticmethod
     def on_my_event(message):
-        log_and_emit(session, message['data'], False)
+        log_and_emit(message['data'], False)
 
     @staticmethod
     def on_my_broadcast_event(message):
-        log_and_emit(session, message['data'], True)
+        log_and_emit(message['data'], True)
 
     @staticmethod
     def on_get_code(message):
         phone_id = message["id"]
-        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
 
         data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
         send_code(data_file, task_id, phone_id)
@@ -94,7 +97,7 @@ class PhoneMap(Namespace):
     @staticmethod
     def on_get_latest_code(message):
         phone_id = message["id"]
-        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
 
         data_file, task_id = sql.get_latest_subtask(phone_id, request.sid)
         send_code(data_file, task_id, phone_id)
@@ -102,7 +105,7 @@ class PhoneMap(Namespace):
     @staticmethod
     def on_get_code_by_id(message):
         phone_id = message["id"]
-        log_and_emit(session, PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
 
         data_file, task_id = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
@@ -113,22 +116,22 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
 
         if sql.start_task(phone_id):
-            log_and_emit(session, PhoneMap.CLIENT_CODE_START + phone_id, True)
+            log_and_emit(PhoneMap.CLIENT_CODE_START + phone_id, True)
         else:
-            log_and_emit(session, PhoneMap.CLIENT_WRONG_START + phone_id, True)
+            log_and_emit(PhoneMap.CLIENT_WRONG_START + phone_id, True)
             emit('stop_executing')
 
     @staticmethod
     def on_execution_failed(message):
         phone_id = message["id"]
         sql.stop_execution(phone_id)
-        log_and_emit(session, phone_id + PhoneMap.CLIENT_ERROR_EXEC + message['exception'], True)
+        log_and_emit(phone_id + PhoneMap.CLIENT_ERROR_EXEC + message['exception'], True)
 
     @staticmethod
     def on_return(message):
         phone_id = message["id"]
         sql.execution_complete(phone_id)
-        log_and_emit(session, phone_id + PhoneMap.CLIENT_FINISHED + message['return'], True)
+        log_and_emit(phone_id + PhoneMap.CLIENT_FINISHED + message['return'], True)
 
     @staticmethod
     def on_get_task_list(message):

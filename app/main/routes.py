@@ -12,7 +12,7 @@ def index():
     try:
         log_file = open(log_filename, 'r')
         log_lines = log_file.readlines()
-    except:
+    except FileNotFoundError:
         log_lines = ""
 
     return render_template('index.html', console_old=log_lines)
@@ -20,8 +20,14 @@ def index():
 
 @app.route('/tasks')
 def tasks():
-    print(sql.get_all_tasks())
-    return render_template('tasks.html', task_list=sql.get_all_tasks())
+    all_tasks = sql.get_all_tasks()
+    return render_template('tasks.html', task_list=all_tasks)
+
+
+@app.route('/tasklist')
+def get_task_list():
+    task_list = sql.get_task_list()
+    return jsonify(task_list)
 
 
 @app.route('/tasks', methods=['POST'])
@@ -57,9 +63,3 @@ def upload_file():
     sql.add_to_db(js_file, zip_file, task_name, task_desc)
 
     return redirect(request.url)
-
-
-@app.route('/tasklist')
-def get_task_list():
-    task_list = sql.get_task_list()
-    return jsonify(task_list)
