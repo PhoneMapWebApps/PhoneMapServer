@@ -28,7 +28,6 @@ def upload_data():
 def delete_data():
     os.remove(app.config['JS_FOLDER'] + '1.js')
     os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-    os.remove(app.config['DESC_FOLDER'] + '1.txt')
     shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
 
@@ -43,7 +42,6 @@ class TestUpload(unittest.TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(os.path.isfile(app.config['JS_FOLDER'] + '1.js'))
         self.assertTrue(os.path.isfile(app.config['ZIP_FOLDER'] + '1.zip'))
-        self.assertTrue(os.path.isfile(app.config['DESC_FOLDER'] + '1.txt'))
         self.assertTrue(os.path.isdir(app.config['ZIP_FOLDER'] + '1'))
 
     # def test_successful_start(self):

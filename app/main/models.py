@@ -1,6 +1,6 @@
 from time import strftime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY, Text
 
 from app import db
 
@@ -10,6 +10,7 @@ class Tasks(db.Model):
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
     task_name = Column(String(255), nullable=False)
+    task_desc = Column(Text, nullable=False) # is empty string null in SQL?
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -17,17 +18,16 @@ class Tasks(db.Model):
     is_complete = Column(Boolean)
 
     # task_id is autoincremented
-    def __init__(self, time_submitted, task_name="No Name Given"):
+    def __init__(self, time_submitted, task_name="No Name Given", task_desc="No Desc Given"):
         self.task_name = task_name
+        self.task_desc = task_desc
         self.time_submitted = time_submitted
         self.time_started = None
         self.time_completed = None
         self.in_progress = False
         self.is_complete = False
 
-    def to_json(self, js_path):
-        with open(js_path + str(self.task_id) + ".txt") as desc_file:
-            desc = desc_file.read()
+    def to_json(self):
         return {"task_id": self.task_id,
                 "task_name": self.task_name,
                 "time_submitted": strftime(self.TIME_FORMAT, self.time_submitted.timetuple()),
@@ -37,7 +37,7 @@ class Tasks(db.Model):
                     if self.time_completed != None else "",
                 "in_progress" : self.in_progress,
                 "is_complete" : self.is_complete,
-                "task_desc": desc}
+                "task_desc": self.task_desc}
 
     def __repr__(self):
         return '<Task %r>' % self.task_id

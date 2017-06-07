@@ -30,7 +30,6 @@ def upload_data():
 def delete_data():
     os.remove(app.config['JS_FOLDER'] + '1.js')
     os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-    os.remove(app.config['DESC_FOLDER'] + '1.txt')
     shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
 

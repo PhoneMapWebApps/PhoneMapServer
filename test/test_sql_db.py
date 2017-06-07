@@ -14,7 +14,6 @@ from app.main.models import AndroidIDs, SubTasks
 def delete_data():
     os.remove(app.config['JS_FOLDER'] + '1.js')
     os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-    os.remove(app.config['DESC_FOLDER'] + '1.txt')
     shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
 
@@ -119,11 +118,9 @@ class TestGetCode(unittest.TestCase):
     def tearDownClass(cls):
         os.remove(app.config['JS_FOLDER'] + '1.js')
         os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-        os.remove(app.config['DESC_FOLDER'] + '1.txt')
         shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
         os.remove(app.config['JS_FOLDER'] + '2.js')
         os.remove(app.config['ZIP_FOLDER'] + '2.zip')
-        os.remove(app.config['DESC_FOLDER'] + '2.txt')
         shutil.rmtree(app.config['ZIP_FOLDER'] + '2')
         with app.app_context():
             db.drop_all()
