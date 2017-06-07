@@ -32,19 +32,31 @@ def file_extension_okay(filename, required_file_extension):
     return False
 
 
-def save_and_extract_files(js_path, zip_path, js_file, zip_file, task_id):
-    js_filename = str(task_id) + ".js"
-    zip_filename = str(task_id) + ".zip"
+def save_and_extract_files(task_id, js_file, zip_file, js_path, zip_path):
     log('Uploading...')
 
-    if hasattr(js_file, 'save'):
-        js_file.save(os.path.join(js_path, js_filename))
-        zip_file.save(os.path.join(zip_path, zip_filename))
-    else:
-        shutil.copyfile(js_file.name, os.path.join(js_path, js_filename))
-        shutil.copyfile(zip_file.name, os.path.join(zip_path, zip_filename))
+    save_and_extract_js(task_id, js_file, js_path)
+    save_and_extract_zip(task_id, zip_file, zip_path)
 
     log("Successfully uploaded JS and ZIP files, as well as set task name and description")
+
+
+def save_and_extract_js(task_id, js_file, js_path):
+    js_filename = str(task_id) + ".js"
+    # TODO: fix tests to use FileStorage and not a reader -> remove this IF statement
+    if hasattr(js_file, 'save'):
+        js_file.save(os.path.join(js_path, js_filename))
+    else:
+        shutil.copyfile(js_file.name, os.path.join(js_path, js_filename))
+
+
+def save_and_extract_zip(task_id, zip_file, zip_path):
+    zip_filename = str(task_id) + ".zip"
+    # TODO: fix tests to use FileStorage and not a reader -> remove this IF statement
+    if hasattr(zip_file, 'save'):
+        zip_file.save(os.path.join(zip_path, zip_filename))
+    else:
+        shutil.copyfile(zip_file.name, os.path.join(zip_path, zip_filename))
     extract(zip_path, task_id)
 
 
@@ -53,3 +65,9 @@ def extract(zip_path, task_id):
         shutil.rmtree(zip_path + str(task_id))
     with zipfile.ZipFile(zip_path + str(task_id) + ".zip", "r") as zip_ref:
         zip_ref.extractall(zip_path + str(task_id) + "/")
+
+
+def remove_task_files(task_id, js_folder, zip_folder):
+    os.remove(js_folder + str(task_id) + '.js')
+    os.remove(zip_folder + str(task_id) + '.zip')
+    shutil.rmtree(zip_folder + str(task_id))

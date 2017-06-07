@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import request, render_template, redirect, jsonify
+from flask import request, render_template, redirect, jsonify, url_for
 
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
@@ -62,4 +62,39 @@ def upload_file():
     # adds to DB and extracts
     sql.add_to_db(js_file, zip_file, task_name, task_desc)
 
+    print(request.url)
     return redirect(request.url)
+
+
+@app.route('/tasks/<task_id>', methods=['POST'])
+def change_files(task_id):
+    js_file_tag = 'JS_FILE'
+    zip_file_tag = 'ZIP_FILE'
+
+    if request_file_exists(request.files, js_file_tag):
+        # update code
+        js_file = request.files[js_file_tag]
+
+        if not file_extension_okay(js_file.filename, 'js'):
+            return redirect(url_for('main.tasks'))
+
+        log("Updating code for task" + task_id)
+        sql.update_code_in_db(task_id, js_file)
+
+    if request_file_exists(request.files, zip_file_tag):
+        # update data
+        zip_file = request.files[zip_file_tag]
+
+        if not file_extension_okay(zip_file.filename, 'zip'):
+            return redirect(url_for('main.tasks'))
+
+        log("Updating data for task" + task_id)
+        sql.update_data_in_db(task_id, zip_file)
+
+    return redirect(url_for('main.tasks'))
+
+
+@app.route('/tasks/del/<task_id>', methods=['POST'])
+def remove_(task_id):
+    sql.remove_from_db(task_id)
+    return redirect(url_for('main.tasks'))

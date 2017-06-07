@@ -200,7 +200,10 @@
                         <td>{{ task.time_submitted }}</td>
                         <td>{{ task.time_started }}</td>
                         <td>{{ task.time_completed }}</td>
-                        <td><img src="static/android-close.png" style="width:16px;height:16px;"></td>
+                        <!--<td><img src="static/android-close.png" style="width:16px;height:16px;"></td>-->
+                        <td> <form id="delete_task"  action="tasks/del/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
+                            <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />
+                        </form></td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -210,7 +213,7 @@
         <div class="task_list" id="content{{ task.task_id }}">
             <p><b>Description:</b> {{ task.task_desc }}</p>
             <p><b>Change file:</b>
-                <form id="upload"  action="" method="POST" enctype="multipart/form-data">
+                <form id="update_data"  action="tasks/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
                     <div class="upload_button"><b>JavaScript Code:&nbsp</b><input type="file" name="JS_FILE"></div>
                     <div class="upload_button"><b>Data Archive:&nbsp</b><input type="file" name="ZIP_FILE"></div>
                     <div class="upload_button"> <input type="submit" value="Upload files"></div>

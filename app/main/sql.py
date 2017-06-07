@@ -5,7 +5,8 @@ from datetime import datetime
 from flask import current_app as app
 
 from app import db
-from app.main.files import save_and_extract_files
+from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
+    remove_task_files
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs
 
@@ -31,19 +32,69 @@ def add_to_db(js_file, zip_file, task_name, task_desc):
     db.session.flush()
 
     log('Saving and extracting...')
-    save_and_extract_files(app.config['JS_FOLDER'],
-                           app.config['ZIP_FOLDER'],
-                           js_file, zip_file, task.task_id)
+    save_and_extract_files(task.task_id, js_file, zip_file,
+                           app.config['JS_FOLDER'],
+                           app.config['ZIP_FOLDER'])
 
-    directory = app.config['ZIP_FOLDER'] + str(task.task_id)
-    # NOTE: NO SUBDIRECTORIES (YET?)
-    for filename in os.listdir(directory):
-        subtask = SubTasks(task.task_id, filename, datetime.utcnow())
-        db.session.add(subtask)
+    create_subtasks(task.task_id)
 
     # make persistent
     db.session.commit()
     return task.task_id
+
+
+def remove_from_db(task_id):
+    task = Tasks.query.get(task_id)
+    db.session.delete(task)
+    remove_task_files(task_id, app.config['JS_FOLDER'], app.config['ZIP_FOLDER'])
+    db.session.commit()
+
+
+def update_code_in_db(task_id, js_file):
+    save_and_extract_js(task_id, js_file, app.config['JS_FOLDER'])
+    subtasks = SubTasks.query.filter_by(task_id=task_id).all()
+
+    for subtask in subtasks:
+        subtask.is_complete = False
+        subtask.in_progress = False
+        subtask.time_started = None
+        subtask.time_completed = None
+
+    task = Tasks.query.get(task_id)
+    task.is_complete = False
+    task.in_progress = False
+    task.time_started = None
+    task.time_completed = None
+
+    # make persistent
+    db.session.commit()
+
+
+def update_data_in_db(task_id, zip_file):
+    save_and_extract_zip(task_id, zip_file, app.config['ZIP_FOLDER'])
+    subtasks = SubTasks.query.filter_by(task_id=task_id).all()
+    print(subtasks)
+    for subtask in subtasks:
+        db.session.delete(subtask)
+    create_subtasks(task_id)
+
+    task = Tasks.query.get(task_id)
+    task.is_complete = False
+    task.in_progress = False
+    task.time_started = None
+    task.time_completed = None
+
+    # make persistent
+    db.session.commit()
+
+
+# NOTE DOES NOT SET PERSISTENCE -> does not commit
+def create_subtasks(task_id):
+    directory = app.config['ZIP_FOLDER'] + str(task_id)
+    # TODO: NO SUBDIRECTORIES (YET?)
+    for filename in os.listdir(directory):
+        subtask = SubTasks(task_id, filename, datetime.utcnow())
+        db.session.add(subtask)
 
 
 def get_phone(android_id, session_id):
@@ -115,7 +166,8 @@ def get_next_subtask(android_id, session_id):
     subtask = fetch_incomplete_subtask(endorsed_task_id)
 
     if not subtask:
-        # TODO: Send a "task(s) complete" message, which causes "All tasks done!" to be displayed on phone UI.
+        # TODO: Send a "task(s) complete" message, which causes "All tasks done!"
+        # to be displayed on phone UI.
         log("No more subtasks to allocate!")
         return None, None
 
