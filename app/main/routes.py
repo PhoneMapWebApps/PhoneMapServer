@@ -1,9 +1,15 @@
 #!/usr/bin/env python
-from flask import request, render_template, redirect, jsonify, url_for
+from urllib.parse import urlparse, urljoin
 
+from flask import request, render_template, redirect, jsonify, url_for
+from flask_login import login_required, login_user, logout_user
+
+
+from app import login_manager, db
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
+from app.main.models import User
 from . import main as app
 
 
@@ -18,7 +24,59 @@ def index():
     return render_template('index.html', console_old=log_lines)
 
 
+def is_safe_url(next_url):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, next_url))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = sql.authenticate_user(username, password)
+        if user:
+            log("Successful login for " + username + " with id " + str(user.user_id))
+            login_user(user)
+            next_url = request.args.get('next')
+
+            return redirect(next_url or url_for('main.index'))
+        else:
+            log("Incorrect login for user " + username)
+            return "Incorrect Login. Please try again."
+    else:
+        return render_template('login.html')
+
+
+@app.route("/create", methods=["GET", "POST"])
+def add_user():
+    if request.method == "POST":
+        username = request.form['username']
+        password = request.form['password']
+        exists = sql.does_user_exist(username)
+        if exists:
+            log("User " + username + " already exists, please choose another name")
+            return render_template("create.html")
+        else:
+            user = sql.add_user(username, password)
+            login_user(user)
+            return redirect(url_for("main.tasks"))
+    else:
+        return render_template("create.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    # return redirect(somewhere)
+    log("Logged out")
+    return redirect(url_for("main.index"))
+
+
 @app.route('/tasks')
+@login_required
 def tasks():
     all_tasks = sql.get_all_tasks()
     return render_template('tasks.html', task_list=all_tasks)
@@ -31,6 +89,7 @@ def get_task_list():
 
 
 @app.route('/tasks', methods=['POST'])
+@login_required
 def upload_file():
     js_file_tag = 'JS_FILE'
     zip_file_tag = 'ZIP_FILE'
@@ -62,11 +121,11 @@ def upload_file():
     # adds to DB and extracts
     sql.add_to_db(js_file, zip_file, task_name, task_desc)
 
-    print(request.url)
     return redirect(request.url)
 
 
 @app.route('/tasks/<task_id>', methods=['POST'])
+@login_required
 def change_files(task_id):
     js_file_tag = 'JS_FILE'
     zip_file_tag = 'ZIP_FILE'
@@ -95,6 +154,12 @@ def change_files(task_id):
 
 
 @app.route('/tasks/del/<task_id>', methods=['POST'])
+@login_required
 def remove_task(task_id):
     sql.remove_from_db(task_id)
     return redirect(url_for('main.tasks'))
+
+
+@login_manager.user_loader
+def user_loader(user_id):
+    return User.query.get(user_id)

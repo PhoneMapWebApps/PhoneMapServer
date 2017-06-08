@@ -8,7 +8,7 @@ from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files
 from app.main.logger import log
-from app.main.models import Tasks, SubTasks, AndroidIDs
+from app.main.models import Tasks, SubTasks, AndroidIDs, User
 
 
 def get_task_list():
@@ -257,3 +257,25 @@ def disconnected(session_id):
         phone.session_id = None  # NOTE: SQL implementation dependent. OK with PostGreSQL
 
         db.session.commit()
+
+
+def authenticate_user(username, password):
+    user = User.query.filter_by(username=username).first()
+    if user and user.check_password(password):
+        db.session.commit()
+        return user
+    return None
+
+
+def does_user_exist(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return True
+    return False
+
+
+def add_user(username, password):
+    user = User(username, password)
+    db.session.add(user)
+    db.session.commit()
+    return user

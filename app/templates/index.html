@@ -164,6 +164,11 @@
           <li class="active"><a href="#">Server monitor</a></li>
           <li><a href="tasks">Task manager</a></li>
           <li><a href="#">About</a></li>
+            {% if current_user.is_authenticated %}
+              <li><a href="/logout">Logout</a></li>
+            {% else %}
+              <li><a href="/login">Login</a></li>
+            {% endif %}
         </ul>
       </div>
     </nav>

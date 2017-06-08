@@ -1,6 +1,7 @@
 from time import strftime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY, Text
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
 
@@ -100,3 +101,49 @@ class AndroidIDs(db.Model):
 
     def __repr__(self):
         return '<Android_ID %r>' % self.android_id
+
+
+class User(db.Model):
+    __tablename__ = "users"
+    user_id = db.Column(Integer, primary_key=True)
+    username = db.Column(String(255), unique=True)
+    password = db.Column(String, nullable=False)
+
+    def __init__(self, username, password):
+        self.username = username
+        self.set_password(password)
+
+    def __repr__(self):
+        return "%d/%s/" % (self.id, self.name)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    @property
+    def is_active(self):
+        return True
+
+    def get_id(self):
+        return self.user_id
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def __eq__(self, other):
+        if isinstance(other, db.Model):
+            return self.get_id() == other.get_id()
+        return NotImplemented
+
+    def __ne__(self, other):
+        equal = self.__eq__(other)
+        if equal is NotImplemented:
+            return NotImplemented
+        return not equal

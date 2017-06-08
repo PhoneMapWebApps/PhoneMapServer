@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Login</title>
+  </head>
+  <body>
+  <h1>Welcome! Please create an account</h1>
+    <form action="" method="post">
+        <p> Username: <input type=text name=username>
+        <p> Password: <input type=password name=password>
+        <p><input type=submit value="Create User and Login">
+    </form>
+
+    <div>
+      {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              {% for message in messages %}
+              <p>{{ message }}</p>
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
+  </div>
+
+  </body>
+</html>

@@ -1,11 +1,13 @@
 import os
 
 from flask import Flask
+from flask_login import LoginManager
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 socketio = SocketIO()
 db = SQLAlchemy()
+login_manager = LoginManager()
 app = Flask(__name__)
 
 
@@ -27,6 +29,9 @@ def create_app(debug=False, testing=False):
     socketio.init_app(app)
 
     db.init_app(app)
+
+    login_manager.init_app(app)
+    login_manager.login_view = "main.login"
 
     # use correct app context
     with app.app_context():
