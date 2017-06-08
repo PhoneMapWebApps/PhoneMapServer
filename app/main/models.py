@@ -10,6 +10,11 @@ class Tasks(db.Model):
     TIME_FORMAT = "%b %d %Y %H:%M:%S"
     __tablename__ = "tasks"
     task_id = Column(Integer, primary_key=True)
+    owner_id = Column(Integer,
+                      ForeignKey("users.user_id",
+                                 onupdate="CASCADE",
+                                 ondelete="CASCADE"),
+                      nullable=False)
     task_name = Column(String(255), nullable=False)
     task_desc = Column(Text, nullable=False)  # is empty string null in SQL?
     time_submitted = Column(DateTime, nullable=False)
@@ -19,7 +24,8 @@ class Tasks(db.Model):
     is_complete = Column(Boolean)
 
     # task_id is autoincremented
-    def __init__(self, time_submitted, task_name="No Name Given", task_desc="No Desc Given"):
+    def __init__(self, owner_id, time_submitted, task_name="No Name Given", task_desc="No Desc Given"):
+        self.owner_id = owner_id
         self.task_name = task_name
         self.task_desc = task_desc
         self.time_submitted = time_submitted
@@ -109,12 +115,14 @@ class User(db.Model):
     username = db.Column(String(255), unique=True)
     password = db.Column(String, nullable=False)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, user_id=None):
+        if user_id:
+            self.user_id = user_id
         self.username = username
         self.set_password(password)
 
     def __repr__(self):
-        return "%d/%s/" % (self.id, self.name)
+        return "%d/%s" % (self.user_id, self.username)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

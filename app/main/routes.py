@@ -2,7 +2,7 @@
 from urllib.parse import urlparse, urljoin
 
 from flask import request, render_template, redirect, jsonify, url_for
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 
 
 from app import login_manager, db
@@ -78,8 +78,11 @@ def logout():
 @app.route('/tasks')
 @login_required
 def tasks():
-    all_tasks = sql.get_all_tasks()
-    return render_template('tasks.html', task_list=all_tasks)
+    if current_user.user_id == 0: # admin user
+        tasks = sql.get_all_tasks()
+    else:
+        tasks = sql.get_user_tasks(current_user.user_id)
+    return render_template('tasks.html', task_list=tasks)
 
 
 @app.route('/tasklist')

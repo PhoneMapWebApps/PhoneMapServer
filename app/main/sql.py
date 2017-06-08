@@ -3,12 +3,20 @@ import os
 from datetime import datetime
 
 from flask import current_app as app
+from flask_login import current_user
 
 from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, User
+
+
+def root_adm():
+    if not User.query.get(0):
+        root = User("root", "toor", user_id=0)
+        db.session.add(root)
+        db.session.commit()
 
 
 def get_task_list():
@@ -22,9 +30,13 @@ def get_all_tasks():
     values = Tasks.query.all()
     return [val.to_json() for val in values]
 
+def get_user_tasks(user_id):
+    values = Tasks.query.filter_by(owner_id=user_id).all()
+    return [val.to_json() for val in values]
+
 
 def add_to_db(js_file, zip_file, task_name, task_desc):
-    task = Tasks(datetime.utcnow(), task_name, task_desc)
+    task = Tasks(current_user.user_id, datetime.utcnow(), task_name, task_desc)
 
     db.session.add(task)
 
