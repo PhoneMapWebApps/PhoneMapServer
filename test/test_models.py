@@ -1,16 +1,13 @@
-import unittest
 from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from app import create_app, app, db
+from app import app, db
 from app.main.models import Tasks, SubTasks, AndroidIDs
+from test.test import BaseTestCase
 
 
-class TestTasks(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        create_app(False, True)
+class TestTasks(BaseTestCase):
 
     def test_single_task(self):
         with app.app_context():
@@ -40,11 +37,7 @@ class TestTasks(unittest.TestCase):
             db.drop_all()
 
 
-class TestSubTasks(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        create_app(False, True)
-
+class TestSubTasks(BaseTestCase):
     def test_foreign_key(self):
         with app.app_context():
             with self.assertRaises(IntegrityError):
@@ -87,11 +80,7 @@ class TestSubTasks(unittest.TestCase):
             db.drop_all()
 
 
-class TestAndroidIDs(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        create_app(False, True)
-
+class TestAndroidIDs(BaseTestCase):
     def test_single_id(self):
         with app.app_context():
             id1 = AndroidIDs("Dr", "Who")

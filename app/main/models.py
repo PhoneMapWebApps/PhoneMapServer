@@ -115,7 +115,7 @@ class User(db.Model):
     username = db.Column(String(255), unique=True)
     password = db.Column(String, nullable=False)
 
-    def __init__(self, username, password, user_id=None):
+    def __init__(self, username, password):
         self.username = username
         self.set_password(password)
 

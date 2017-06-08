@@ -1,9 +1,8 @@
-import unittest
-
 from app.main.files import file_extension_okay, request_files_missing
+from test.test import BaseTestCase
 
 
-class TestFiles(unittest.TestCase):
+class TestFiles(BaseTestCase):
     def test_extensions(self):
         self.assertTrue(file_extension_okay('whatever.js', 'js'))
         self.assertFalse(file_extension_okay('whatever.png', 'js'))

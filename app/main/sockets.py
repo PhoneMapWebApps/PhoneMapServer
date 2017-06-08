@@ -108,7 +108,9 @@ class PhoneMap(Namespace):
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
 
-        data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
+        data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id,
+                                                                   request.sid,
+                                                                   requested_task_id)
         send_code(data_file, task_id, task_name)
 
     @staticmethod

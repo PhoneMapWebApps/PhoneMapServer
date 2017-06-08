@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 from flask import current_app as app
-from flask_login import current_user
 
 from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
@@ -28,8 +27,8 @@ def get_user_tasks(user_id):
     return [val.to_json() for val in values]
 
 
-def add_to_db(js_file, zip_file, task_name, task_desc):
-    task = Tasks(current_user.user_id, datetime.utcnow(), task_name, task_desc)
+def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
+    task = Tasks(user_id, datetime.utcnow(), task_name, task_desc)
 
     db.session.add(task)
 

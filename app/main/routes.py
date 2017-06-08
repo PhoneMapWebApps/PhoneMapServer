@@ -1,11 +1,10 @@
-#!/usr/bin/env python
 from urllib.parse import urlparse, urljoin
 
 from flask import request, render_template, redirect, jsonify, url_for
 from flask_login import login_required, login_user, logout_user, current_user
 
 
-from app import login_manager, db
+from app import login_manager
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
@@ -122,7 +121,7 @@ def upload_file():
         return redirect(request.url)
 
     # adds to DB and extracts
-    sql.add_to_db(js_file, zip_file, task_name, task_desc)
+    sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
 
     return redirect(request.url)
 
