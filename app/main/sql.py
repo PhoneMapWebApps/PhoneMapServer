@@ -12,11 +12,10 @@ from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, User
 
 
-def root_adm():
-    if not User.query.get(0):
-        root = User("root", "toor", user_id=0)
-        db.session.add(root)
-        db.session.commit()
+if not User.query.get(0):
+    root = User("root", "toor", user_id=0)
+    db.session.add(root)
+    db.session.commit()
 
 
 def get_task_list():
