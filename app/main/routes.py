@@ -78,7 +78,7 @@ def logout():
 @app.route('/tasks')
 @login_required
 def tasks():
-    if current_user.user_id == 0: # admin user
+    if current_user.username == "root": # admin user
         tasks = sql.get_all_tasks()
     else:
         tasks = sql.get_user_tasks(current_user.user_id)
