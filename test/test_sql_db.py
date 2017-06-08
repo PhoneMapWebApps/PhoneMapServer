@@ -81,7 +81,7 @@ class TestGetCodeFail(unittest.TestCase):
 
     def test_get_next_fail(self):
         with app.app_context():
-            data_file, task_id = sql.get_next_subtask("TestPhone", "TestSessionID")
+            data_file, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
 
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
@@ -89,14 +89,14 @@ class TestGetCodeFail(unittest.TestCase):
     def test_get_by_task_id_fail(self):
         with app.app_context():
             # task 0 is never present
-            data_file, task_id = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
+            data_file, task_id, task_name = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
 
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
 
     def test_get_latest_fail(self):
         with app.app_context():
-            data_file, task_id = sql.get_latest_subtask("TestPhone", "TestSessionID")
+            data_file, task_id, task_name = sql.get_latest_subtask("TestPhone", "TestSessionID")
 
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
@@ -127,7 +127,7 @@ class TestGetCode(unittest.TestCase):
 
     def test_get_next(self):
         with app.app_context():
-            data_file, task_id = sql.get_next_subtask("TestPhone", "TestSessionID")
+            data_file, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
 
         self.assertIsNotNone(data_file)
         self.assertIsNotNone(task_id)
@@ -135,8 +135,8 @@ class TestGetCode(unittest.TestCase):
 
     def test_get_by_task_id(self):
         with app.app_context():
-            data_file, task_id = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
-            data_file_2, task_id_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 2)
+            data_file, task_id, task_name = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
+            data_file_2, task_id_2, task_name_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 2)
 
         self.assertIsNotNone(data_file)
         self.assertIsNotNone(data_file_2)

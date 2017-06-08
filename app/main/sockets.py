@@ -33,7 +33,7 @@ def log_and_emit(data, broadcast):
     log(data)
 
 
-def send_code(data_file, task_id):
+def send_code(data_file, task_id, task_name):
     if not (data_file and task_id):
         emit('no_tasks')
         log_and_emit(PhoneMap.SERVER_NO_TASKS, True)
