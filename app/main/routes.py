@@ -8,7 +8,7 @@ from app import login_manager
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
-from app.main.models import User
+from app.main.models import Users
 from . import main as app
 
 
@@ -164,4 +164,4 @@ def remove_task(task_id):
 
 @login_manager.user_loader
 def user_loader(user_id):
-    return User.query.get(user_id)
+    return Users.query.get(user_id)

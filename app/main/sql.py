@@ -1,4 +1,3 @@
-# TODO: CHANGE UNIQUE KEYS FROM FIRST() TO ONE()? check reasons?
 import os
 from datetime import datetime
 
@@ -8,7 +7,7 @@ from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files
 from app.main.logger import log
-from app.main.models import Tasks, SubTasks, AndroidIDs, User
+from app.main.models import Tasks, SubTasks, AndroidIDs, Users
 
 
 def get_task_list():
@@ -21,6 +20,7 @@ def get_task_list():
 def get_all_tasks():
     values = Tasks.query.all()
     return [val.to_json() for val in values]
+
 
 def get_user_tasks(user_id):
     values = Tasks.query.filter_by(owner_id=user_id).all()
@@ -102,7 +102,7 @@ def create_subtasks(task_id):
 
 
 def get_phone(android_id, session_id):
-    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.get(android_id)
     if not phone:
         log("Phone has never been seen before, adding phone to DB " + android_id + " " + session_id)
         phone = AndroidIDs(android_id, session_id)
@@ -111,19 +111,19 @@ def get_phone(android_id, session_id):
     return phone
 
 
-def get_subtask_by_task_id(android_id, session_id, id_val):
+def get_subtask_by_task_id(android_id, session_id, task_id):
     phone = get_phone(android_id, session_id)
 
     # NOTE: task query only required for the start_task func
-    task = Tasks.query.filter_by(task_id=id_val, is_complete=False).first()
-    if not task:
-        log("Selected task " + str(id_val) + " is unavailable! Either it is already finished, or \
+    task = Tasks.query.get(task_id)
+    if not task or task.is_complete:
+        log("Selected task " + str(task_id) + " is unavailable! Either it is already finished, or \
             it doesnt exist.")
         return None, None, None
 
-    subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
+    subtask = SubTasks.query.filter_by(task_id=task_id, is_complete=False, in_progress=False).first()
     if not subtask:
-        log("Selected task " + str(id_val) + " already has all tasks in progress.")
+        log("Selected task " + str(task_id) + " already has all tasks in progress.")
         return None, None, None
 
     # set correct values of session id and subtask_id in phone DB
@@ -192,7 +192,7 @@ def fetch_incomplete_subtask(task_id):
 
 
 def start_task(android_id):
-    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.get(android_id)
     if not phone:
         log("Phone not found - " + android_id)
         return
@@ -201,7 +201,7 @@ def start_task(android_id):
     if not subtask:
         log("No subtask found at: " + str(phone.subtask_id))
         return False
-    task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+    task = Tasks.query.get(subtask.task_id)
 
     if subtask.is_complete:
         # return false so as to emit a "stop executing" signal
@@ -219,9 +219,9 @@ def start_task(android_id):
 
 
 def stop_execution(android_id):
-    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
-        subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
+        subtask = SubTasks.query.get(phone.subtask_id)
         # task = Tasks.query.filter_by(task_id=subtask.task_id).first()
 
         phone.is_processing = False
@@ -232,11 +232,11 @@ def stop_execution(android_id):
 
 
 def execution_complete(android_id):
-    phone = AndroidIDs.query.filter_by(android_id=android_id).first()
+    phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
-        subtask = SubTasks.query.filter_by(subtask_id=phone.subtask_id).first()
+        subtask = SubTasks.query.get(phone.subtask_id)
         if not subtask.is_complete:
-            task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+            task = Tasks.query.get(subtask.task_id)
 
             phone.is_processing = False
             subtask.in_progress = False
@@ -267,7 +267,7 @@ def disconnected(session_id):
 
 
 def authenticate_user(username, password):
-    user = User.query.filter_by(username=username).first()
+    user = Users.query.filter_by(username=username).first()
     if user and user.check_password(password):
         db.session.commit()
         return user
@@ -275,14 +275,14 @@ def authenticate_user(username, password):
 
 
 def does_user_exist(username):
-    user = User.query.filter_by(username=username).first()
+    user = Users.query.filter_by(username=username).first()
     if user:
         return True
     return False
 
 
 def add_user(username, password):
-    user = User(username, password)
+    user = Users(username, password)
     db.session.add(user)
     db.session.commit()
     return user

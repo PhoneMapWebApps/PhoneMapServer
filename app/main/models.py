@@ -109,7 +109,7 @@ class AndroidIDs(db.Model):
         return '<Android_ID %r>' % self.android_id
 
 
-class User(db.Model):
+class Users(db.Model):
     __tablename__ = "users"
     user_id = db.Column(Integer, primary_key=True)
     username = db.Column(String(255), unique=True)

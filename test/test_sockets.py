@@ -7,7 +7,7 @@ from flask_login import current_user
 from nose.tools import nottest
 
 from app import socketio, app, db
-from app.main.models import User
+from app.main.models import Users
 from app.main.sockets import PhoneMap
 from test.test import BaseTestCase
 
@@ -40,7 +40,6 @@ class TestVanillaSockets(BaseTestCase):
         self.assertEqual(len(snd_received), 1)
         self.assertEqual(len(snd_received[0]["args"]), 1)
         self.assertEqual(snd_received[0]["args"][0]["data"], "junk")
-        client.disconnect("/test")
 
     def test_emit(self):
         client = socketio.test_client(app, "/test")
@@ -81,10 +80,9 @@ class TestVanillaSockets(BaseTestCase):
 
 
 class TestGetAndStartSockets(BaseTestCase):
-    # TODO: test login
     @nottest
     def login_and_upload_data(self):
-        user = User("Test", "pw")
+        user = Users("Test", "pw")
         db.session.add(user)
         db.session.commit()
         resp = self.client.post(url_for('main.login'),
@@ -162,6 +160,44 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(received[1]['name'], "set_code")
 
+    def test_get_latest_code(self):
+        with app.app_context():
+            with self.client:
+                self.login_and_upload_data()
+                client = socketio.test_client(app, "/test")
+                # clear received queue
+                client.get_received("/test")
+
+                client.emit("get_latest_code", {"id": "TestID"}, namespace="/test")
+
+                received = client.get_received("/test")
+                print(received)
+
+                self.assertEqual(len(received), 2)  # broadcast + confirmation
+                self.assertEqual(received[0]['name'], "my_response")
+                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+
+                self.assertEqual(received[1]['name'], "set_code")
+
+    def test_get_code_by_id(self):
+        with app.app_context():
+            with self.client:
+                self.login_and_upload_data()
+                client = socketio.test_client(app, "/test")
+                # clear received queue
+                client.get_received("/test")
+
+                client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/test")
+
+                received = client.get_received("/test")
+                print(received)
+
+                self.assertEqual(len(received), 2)  # broadcast + confirmation
+                self.assertEqual(received[0]['name'], "my_response")
+                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+
+                self.assertEqual(received[1]['name'], "set_code")
+
     def tearDown(self):
         self.delete_data()
         with app.app_context():
@@ -175,6 +211,36 @@ class TestAPISockets(BaseTestCase):
         client.get_received("/test")
 
         client.emit("get_code", {"id": "TestID"}, namespace="/test")
+
+        received = client.get_received("/test")
+
+        self.assertEqual(len(received), 3)  # broadcast + confirmation
+        self.assertEqual(received[0]['name'], "my_response")
+        # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+        self.assertEqual(received[1]['name'], "no_tasks")
+        self.assertEqual(received[2]['name'], "my_response")
+
+    def test_get_latest_code_no_tasks(self):
+        client = socketio.test_client(app, "/test")
+        # clear received queue
+        client.get_received("/test")
+
+        client.emit("get_latest_code", {"id": "TestID"}, namespace="/test")
+
+        received = client.get_received("/test")
+
+        self.assertEqual(len(received), 3)  # broadcast + confirmation
+        self.assertEqual(received[0]['name'], "my_response")
+        # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+        self.assertEqual(received[1]['name'], "no_tasks")
+        self.assertEqual(received[2]['name'], "my_response")
+
+    def test_get_code_by_id_no_tasks(self):
+        client = socketio.test_client(app, "/test")
+        # clear received queue
+        client.get_received("/test")
+
+        client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/test")
 
         received = client.get_received("/test")
 
@@ -241,6 +307,19 @@ class TestAPISockets(BaseTestCase):
     #
     #     self.assertEqual(len(received), 1)
     #     self.assertEqual(received[0]['name'], "error")
+
+    def test_get_task_list(self):
+        client = socketio.test_client(app, "/test")
+        # clear received queue
+        client.get_received("/test")
+
+        client.emit("get_task_list", {"id": "TestID"}, namespace="/test")
+
+        received = client.get_received("/test")
+
+        self.assertEqual(len(received), 2)
+        self.assertEqual(received[0]['name'], "my_response")
+        self.assertEqual(received[1]['name'], "task_list")
 
     @classmethod
     def tearDownClass(cls):

@@ -6,14 +6,14 @@ from flask import url_for
 from flask_login import current_user
 
 from app import app, db
-from app.main.models import User
+from app.main.models import Users
 from test.test import BaseTestCase
 
 
-class TestUpload(BaseTestCase):
+class TestTasks(BaseTestCase):
 
     def login(self):
-        user = User("Test", "pw")
+        user = Users("Test", "pw")
         db.session.add(user)
         db.session.commit()
         resp = self.client.post(url_for('main.login'),
@@ -41,14 +41,33 @@ class TestUpload(BaseTestCase):
         self.assertTrue(os.path.isfile(app.config['JS_FOLDER'] + '1.js'))
         self.assertTrue(os.path.isfile(app.config['ZIP_FOLDER'] + '1.zip'))
         self.assertTrue(os.path.isdir(app.config['ZIP_FOLDER'] + '1'))
-
-    @staticmethod
-    def tearDown():
         os.remove(app.config['JS_FOLDER'] + '1.js')
         os.remove(app.config['ZIP_FOLDER'] + '1.zip')
         shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
+
+    def test_tasks(self):
+        with app.app_context():
+            with self.client:
+                self.login()
+                resp = self.client.get("/tasks")
+        self.assert200(resp)
+
+    def tearDown(self):
         with app.app_context():
             db.drop_all()
+
+
+class TestIndex(BaseTestCase):
+    def tearDown(self):
+        with app.app_context():
+            db.drop_all()
+
+    def test_index(self):
+        with app.app_context():
+            with self.client:
+                resp = self.client.get("/")
+
+        self.assert200(resp)
 
 
 class TestLogin(BaseTestCase):
@@ -64,7 +83,7 @@ class TestLogin(BaseTestCase):
 
     def test_login_auth(self):
         with app.app_context():
-            user = User("Test", "pw")
+            user = Users("Test", "pw")
             db.session.add(user)
             db.session.commit()
 
@@ -86,3 +105,64 @@ class TestLogin(BaseTestCase):
     def tearDown(self):
         with app.app_context():
             db.drop_all()
+
+
+# class TestCreate(BaseTestCase):
+#     def tearDown(self):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_create(self):
+#         pass
+#
+#     def test_already_exists_create(self):
+#         pass
+#
+#
+# class TestLogout(BaseTestCase):
+#     def tearDown(self):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_logout(self):
+#         pass
+#
+#
+# class TestTaskList(BaseTestCase):
+#     def tearDown(self):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_task_list(self):
+#         pass
+#
+#
+# class TestChangeFiles(BaseTestCase):
+#     def tearDown(self):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_change_zip(self):
+#         pass
+#
+#     def test_change_js(self):
+#         pass
+#
+#     def test_change_bot(self):
+#         pass
+#
+#     def test_change_other_user_task(self):
+#         pass
+#
+#
+# class TestRemoveTask(BaseTestCase):
+#     def tearDown(self):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_remove_task(self):
+#         pass
+#
+#     def test_remove_other_user_task(self):
+#         pass
+

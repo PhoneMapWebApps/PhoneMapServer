@@ -33,6 +33,15 @@ class TestSQLdb(BaseTestCase):
         with app.app_context():
             db.drop_all()
 
+    # def test_task_list(self):
+    #     pass
+    #
+    # def test_all_tasks(self):
+    #     pass
+    #
+    # def test_user_tasks(self):
+    #     pass
+
     @classmethod
     def millis_within_range(cls, t1, t2, max_separation):
         return (0.001 * abs(t1 - t2).microseconds) < max_separation
@@ -51,6 +60,18 @@ class TestSQLdb(BaseTestCase):
 
             subtask = SubTasks.query.first()
             self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 20.0))
+
+    # def test_remove_from_db(self):
+    #     pass
+    #
+    # def test_update_db_code(self):
+    #     pass
+    #
+    # def test_update_db_data(self):
+    #     pass
+    #
+    # def test_create_sub(self):
+    #     pass
 
     def test_get_phone_in_db(self):
         with app.app_context():
@@ -72,6 +93,21 @@ class TestSQLdb(BaseTestCase):
             self.assertEqual(phone.session_id, "Watson")
             self.assertTrue(phone.is_connected)
             self.assertFalse(phone.is_processing)
+
+    # def test_incomplete_sub(self):
+    #     pass
+    #
+    # def test_start_task(self):
+    #     pass
+    #
+    # def test_stop_exe(self):
+    #     pass
+    #
+    # def test_exe_compl(self):
+    #     pass
+    #
+    # def test_disconnected(self):
+    #     pass
 
 
 class TestGetCodeFail(BaseTestCase):
@@ -97,7 +133,6 @@ class TestGetCodeFail(BaseTestCase):
         self.assertIsNone(data_file)
         self.assertIsNone(task_id)
         self.assertIsNone(task_name)
-
 
     def test_get_latest_fail(self):
         with app.app_context():
@@ -173,3 +208,19 @@ class TestGetCode(BaseTestCase):
         self.assertIsNotNone(task_name)
         self.assertIsNotNone(task_name_2)
         self.assertLess(task_id_2, task_id)
+
+
+# class TestUserAuth(BaseTestCase):
+#     @classmethod
+#     def tearDownClass(cls):
+#         with app.app_context():
+#             db.drop_all()
+#
+#     def test_user_auth(self):
+#         pass
+#
+#     def test_user_exist(self):
+#         pass
+#
+#     def test_add_user(self):
+#         pass

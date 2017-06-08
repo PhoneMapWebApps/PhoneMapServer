@@ -36,8 +36,8 @@ def create_app(debug=False, testing=False):
     # use correct app context
     with app.app_context():
         db.create_all()
-        from app.main.models import User
-        if not User.query.filter_by(username="root").first():
-            root = User("root", "toor")
+        from app.main.models import Users
+        if not Users.query.filter_by(username="root").first():
+            root = Users("root", "toor")
             db.session.add(root)
             db.session.commit()
