@@ -147,8 +147,8 @@ class TestGetCode(unittest.TestCase):
 
     def test_get_latest(self):
         with app.app_context():
-            data_file, task_id = sql.get_latest_subtask("TestPhone", "TestSessionID")
-            data_file_2, task_id_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
+            data_file, task_id, task_name = sql.get_latest_subtask("TestPhone", "TestSessionID")
+            data_file_2, task_id_2, task_name_2 = sql.get_subtask_by_task_id("TestPhone", "TestSessionID", 1)
 
         self.assertIsNotNone(data_file)
         self.assertIsNotNone(data_file_2)
