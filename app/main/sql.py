@@ -12,12 +12,6 @@ from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, User
 
 
-if not User.query.get(0):
-    root = User("root", "toor", user_id=0)
-    db.session.add(root)
-    db.session.commit()
-
-
 def get_task_list():
     # ensure some ID is obtained from phone
     # get_phone(id, sess_id)

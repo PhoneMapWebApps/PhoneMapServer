@@ -116,8 +116,6 @@ class User(db.Model):
     password = db.Column(String, nullable=False)
 
     def __init__(self, username, password, user_id=None):
-        if user_id:
-            self.user_id = user_id
         self.username = username
         self.set_password(password)
 

@@ -14,7 +14,7 @@ class TestTasks(unittest.TestCase):
 
     def test_single_task(self):
         with app.app_context():
-            task = Tasks(0, datetime.utcnow())
+            task = Tasks(1, datetime.utcnow())
             db.session.add(task)
             db.session.commit()
 
@@ -24,8 +24,8 @@ class TestTasks(unittest.TestCase):
 
     def test_double_task(self):
         with app.app_context():
-            task = Tasks(0, datetime.utcnow())
-            task2 = Tasks(0, datetime.utcnow())
+            task = Tasks(1, datetime.utcnow())
+            task2 = Tasks(1, datetime.utcnow())
             db.session.add(task)
             db.session.add(task2)
             db.session.commit()
@@ -55,7 +55,7 @@ class TestSubTasks(unittest.TestCase):
 
     def test_single_subtask(self):
         with app.app_context():
-            task = Tasks(0, datetime.utcnow())
+            task = Tasks(1, datetime.utcnow())
             db.session.add(task)
             db.session.flush()
             subtask = SubTasks(task.task_id, "somefile.js", datetime.utcnow())
@@ -68,7 +68,7 @@ class TestSubTasks(unittest.TestCase):
 
     def test_double_subtask(self):
         with app.app_context():
-            task = Tasks(0, datetime.utcnow())
+            task = Tasks(1, datetime.utcnow())
             db.session.add(task)
             db.session.flush()
             subtask = SubTasks(task.task_id, "randomfile1.js", datetime.utcnow())
