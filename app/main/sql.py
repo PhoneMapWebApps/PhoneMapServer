@@ -115,19 +115,19 @@ def get_subtask_by_task_id(android_id, session_id, id_val):
     if not task:
         log("Selected task " + str(id_val) + " is unavailable! Either it is already finished, or \
             it doesnt exist.")
-        return None, None
+        return None, None, None
 
     subtask = SubTasks.query.filter_by(task_id=id_val, is_complete=False, in_progress=False).first()
     if not subtask:
         log("Selected task " + str(id_val) + " already has all tasks in progress.")
-        return None, None
+        return None, None, None
 
     # set correct values of session id and subtask_id in phone DB
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, subtask.task_id
+    return subtask.data_file, subtask.task_id, task.task_name
 
 
 # order reverse -> run latest submissions first
@@ -139,14 +139,16 @@ def get_latest_subtask(android_id, session_id):
 
     if not subtask:
         log("No more tasks!")
-        return None, None
+        return None, None, None
+
+    task = Tasks.query.get(subtask.task_id)
 
     # set correct values of session id and subtask_id in phone DB
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, subtask.task_id
+    return subtask.data_file, subtask.task_id, task.task_name
 
 
 # Returns a tuple of (data file, task id) for the next subtask to be
@@ -158,10 +160,11 @@ def get_next_subtask(android_id, session_id):
     incomplete_tasks = Tasks.query.filter_by(is_complete=False).all()
     if not incomplete_tasks:
         log("No more tasks!")
-        return None, None
+        return None, None, None
 
     # TODO: Must add an "endorsed_task(s)" field (or equivalent) to AndroidIDs table.
     endorsed_task_id = incomplete_tasks[0].task_id
+    endorsed_task_name = incomplete_tasks[0].task_name
 
     subtask = fetch_incomplete_subtask(endorsed_task_id)
 
@@ -169,13 +172,13 @@ def get_next_subtask(android_id, session_id):
         # TODO: Send a "task(s) complete" message, which causes "All tasks done!"
         # to be displayed on phone UI.
         log("No more subtasks to allocate!")
-        return None, None
+        return None, None, None
 
     phone.session_id = session_id
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, endorsed_task_id
+    return subtask.data_file, endorsed_task_id, endorsed_task_name
 
 
 def fetch_incomplete_subtask(task_id):

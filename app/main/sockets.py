@@ -33,17 +33,17 @@ def log_and_emit(data, broadcast):
     log(data)
 
 
-def send_code(data_file, task_id, phone_id):
+def send_code(data_file, task_id):
     if not (data_file and task_id):
         emit('no_tasks')
-        log_and_emit(PhoneMap.SERVER_NO_TASKS + phone_id, True)
+        log_and_emit(PhoneMap.SERVER_NO_TASKS, True)
         return
 
     with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
         js_data = js_file.read()
     with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
         data = data_file.read()
-    emit('set_code', {'code': js_data, 'data': data})
+    emit('set_code', {'code': js_data, 'data': data, 'task_name': task_name})
 
 
 class PhoneMap(Namespace):
@@ -91,16 +91,16 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
 
-        data_file, task_id = sql.get_next_subtask(phone_id, request.sid)
-        send_code(data_file, task_id, phone_id)
+        data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
+        send_code(data_file, task_id, task_name)
 
     @staticmethod
     def on_get_latest_code(message):
         phone_id = message["id"]
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
 
-        data_file, task_id = sql.get_latest_subtask(phone_id, request.sid)
-        send_code(data_file, task_id, phone_id)
+        data_file, task_id, task_name = sql.get_latest_subtask(phone_id, request.sid)
+        send_code(data_file, task_id, task_name)
 
     @staticmethod
     def on_get_code_by_id(message):
@@ -108,8 +108,8 @@ class PhoneMap(Namespace):
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
 
-        data_file, task_id = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
-        send_code(data_file, task_id, phone_id)
+        data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id, request.sid, requested_task_id)
+        send_code(data_file, task_id, task_name)
 
     @staticmethod
     def on_start_code(message):
