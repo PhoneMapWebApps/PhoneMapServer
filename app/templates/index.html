@@ -154,6 +154,10 @@
             $( '.fileinput').change(function(){
                $( 'span' ).text($( this ).val() );
             });
+
+            $(document).ready(function () {
+                $('#msgmodal').modal('show');
+            });
         });
 
     </script>
@@ -208,23 +212,24 @@
     <br/>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div class="container-fluid new_task">
-        <div class="row">
-            <div class="col-sm-12">
-            <h3>SERVER RESPONSE</h3>
-            </div>
-        </div>
-        </div>
-        <div class="container-fluid new_task_lighter">
-          <div class="row">
-            <div class="col-sm-12">
-            {% for message in messages %}
-              {{ message }} <br/>
-            {% endfor %}
+        <div class="modal fade" id="msgmodal" role="dialog">
+          <div class="modal-dialog modal-bg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Server response</h4>
+              </div>
+              <div class="modal-body">
+                {% for message in messages %}
+                  {{ message }} <br/>
+                {% endfor %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
             </div>
           </div>
         </div>
-        <br/>
       {% endif %}
     {% endwith %}
 

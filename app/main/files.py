@@ -3,18 +3,25 @@ import shutil
 import zipfile
 
 from app.main.logger import log
+from flask import flash
+
+def flashmsg(msg):
+    try:
+        flash(msg)
+    except RuntimeError:
+        pass
 
 
 def request_files_empty(request_result, filetype):
     if request_result.filename == '' or request_result.filename is None:
-        log('Empty in submission: ' + filetype)
+        flashmsg('Empty in submission: ' + filetype)
         return True
     return False
 
 
 def request_files_missing(request_files, filetype):
     if filetype not in request_files:
-        log('Missing from submission: ' + filetype)
+        flashmsg('Missing from submission: ' + filetype)
         return True
     return False
 
@@ -28,17 +35,17 @@ def file_extension_okay(filename, required_file_extension):
     file_extension = filename.rsplit('.', 1)[1].lower()
     if '.' in filename and file_extension == required_file_extension:
         return True
-    log('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
+    flashmsg('Expected file extension: ' + required_file_extension + ' but got: ' + file_extension)
     return False
 
 
 def save_and_extract_files(task_id, js_file, zip_file, js_path, zip_path):
-    log('Uploading...')
+    flashmsg('Uploading...')
 
     save_and_extract_js(task_id, js_file, js_path)
     save_and_extract_zip(task_id, zip_file, zip_path)
 
-    log("Successfully uploaded JS and ZIP files, as well as set task name and description")
+    flashmsg("Successfully uploaded JS and ZIP files, as well as set task name and description")
 
 
 def save_and_extract_js(task_id, js_file, js_path):

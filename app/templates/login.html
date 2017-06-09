@@ -51,9 +51,10 @@
   <section class="login-form col-sm-2 col-sm-offset-5">
     <div class="login-input">
         <div class="row">
-            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png" widt>
-
-            <form action="" method="post">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/motto.png">
+            <br/>
+            <form action="/login" method="post">
                 <div class="form-group">
                   <label for="username">User name</label>
                   <input class="form-control" id="username" type=text name=username>
@@ -64,18 +65,17 @@
                 </div>
                 <input class="btn btn-default" type=submit value=Login>
             </form>
-            <br/><br/>
+            <br/>
+            {% if badlogin %}
+              <div class="alert alert-dismissable alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
+                Wrong username or password!
+              </div>
+            {% endif %}
+            <br/>
             <p>
               Click <a href="/create">here</a> to create a new account.
             </p>
-
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                    <p>{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
           </div>
     </div>
   </section>

@@ -59,7 +59,7 @@ class TestSQLdb(BaseTestCase):
             self.assertEqual(new_nTasks, old_nTasks + 3) # 3 subtasks added from test.zip
 
             subtask = SubTasks.query.first()
-            self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 20.0))
+            self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 30.0))
 
     # def test_remove_from_db(self):
     #     pass
