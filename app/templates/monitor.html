@@ -17,7 +17,6 @@
         body {
           /* Margin bottom by footer height */
           margin-bottom: 60px;
-          text-align: center;
         }
 
         form {
@@ -38,24 +37,40 @@
           margin-bottom: 20px;
         }
 
-        #serverui {
-            width: 100%;
-            height: 100%;
-            background-color: #d3d3d3;
-        }
-        .consolemenu {
-            background-color: #44464a;
-            color: #ffffff;
+        .task_list {
+            background-color: #7c9bad;
+            margin-left: 2%;
+            margin-right: 2%;
             text-align: left;
-            margin-left: 5px;
-            margin-right: 5px;
         }
-        #log {
+
+        .new_task {
+            background-color: #001f3f;
+            width: 95%;
+        }
+
+        .new_task h3 {
+            color: white;
+            margin-top: 10px;
+        }
+
+        .new_task_lighter {
+            background-color: #DDDDDD;
+            padding: 10px;
+            width: 95%;
+        }
+
+        .new_task_lighter h3 {
+            color: white;
+            margin-top: 10px;
+        }
+
+        .log {
             background-color: #44464a;
             color: #ffffff;
             position: relative;
             overflow-y: scroll;
-            height: 70vh;
+            height: 30vh;
             text-align: left;
             margin-left: 5px;
             margin-right: 5px;
@@ -167,8 +182,7 @@
     </script>
 </head>
 <body>
-    <div id="serverui">
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
           <a class="navbar-brand" href="#">sciRunner Server internal alpha</a>
@@ -182,35 +196,60 @@
       </div>
     </nav>
 
-    <br/><br/>
-
-    <div class="consolemenu">
-        <h3>CONSOLE</h3>
-        <form id="get_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent request job">
-        </form>
-        <form id="start_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent start job">
-        </form>
-        <form id="stop_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent erroneous return">
-        </form>
-        <form id="return_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate results to code">
-        </form>
-        <form id="get_task_list" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate get list of tasks">
-        </form>
-        <br/>
-        <br/>
+    <div class="container-fluid new_task">
+      <div class="row">
+          <div class="col-sm-12">
+          <h3>CURRENT EVENTS</h3>
+          </div>
+      </div>
+    </div>
+    <div class="container-fluid new_task_lighter">
+      <div class="row">
+        <div class="col-sm-12">
+          <form id="get_code" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Simulate agent request job">
+          </form>
+          <form id="start_code" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Simulate agent start job">
+          </form>
+          <form id="stop_code" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Simulate agent erroneous return">
+          </form>
+          <form id="return_code" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Simulate results to code">
+          </form>
+          <form id="get_task_list" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Simulate get list of tasks">
+          </form>
+        </div>
+      </div>
+      <div class="log" id="log">
+      </div>
     </div>
 
-    <div id="log">
-        <br/>
-        {% for line in console_old %}
-        {{ line }}<br/>
-        {% endfor %}
+    <br/>
+
+    <div class="container-fluid new_task">
+      <div class="row">
+          <div class="col-sm-12">
+          <h3>LOG HISTORY</h3>
+          </div>
+      </div>
     </div>
+    <div class="container-fluid new_task_lighter">
+      <div class="row">
+        <div class="col-sm-12">
+           <div class="log">
+              <br/>
+              {% for line in console_old %}
+              {{ line }}<br/>
+              {% endfor %}
+            </div>
+        </div>
+      </div>
+    </div>
+
+
 
     <footer class="footer">
       <div class="container">
@@ -220,6 +259,5 @@
         </p><br/>
       </div>
     </footer>
-    </div>
 </body>
 </html>
