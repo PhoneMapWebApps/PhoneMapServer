@@ -4,36 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask-SocketIO Test</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <style>
-        #serverui {
-            width: 100%;
-            height: 100%;
+        .serverui {
             background-color: #d3d3d3;
         }
-        .consolemenu {
-            background-color: #44464a;
-            color: #ffffff;
+
+        .task_list {
+            background-color: #7c9bad;
+            margin-left: 2%;
+            margin-right: 2%;
             text-align: left;
-            margin-left: 5px;
-            margin-right: 5px;
         }
-        #log {
-            background-color: #44464a;
-            color: #ffffff;
-            position: relative;
-            overflow-y: scroll;
-            height: 70vh;
+
+        .new_task {
+            background-color: #7c9bad;
+            margin-left: 2%;
+            margin-right: 2%;
             text-align: left;
-            margin-left: 5px;
-            margin-right: 5px;
-            border-top-width: 15px;
-            border: solid #999999;
-            border-width: 5px;
         }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        [id*=content] {
+            background-color: #7c9bad;
+            position: absolute;
+            display: none;
+        }
+
+        input[type=text], select {
+            color: black;
+        }
+
         #footer {
             background-color: #d3d3d3;
             position: absolute;
@@ -44,17 +52,19 @@
             bottom: 0;
 
         }
-        body {
-            text-align: center;
-        }
-        form {
-            display: inline;
+
+        .upload_button {
+            display: inline-flex;
         }
 
     </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
-
             // Use a "/test" namespace.
             // An application can open a connection on multiple namespaces, and
             // Socket.IO will multiplex all those connections on a single
@@ -69,37 +79,8 @@
             // The callback function is invoked when a connection with the
             // server is established.
             socket.on('connect', function() {
-                socket.emit('my_event', {data: 'Browser is connected!'});
+                socket.emit('my_event', {data: 'I\'m connected!'});
             });
-            // Event handler for server sent data.
-            // The callback function is invoked whenever the server emits data
-            // to the client. The data is then displayed in the "Received"
-            // section of the page.
-            socket.on('my_response', function(msg) {
-                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
-                $("#log").scrollTop($("#log")[0].scrollHeight);
-            });
-
-            socket.on('set_code', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
-              $("#log").scrollTop($("#log")[0].scrollHeight);
-            });
-
-            socket.on('no_tasks', function() {
-              $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
-              $("#log").scrollTop($("#log")[0].scrollHeight);
-            });
-
-            socket.on('task_list', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
-              list = msg.list;
-              for(var i = 0, size = list.length; i < size ; i++){
-                   $('#log').append('<br>' + $('<div/>').text(JSON.stringify(list[i]) ).html());
-              }
-              $("#log").scrollTop($("#log")[0].scrollHeight);
-            });
-
-            $("#log").scrollTop($("#log")[0].scrollHeight);
 
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
@@ -122,91 +103,130 @@
                     sum += ping_pong_times[i];
                 $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
             });
-            // Handlers for the different forms in the page.
-            // These accept data from the user and send it to the server in a
-            // variety of ways
-           // $('form#emit').submit(function(event) {
-           //     socket.emit('my_event', {data: $('#emit_data').val()});
-           //     return false;
-           // });
-           $('form#get_code').submit(function(event) {
-               socket.emit('get_code', {id: "DB Master Paul"});
-               return false;
-           });
-           $('form#start_code').submit(function(event) {
-               socket.emit('start_code', {id: "DB Master Paul"});
-               return false;
-           });
-           $('form#stop_code').submit(function(event) {
-               socket.emit('execution_failed', {id: "DB Master Paul", exception: "I asked for shaken, not stirred."});
-               return false;
-           });
-           $('form#return_code').submit(function(event) {
-               socket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
-               return false;
-           });
-          $('form#get_task_list').submit(function(event) {
-               socket.emit('get_task_list', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
-               return false;
-           });
+
+
+            $(".expand_btn").button().click(function() {
+                var row = $(this).closest('tr');
+                var content = $(this).data("href")
+
+                if ($(content).is(":visible")) {
+                   $(row).css({"height" : "auto"});
+                   $(content).css({"display" : "none", "left": "auto", "top" : "auto"});
+               } else  {
+                   $("tr").css({"height" : "auto"});
+                   var conH = $(content).height();
+                   var rowH = $(row).height();
+                   var updatedHeight = conH + rowH;
+                   $(row).css({"height" : updatedHeight});
+                                   var left = $(row).position().left;
+                var top = $(row).position().top + rowH + 'px';
+                   $("[id*=content]").css({"display" : "none", "left": "auto", "top" : "auto"});
+                   $(content).css({"display" : "block", "auto": left, "top" : top});
+                   var newBg = $(row).css("background-color");
+                   $(content).css({"background-color" : newBg});
+               }
+            });
+
+            $( '.fileinput').change(function(){
+               $( 'span' ).text($( this ).val() );
+            });
         });
 
     </script>
 </head>
-<body>
-    <div id="serverui">
+<body class="serverui">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
           <a class="navbar-brand" href="#">PhoneMapServer internal alpha</a>
         </div>
         <ul class="nav navbar-nav">
-          <li class="active"><a href="#">Server monitor</a></li>
-          <li><a href="tasks">Task manager</a></li>
+          <li><a href="/">Server monitor</a></li>
+          <li class="active"><a href="#">Task manager</a></li>
           <li><a href="#">About</a></li>
-            {% if current_user.is_authenticated %}
-              <li><a href="/logout">Logout</a></li>
-            {% else %}
-              <li><a href="/login">Login</a></li>
-            {% endif %}
+          <li><a href="/logout">Logout</a></li>
         </ul>
       </div>
     </nav>
 
     <br/><br/>
 
-    <div class="consolemenu">
-        <h3>CONSOLE</h3>
-        <form id="get_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent request job">
+    <!-- Upload zip files + JS code -->
+    <div class="new_task">
+        <h3>NEW TASK</h3>
+        <form id="upload"  action="" method="POST" enctype="multipart/form-data">
+            <b>Task Name:</b> <input type="text" name="TASK_NAME" value="">
+            <b>Task Description:</b> <input type="text" name="TASK_DESC" value="">
+            <div class="upload_button"><b>JavaScript Code:&nbsp</b><input type="file" name="JS_FILE"></div>
+            <div class="upload_button"><b>Data Archive:&nbsp</b><input type="file" name="ZIP_FILE"></div>
+            <div class="upload_button"> <input type="submit" value="Upload files"></div>
         </form>
-        <form id="start_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent start job">
-        </form>
-        <form id="stop_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate agent erroneous return">
-        </form>
-        <form id="return_code" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate results to code">
-        </form>
-        <form id="get_task_list" method="POST" action="#">
-          <input class="btn btn-info" type="submit" value="Simulate get list of tasks">
-        </form>
-        <br/>
-        <br/>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              {% for message in messages %}
+              <p>{{ message }}</p>
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
     </div>
 
-    <div id="log">
-        <br/>
-        {% for line in console_old %}
-        {{ line }}<br/>
+    <div class="task_list">
+        <h3>TASK MANAGER</h3>
+        <table class="table table-striped">
+            <thead>
+                <th>Expand</th>
+                <th>Task name</th>
+                <th>Task status</th>
+                <th>Time submitted</th>
+                <th>Time started</th>
+                <th>Time completed</th>
+                <th>Remove task</th>
+            </thead>
+            <tbody>
+                {% for task in task_list %}
+                    <tr id="{{ task.task_id }}">
+                        <td><button class="expand_btn" name=""
+                                    value=" " data-href="#content{{ task.task_id }}">
+                            <img src="static/more.png" style="width:16px;height:16px;">
+                        </button></td>
+                        <td>{{ task.task_name }}</td>
+                        {% if task.in_progress %}
+                            <td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>
+                        {% elif task.is_complete %}
+                            <td>Complete!</td>
+                        {% else %}
+                            <td>Ready</td>
+                        {% endif %}
+                        <td>{{ task.time_submitted }}</td>
+                        <td>{{ task.time_started }}</td>
+                        <td>{{ task.time_completed }}</td>
+                        <!--<td><img src="static/android-close.png" style="width:16px;height:16px;"></td>-->
+                        <td> <form id="delete_task"  action="tasks/del/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
+                            <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />
+                        </form></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% for task in task_list %}
+        <div class="task_list" id="content{{ task.task_id }}">
+            <p><b>Description:</b> {{ task.task_desc }}</p>
+            <p><b>Change file:</b>
+                <form id="update_data"  action="tasks/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
+                    <div class="upload_button"><b>JavaScript Code:&nbsp</b><input type="file" name="JS_FILE"></div>
+                    <div class="upload_button"><b>Data Archive:&nbsp</b><input type="file" name="ZIP_FILE"></div>
+                    <div class="upload_button"> <input type="submit" value="Upload files"></div>
+                </form>
+            </p>
+        </div>
         {% endfor %}
     </div>
 
     <div id="footer">
         <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
         <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
-    </div>
     </div>
 </body>
 </html>

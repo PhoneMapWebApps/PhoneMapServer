@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flask-SocketIO Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <style>
+        #serverui {
+            width: 100%;
+            height: 100%;
+            background-color: #d3d3d3;
+        }
+        .consolemenu {
+            background-color: #44464a;
+            color: #ffffff;
+            text-align: left;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+        #log {
+            background-color: #44464a;
+            color: #ffffff;
+            position: relative;
+            overflow-y: scroll;
+            height: 70vh;
+            text-align: left;
+            margin-left: 5px;
+            margin-right: 5px;
+            border-top-width: 15px;
+            border: solid #999999;
+            border-width: 5px;
+        }
+        #footer {
+            background-color: #d3d3d3;
+            position: absolute;
+            text-align: center;
+            padding: 1rem;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+        }
+        body {
+            text-align: center;
+        }
+        form {
+            display: inline;
+        }
+
+    </style>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+
+            // Use a "/test" namespace.
+            // An application can open a connection on multiple namespaces, and
+            // Socket.IO will multiplex all those connections on a single
+            // physical channel. If you don't care about multiple channels, you
+            // can set the namespace to an empty string.
+            namespace = '/test';
+            // Connect to the Socket.IO server.
+            // The connection URL has the following format:
+            //     http[s]://<domain>:<port>[/<namespace>]
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            // Event handler for new connections.
+            // The callback function is invoked when a connection with the
+            // server is established.
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 'Browser is connected!'});
+            });
+            // Event handler for server sent data.
+            // The callback function is invoked whenever the server emits data
+            // to the client. The data is then displayed in the "Received"
+            // section of the page.
+            socket.on('my_response', function(msg) {
+                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+                $("#log").scrollTop($("#log")[0].scrollHeight);
+            });
+
+            socket.on('set_code', function(msg) {
+              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
+              $("#log").scrollTop($("#log")[0].scrollHeight);
+            });
+
+            socket.on('no_tasks', function() {
+              $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
+              $("#log").scrollTop($("#log")[0].scrollHeight);
+            });
+
+            socket.on('task_list', function(msg) {
+              $('#log').append('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
+              list = msg.list;
+              for(var i = 0, size = list.length; i < size ; i++){
+                   $('#log').append('<br>' + $('<div/>').text(JSON.stringify(list[i]) ).html());
+              }
+              $("#log").scrollTop($("#log")[0].scrollHeight);
+            });
+
+            $("#log").scrollTop($("#log")[0].scrollHeight);
+
+            // Interval function that tests message latency by sending a "ping"
+            // message. The server then responds with a "pong" message and the
+            // round trip time is measured.
+            var ping_pong_times = [];
+            var start_time;
+            window.setInterval(function() {
+                start_time = (new Date).getTime();
+                socket.emit('my_ping');
+            }, 1000);
+            // Handler for the "pong" message. When the pong is received, the
+            // time from the ping is stored, and the average of the last 30
+            // samples is average and displayed.
+            socket.on('my_pong', function() {
+                var latency = (new Date).getTime() - start_time;
+                ping_pong_times.push(latency);
+                ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
+                var sum = 0;
+                for (var i = 0; i < ping_pong_times.length; i++)
+                    sum += ping_pong_times[i];
+                $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+            });
+            // Handlers for the different forms in the page.
+            // These accept data from the user and send it to the server in a
+            // variety of ways
+           // $('form#emit').submit(function(event) {
+           //     socket.emit('my_event', {data: $('#emit_data').val()});
+           //     return false;
+           // });
+           $('form#get_code').submit(function(event) {
+               socket.emit('get_code', {id: "DB Master Paul"});
+               return false;
+           });
+           $('form#start_code').submit(function(event) {
+               socket.emit('start_code', {id: "DB Master Paul"});
+               return false;
+           });
+           $('form#stop_code').submit(function(event) {
+               socket.emit('execution_failed', {id: "DB Master Paul", exception: "I asked for shaken, not stirred."});
+               return false;
+           });
+           $('form#return_code').submit(function(event) {
+               socket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               return false;
+           });
+          $('form#get_task_list').submit(function(event) {
+               socket.emit('get_task_list', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               return false;
+           });
+        });
+
+    </script>
+</head>
+<body>
+    <div id="serverui">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">PhoneMapServer internal alpha</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Server monitor</a></li>
+          <li><a href="tasks">Task manager</a></li>
+          <li><a href="#">About</a></li>
+            {% if current_user.is_authenticated %}
+              <li><a href="/logout">Logout</a></li>
+            {% else %}
+              <li><a href="/login">Login</a></li>
+            {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <br/><br/>
+
+    <div class="consolemenu">
+        <h3>CONSOLE</h3>
+        <form id="get_code" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate agent request job">
+        </form>
+        <form id="start_code" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate agent start job">
+        </form>
+        <form id="stop_code" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate agent erroneous return">
+        </form>
+        <form id="return_code" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate results to code">
+        </form>
+        <form id="get_task_list" method="POST" action="#">
+          <input class="btn btn-info" type="submit" value="Simulate get list of tasks">
+        </form>
+        <br/>
+        <br/>
+    </div>
+
+    <div id="log">
+        <br/>
+        {% for line in console_old %}
+        {{ line }}<br/>
+        {% endfor %}
+    </div>
+
+    <div id="footer">
+        <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
+        <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
+    </div>
+    </div>
+</body>
+</html>

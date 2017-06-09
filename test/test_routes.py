@@ -49,7 +49,7 @@ class TestTasks(BaseTestCase):
         with app.app_context():
             with self.client:
                 self.login()
-                resp = self.client.get("/tasks")
+                resp = self.client.get("/")
         self.assert200(resp)
 
     def tearDown(self):
@@ -67,17 +67,17 @@ class TestIndex(BaseTestCase):
             with self.client:
                 resp = self.client.get("/")
 
-        self.assert200(resp)
+        self.assertEqual(resp.status_code, 302)
 
 
 class TestLogin(BaseTestCase):
     def test_start(self):
         with app.app_context():
             resp = self.client.get("/")
-            self.assert200(resp)
+            self.assertEqual(resp.status_code, 302)
 
     def test_login_no_auth(self):
-        resp = self.client.get("/tasks")
+        resp = self.client.get("/console")
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(url_for('main.login') in resp.location)
 

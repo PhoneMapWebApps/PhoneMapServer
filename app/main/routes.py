@@ -12,15 +12,16 @@ from app.main.models import Users
 from . import main as app
 
 
-@app.route('/')
-def index():
+@app.route('/console')
+@login_required
+def console():
     try:
         log_file = open(log_filename, 'r')
         log_lines = log_file.readlines()
     except FileNotFoundError:
         log_lines = ""
 
-    return render_template('index.html', console_old=log_lines)
+    return render_template('console.html', console_old=log_lines)
 
 
 def is_safe_url(next_url):
@@ -60,7 +61,7 @@ def add_user():
         else:
             user = sql.add_user(username, password)
             login_user(user)
-            return redirect(url_for("main.tasks"))
+            return redirect(url_for("main.index"))
     else:
         return render_template("create.html")
 
@@ -74,14 +75,14 @@ def logout():
     return redirect(url_for("main.index"))
 
 
-@app.route('/tasks')
+@app.route('/')
 @login_required
-def tasks():
+def index():
     if current_user.username == "root": # admin user
         tasks = sql.get_all_tasks()
     else:
         tasks = sql.get_user_tasks(current_user.user_id)
-    return render_template('tasks.html', task_list=tasks)
+    return render_template('index.html', task_list=tasks)
 
 
 @app.route('/tasklist')
@@ -137,7 +138,7 @@ def change_files(task_id):
         js_file = request.files[js_file_tag]
 
         if not file_extension_okay(js_file.filename, 'js'):
-            return redirect(url_for('main.tasks'))
+            return redirect(url_for('main.index'))
 
         log("Updating code for task" + task_id)
         sql.update_code_in_db(task_id, js_file)
@@ -147,19 +148,19 @@ def change_files(task_id):
         zip_file = request.files[zip_file_tag]
 
         if not file_extension_okay(zip_file.filename, 'zip'):
-            return redirect(url_for('main.tasks'))
+            return redirect(url_for('main.index'))
 
         log("Updating data for task" + task_id)
         sql.update_data_in_db(task_id, zip_file)
 
-    return redirect(url_for('main.tasks'))
+    return redirect(url_for('main.index'))
 
 
 @app.route('/tasks/del/<task_id>', methods=['POST'])
 @login_required
 def remove_task(task_id):
     sql.remove_from_db(task_id)
-    return redirect(url_for('main.tasks'))
+    return redirect(url_for('main.index'))
 
 
 @login_manager.user_loader
