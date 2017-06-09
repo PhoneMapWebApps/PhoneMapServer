@@ -38,7 +38,7 @@ def log_and_emit(data, broadcast):
 
 
 def send_code(data_file, task_id, task_name):
-    if not (data_file and task_id):
+    if not (data_file and task_id and task_name):
         emit('no_tasks')
         log_and_emit(PhoneMap.SERVER_NO_TASKS, True)
         return
@@ -111,17 +111,23 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
-        force = message.get("force_task", False)
-        print(force)
 
-        try:
-            print(message["force_task"])
-        except:
-            pass
+        # Force task -> if true:
+        #           only compute for this task, if nothing else available, do nothing.
+        #               else:
+        #           this task is preferred
+        force_task = message.get("force_task", False)
 
         data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id,
                                                                    request.sid,
                                                                    requested_task_id)
+
+        if force_task:
+            send_code(data_file, task_id, task_name)
+
+        elif not (data_file and task_id and task_name):
+            data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
+
         send_code(data_file, task_id, task_name)
 
     @staticmethod
