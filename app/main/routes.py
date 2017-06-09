@@ -124,7 +124,7 @@ def upload_file():
     # adds to DB and extracts
     sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
 
-    return redirect(request.url)
+    return redirect(url_for('main.index'))
 
 
 @app.route('/tasks/<task_id>', methods=['POST'])
