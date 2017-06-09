@@ -12,16 +12,16 @@ from app.main.models import Users
 from . import main as app
 
 
-@app.route('/console')
+@app.route('/monitor')
 @login_required
-def console():
+def monitor():
     try:
         log_file = open(log_filename, 'r')
         log_lines = log_file.readlines()
     except FileNotFoundError:
         log_lines = ""
 
-    return render_template('console.html', console_old=log_lines)
+    return render_template('monitor.html', console_old=log_lines)
 
 
 def is_safe_url(next_url):

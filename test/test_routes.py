@@ -77,7 +77,7 @@ class TestLogin(BaseTestCase):
             self.assertEqual(resp.status_code, 302)
 
     def test_login_no_auth(self):
-        resp = self.client.get("/console")
+        resp = self.client.get("/monitor")
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(url_for('main.login') in resp.location)
 
