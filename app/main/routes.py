@@ -63,12 +63,10 @@ def add_user():
     if request.method == "POST":
         username = request.form['username']
         if username == "":
-            log("Cannot use an empty username")
-            return render_template("create.html")
+            return render_template("create.html", issue=True)
         password = request.form['password']
         if len(password) < 6:
-            log("Password must be over 6 chars long")
-            return render_template("create.html")
+            return render_template("create.html", issue=True)
 
         exists = sql.does_user_exist(username)
         if exists:
