@@ -10,7 +10,15 @@ from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
 from app.main.models import Users
 from app.main.sockets import code_available
+from flask import flash
 from . import main as app
+
+
+def flashmsg(msg):
+    try:
+        flash(msg)
+    except RuntimeError:
+        pass
 
 
 @app.route('/monitor')
@@ -45,7 +53,7 @@ def login():
             return redirect(next_url or url_for('main.index'))
         else:
             log("Incorrect login for user " + username)
-            return "Incorrect Login. Please try again."
+            return render_template('login.html', badlogin=True)
     else:
         return render_template('login.html')
 
@@ -58,7 +66,7 @@ def add_user():
         exists = sql.does_user_exist(username)
         if exists:
             log("User " + username + " already exists, please choose another name")
-            return render_template("create.html")
+            return render_template("create.html", exists=True)
         else:
             user = sql.add_user(username, password)
             login_user(user)
@@ -100,7 +108,7 @@ def upload_file():
     task_name_tag = 'TASK_NAME'
     task_desc_tag = 'TASK_DESC'
 
-    log('Checking file existence')
+    flash('Checking file existence...')
     if not request_file_exists(request.files, js_file_tag):
         return redirect(url_for('main.index'))
     if not request_file_exists(request.files, zip_file_tag):
@@ -112,11 +120,11 @@ def upload_file():
     task_desc = request.values[task_desc_tag]
 
     if not (len(task_name) and len(task_desc)):
-        log('Must have a task Name and task Desc!')
+        flashmsg('Missing task name or task description!')
     if len(task_name) > 255:
-        log('task name too long')
+        flashmsg('Task name is too long')
         return redirect(url_for('main.index'))
-    log('Checking file extensions')
+    flashmsg('Checking file extensions...')
     if not file_extension_okay(js_file.filename, 'js'):
         return redirect(url_for('main.index'))
     if not file_extension_okay(zip_file.filename, 'zip'):
@@ -125,7 +133,7 @@ def upload_file():
     no_tasks_currently = not sql.get_task_list()
     # adds to DB and extracts
     sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
-
+    log('Uploaded new task ' + task_name + ' (' + js_file.filename + ' ' + zip_file.filename + ')')
     if no_tasks_currently:
         code_available()
 
@@ -145,7 +153,7 @@ def change_files(task_id):
         if not file_extension_okay(js_file.filename, 'js'):
             return redirect(url_for('main.index'))
 
-        log("Updating code for task" + task_id)
+        flashmsg("Updating code for task" + task_id)
         sql.update_code_in_db(task_id, js_file)
 
     if request_file_exists(request.files, zip_file_tag):
@@ -155,8 +163,10 @@ def change_files(task_id):
         if not file_extension_okay(zip_file.filename, 'zip'):
             return redirect(url_for('main.index'))
 
-        log("Updating data for task" + task_id)
+        flashmsg("Updating data for task" + task_id)
         sql.update_data_in_db(task_id, zip_file)
+
+    log('Updated task code or data, task id ' + task_id)
 
     return redirect(url_for('main.index'))
 
@@ -171,3 +181,7 @@ def remove_task(task_id):
 @login_manager.user_loader
 def user_loader(user_id):
     return Users.query.get(user_id)
+
+@login_manager.unauthorized_handler
+def unauthorised():
+    return render_template('login.html')

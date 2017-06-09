@@ -1,26 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Login</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <title>SciRunner Login</title>
+    <style>
+      .login-form {
+        display: table;
+      }
+
+      .login-input {
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+
+      body {
+        /* Margin bottom by footer height */
+        margin-bottom: 60px;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* Set the fixed height of the footer here */
+        height: 80px;
+        background-color: #f5f5f5;
+      }
+
+      .container .text-muted {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
   </head>
   <body>
-  <h1>Welcome! Please create an account</h1>
-    <form action="" method="post">
-        <p> Username: <input type=text name=username>
-        <p> Password: <input type=password name=password>
-        <p><input type=submit value="Create User and Login">
-    </form>
 
-    <div>
-      {% with messages = get_flashed_messages() %}
-          {% if messages %}
-              {% for message in messages %}
-              <p>{{ message }}</p>
-              {% endfor %}
-          {% endif %}
-        {% endwith %}
+  <div class="container-fluid">
+  <section class="login-form col-sm-2 col-sm-offset-5">
+    <div class="login-input">
+        <div class="row">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/motto.png">
+            <br/>
+            <form action="/create" method="post">
+                <div class="form-group">
+                  <label for="username">Your new user name</label>
+                  <input class="form-control" id="username" type=text name=username>
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input class="form-control" id="password" type=password name=password>
+                </div>
+                <input class="btn btn-default" type=submit value="Create and login">
+            </form>
+            <br/>
+            {% if exists %}
+              <div class="alert alert-dismissable alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
+                Username already exists!
+              </div>
+            {% endif %}
+            <br/>
+            <p>
+              Click <a href="/login">here</a> to go back to the login page.
+            </p>
+          </div>
+    </div>
+  </section>
   </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted text-center">Copyright (c) sciRunner Team 2017, All rights reserved.</p>
+    </div>
+  </footer>
 
   </body>
 </html>

@@ -67,19 +67,18 @@ class TestIndex(BaseTestCase):
             with self.client:
                 resp = self.client.get("/")
 
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 200) # should show /login directly
 
 
 class TestLogin(BaseTestCase):
     def test_start(self):
         with app.app_context():
             resp = self.client.get("/")
-            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.status_code, 200) # should show /login directly
 
     def test_login_no_auth(self):
         resp = self.client.get("/monitor")
-        self.assertEqual(resp.status_code, 302)
-        self.assertTrue(url_for('main.login') in resp.location)
+        self.assertEqual(resp.status_code, 200) # should show /login directly
 
     def test_login_auth(self):
         with app.app_context():
