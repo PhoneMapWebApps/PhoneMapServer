@@ -9,6 +9,35 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <style>
+        html {
+          position: relative;
+          min-height: 100%;
+        }
+
+        body {
+          /* Margin bottom by footer height */
+          margin-bottom: 60px;
+          text-align: center;
+        }
+
+        form {
+            display: inline;
+        }
+
+        .footer {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          /* Set the fixed height of the footer here */
+          height: 80px;
+          background-color: #f5f5f5;
+        }
+
+        .container .text-muted {
+          margin-top: 20px;
+          margin-bottom: 20px;
+        }
+
         #serverui {
             width: 100%;
             height: 100%;
@@ -33,22 +62,6 @@
             border-top-width: 15px;
             border: solid #999999;
             border-width: 5px;
-        }
-        #footer {
-            background-color: #d3d3d3;
-            position: absolute;
-            text-align: center;
-            padding: 1rem;
-            left: 0;
-            right: 0;
-            bottom: 0;
-
-        }
-        body {
-            text-align: center;
-        }
-        form {
-            display: inline;
         }
 
     </style>
@@ -158,7 +171,7 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">PhoneMapServer internal alpha</a>
+          <a class="navbar-brand" href="#">sciRunner Server internal alpha</a>
         </div>
         <ul class="nav navbar-nav">
           <li><a href="/">Task manager</a></li>
@@ -199,10 +212,14 @@
         {% endfor %}
     </div>
 
-    <div id="footer">
-        <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
-        <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
-    </div>
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted text-center">
+          Copyright (c) sciRunner Team 2017, All rights reserved.<br/>
+          Average ping/pong latency: <b><span id="ping-pong"></span>ms</b>
+        </p><br/>
+      </div>
+    </footer>
     </div>
 </body>
 </html>

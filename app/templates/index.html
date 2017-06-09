@@ -4,12 +4,38 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask-SocketIO Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <style>
-        .serverui {
-            background-color: #d3d3d3;
+        html {
+          position: relative;
+          min-height: 100%;
         }
 
-        .task_list {
+        body {
+          /* Margin bottom by footer height */
+          margin-bottom: 60px;
+        }
+
+        .footer {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          /* Set the fixed height of the footer here */
+          height: 80px;
+          background-color: #f5f5f5;
+        }
+
+        .container .text-muted {
+          margin-top: 20px;
+          margin-bottom: 20px;
+        }
+
+       .task_list {
             background-color: #7c9bad;
             margin-left: 2%;
             margin-right: 2%;
@@ -17,10 +43,24 @@
         }
 
         .new_task {
-            background-color: #7c9bad;
-            margin-left: 2%;
-            margin-right: 2%;
-            text-align: left;
+            background-color: #001f3f;
+            width: 95%;
+        }
+
+        .new_task h3 {
+            color: white;
+            margin-top: 10px;
+        }
+
+        .new_task_lighter {
+            background-color: #DDDDDD;
+            padding: 10px;
+            width: 95%;
+        }
+
+        .new_task_lighter h3 {
+            color: white;
+            margin-top: 10px;
         }
 
         table {
@@ -42,27 +82,11 @@
             color: black;
         }
 
-        #footer {
-            background-color: #d3d3d3;
-            position: absolute;
-            text-align: center;
-            padding: 1rem;
-            left: 0;
-            right: 0;
-            bottom: 0;
-
-        }
-
         .upload_button {
-            display: inline-flex;
+            margin-right: 25px;
         }
 
     </style>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
             // Use a "/test" namespace.
@@ -134,11 +158,11 @@
 
     </script>
 </head>
-<body class="serverui">
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+<body>
+    <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">PhoneMapServer internal alpha</a>
+          <a class="navbar-brand" href="#">sciRunner Server internal alpha</a>
         </div>
         <ul class="nav navbar-nav">
           <li class="active"><a href="/">Task manager</a></li>
@@ -149,10 +173,41 @@
       </div>
     </nav>
 
-    <br/><br/>
+    <div class="container-fluid new_task">
+      <div class="row">
+          <div class="col-sm-12">
+          <h3>NEW TASK</h3>
+          </div>
+      </div>
+    </div>
+    <div class="container-fluid new_task_lighter">
+      <div class="row">
+        <div class="col-sm-12">
+          <form class="form-inline" id="upload"  action="tasks" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="taskname">Task name:</label>
+                <input class="form-control" id="taskname" type="text" name="TASK_NAME" value="">
+              </div>
+              <div class="form-group">
+                <label for="taskdesc">Task description:</label>
+                <input class="form-control" id="taskdesc" type="text" name="TASK_DESC" value="">
+              </div>
+              <label class="btn btn-default btn-file">
+                  Select JavaScript code <input type="file" name="JS_FILE" style="display: none;">
+              </label>
+              <label class="btn btn-default btn-file">
+                  Select data archive <input type="file" name="ZIP_FILE" style="display: none;">
+              </label>&nbsp;&nbsp;
+              <label class="btn btn-primary btn-file">
+                  Upload Files <input type="submit" value="Upload files" style="display: none;">
+              </label>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Upload zip files + JS code -->
-    <div class="new_task">
+    <!-- <div class="new_task">
         <h3>&nbspNEW TASK</h3>
         <form id="upload"  action="tasks" method="POST" enctype="multipart/form-data">
             <b>Task Name:</b> <input type="text" name="TASK_NAME" value="">
@@ -162,6 +217,8 @@
             <div class="upload_button"> <input type="submit" value="Upload files"></div>
         </form>
 
+    </div> -->
+
         {% with messages = get_flashed_messages() %}
           {% if messages %}
               {% for message in messages %}
@@ -169,8 +226,6 @@
               {% endfor %}
           {% endif %}
         {% endwith %}
-    </div>
-
     <div class="task_list">
         <h3>&nbspTASK MANAGER</h3>
         <table class="table table-striped">
@@ -224,9 +279,13 @@
         {% endfor %}
     </div>
 
-    <div id="footer">
-        <p>Copyright (c) PhoneMap Team 2017, All rights reserved.</p>
-        <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
-    </div>
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted text-center">
+          Copyright (c) sciRunner Team 2017, All rights reserved.<br/>
+          Average ping/pong latency: <b><span id="ping-pong"></span>ms</b>
+        </p><br/>
+      </div>
+    </footer>
 </body>
 </html>
