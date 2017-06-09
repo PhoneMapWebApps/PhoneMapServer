@@ -25,6 +25,10 @@ thread = None
 #         raise value
 
 
+def code_available():
+    emit("code_available", broadcast=True, namespace="/test")
+
+
 def log_and_emit(data, broadcast):
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
@@ -107,6 +111,13 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
         log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
+        force = message.get("force_task", False)
+        print(force)
+
+        try:
+            print(message["force_task"])
+        except:
+            pass
 
         data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id,
                                                                    request.sid,

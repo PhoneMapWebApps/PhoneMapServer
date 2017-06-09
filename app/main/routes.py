@@ -9,6 +9,7 @@ from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
 from app.main.models import Users
+from app.main.sockets import code_available
 from . import main as app
 
 
@@ -121,8 +122,12 @@ def upload_file():
     if not file_extension_okay(zip_file.filename, 'zip'):
         return redirect(url_for('main.index'))
 
+    no_tasks_currently = not sql.get_task_list()
     # adds to DB and extracts
     sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
+
+    if no_tasks_currently:
+        code_available()
 
     return redirect(url_for('main.index'))
 
