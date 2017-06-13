@@ -2,8 +2,8 @@ import os
 import shutil
 import zipfile
 
-from app.main.logger import log
 from flask import flash
+
 
 def flashmsg(msg):
     try:

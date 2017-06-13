@@ -11,7 +11,6 @@ ROOT_ID = 1
 
 
 class TestTasks(BaseTestCase):
-
     def test_single_task(self):
         with app.app_context():
             task = Tasks(ROOT_ID, datetime.utcnow())
@@ -42,19 +41,20 @@ class TestTasks(BaseTestCase):
             db.session.commit()
 
             def_json = {"task_id": 1,
-                "task_name": "Task",
-                "time_submitted": strftime(task.TIME_FORMAT, time.timetuple()),
-                "time_started": "",
-                "time_completed": "",
-                "in_progress": False,
-                "is_complete": False,
-                "task_desc": "Desc",
-                "owner_fullname": "Admin",
-                "owner_org": "No Org"}
+                        "task_name": "Task",
+                        "time_submitted": strftime(task.TIME_FORMAT, time.timetuple()),
+                        "time_started": "",
+                        "time_completed": "",
+                        "in_progress": False,
+                        "is_complete": False,
+                        "task_desc": "Desc",
+                        "owner_fullname": "Admin",
+                        "owner_org": "No Org"}
 
             self.assertEqual(task.to_json(), def_json)
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
 
@@ -96,7 +96,8 @@ class TestSubTasks(BaseTestCase):
             self.assertEqual(len(subtasks), 2)
             self.assertTrue(subtask in subtasks and subtask2 in subtasks)
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
 
@@ -124,7 +125,8 @@ class TestAndroidIDs(BaseTestCase):
             self.assertEqual(len(ids), 2)
             self.assertTrue(id1 in ids and id2 in ids)
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
 
@@ -192,6 +194,7 @@ class TestUsers(BaseTestCase):
 
             user.check_password("password")
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()

@@ -72,18 +72,8 @@
             vertical-align: top;
         }
 
-        [id*=content] {
-            background-color: #7c9bad;
-            position: absolute;
-            display: none;
-        }
-
         input[type=text], select {
             color: black;
-        }
-
-        .upload_button {
-            margin-right: 25px;
         }
 
     </style>
@@ -131,7 +121,7 @@
 
             $(".expand_btn").button().click(function() {
                 var row = $(this).closest('tr');
-                var content = $(this).data("href")
+                var content = $(this).data("href");
 
                 if ($(content).is(":visible")) {
                    $(row).css({"height" : "auto"});

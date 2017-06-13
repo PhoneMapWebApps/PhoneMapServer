@@ -10,6 +10,14 @@ from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, Users
 
 
+def get_task(task_id):
+    return Tasks.query.get(task_id)
+
+
+def get_user(user_id):
+    return Users.query.get(user_id)
+
+
 def get_task_list():
     # ensure some ID is obtained from phone
     # get_phone(id, sess_id)

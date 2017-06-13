@@ -3,14 +3,13 @@ from urllib.parse import urlparse, urljoin
 from flask import request, render_template, redirect, jsonify, url_for
 from flask_login import login_required, login_user, logout_user, current_user
 
-
 from app import login_manager
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay
 from app.main.logger import log, log_filename
-from app.main.models import Users
 from app.main.sockets import code_available
 from flask import flash
+
 from . import main as app
 
 
@@ -94,7 +93,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    if current_user.username == "root": # admin user
+    if current_user.username == "root":  # admin user
         tasks = sql.get_all_tasks()
     else:
         tasks = sql.get_user_tasks(current_user.user_id)
@@ -107,6 +106,7 @@ def get_task_list():
     return jsonify(task_list)
 
 
+# upload task to db
 @app.route('/tasks', methods=['POST'])
 @login_required
 def upload_file():
@@ -150,6 +150,9 @@ def upload_file():
 @app.route('/tasks/<task_id>', methods=['POST'])
 @login_required
 def change_files(task_id):
+    if not allowed_user(task_id):
+        return "You dont have access to this"
+
     js_file_tag = 'JS_FILE'
     zip_file_tag = 'ZIP_FILE'
 
@@ -181,14 +184,26 @@ def change_files(task_id):
 @app.route('/tasks/del/<task_id>', methods=['POST'])
 @login_required
 def remove_task(task_id):
+    if not allowed_user(task_id):
+        return "You dont have access to this"
+
     sql.remove_from_db(task_id)
     return redirect(url_for('main.index'))
 
 
 @login_manager.user_loader
 def user_loader(user_id):
-    return Users.query.get(user_id)
+    return sql.get_user(user_id)
+
 
 @login_manager.unauthorized_handler
 def unauthorised():
     return render_template('login.html')
+
+
+def allowed_user(task_id):
+    # Check if valid user
+    curr_id = current_user.user_id
+    task = sql.get_task(task_id)
+    # 1 == root
+    return not (curr_id != 1 and task.owner_id != curr_id)

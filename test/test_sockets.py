@@ -129,7 +129,7 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
                 self.assertEqual(received[0]['name'], "my_response")
-                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+                # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
                 self.assertEqual(received[1]['name'], "set_code")
 
@@ -139,7 +139,7 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(len(received), 1)
                 self.assertEqual(received[0]['name'], "my_response")
-                #TODO self.assertEqual(received[0]['args'][0]["data"], "Code started")
+                # TODO self.assertEqual(received[0]['args'][0]["data"], "Code started")
 
     def test_get_code(self):
         with app.app_context():
@@ -156,7 +156,7 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
                 self.assertEqual(received[0]['name'], "my_response")
-                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+                # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
                 self.assertEqual(received[1]['name'], "set_code")
 
@@ -175,7 +175,7 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
                 self.assertEqual(received[0]['name'], "my_response")
-                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+                # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
                 self.assertEqual(received[1]['name'], "set_code")
 
@@ -194,7 +194,7 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
                 self.assertEqual(received[0]['name'], "my_response")
-                #TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
+                # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
 
                 self.assertEqual(received[1]['name'], "set_code")
 

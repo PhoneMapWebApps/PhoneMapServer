@@ -21,11 +21,11 @@ def delete_data(folder):
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
 
+
 ROOT_ID = 1
 
 
 class TestSQLdb(BaseTestCase):
-
     @classmethod
     def tearDownClass(cls):
         delete_data(app.config['JS_FOLDER'])
@@ -56,7 +56,7 @@ class TestSQLdb(BaseTestCase):
 
             self.assertIsNotNone(val)
             new_nTasks = SubTasks.query.count()
-            self.assertEqual(new_nTasks, old_nTasks + 3) # 3 subtasks added from test.zip
+            self.assertEqual(new_nTasks, old_nTasks + 3)  # 3 subtasks added from test.zip
 
             subtask = SubTasks.query.first()
             self.assertTrue(self.millis_within_range(subtask.time_submitted, submission_time, 30.0))
@@ -94,20 +94,20 @@ class TestSQLdb(BaseTestCase):
             self.assertTrue(phone.is_connected)
             self.assertFalse(phone.is_processing)
 
-    # def test_incomplete_sub(self):
-    #     pass
-    #
-    # def test_start_task(self):
-    #     pass
-    #
-    # def test_stop_exe(self):
-    #     pass
-    #
-    # def test_exe_compl(self):
-    #     pass
-    #
-    # def test_disconnected(self):
-    #     pass
+            # def test_incomplete_sub(self):
+            #     pass
+            #
+            # def test_start_task(self):
+            #     pass
+            #
+            # def test_stop_exe(self):
+            #     pass
+            #
+            # def test_exe_compl(self):
+            #     pass
+            #
+            # def test_disconnected(self):
+            #     pass
 
 
 class TestGetCodeFail(BaseTestCase):
@@ -208,7 +208,6 @@ class TestGetCode(BaseTestCase):
         self.assertIsNotNone(task_name)
         self.assertIsNotNone(task_name_2)
         self.assertLess(task_id_2, task_id)
-
 
 # class TestUserAuth(BaseTestCase):
 #     @classmethod

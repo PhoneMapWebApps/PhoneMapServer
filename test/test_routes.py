@@ -11,7 +11,6 @@ from test.test import BaseTestCase
 
 
 class TestTasks(BaseTestCase):
-
     def login(self):
         user = Users("Test", "pw", "So many test users")
         db.session.add(user)
@@ -52,13 +51,15 @@ class TestTasks(BaseTestCase):
                 resp = self.client.get("/")
         self.assert200(resp)
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
 
 
 class TestIndex(BaseTestCase):
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
 
@@ -67,18 +68,18 @@ class TestIndex(BaseTestCase):
             with self.client:
                 resp = self.client.get("/")
 
-        self.assertEqual(resp.status_code, 200) # should show /login directly
+        self.assertEqual(resp.status_code, 200)  # should show /login directly
 
 
 class TestLogin(BaseTestCase):
     def test_start(self):
         with app.app_context():
             resp = self.client.get("/")
-            self.assertEqual(resp.status_code, 200) # should show /login directly
+            self.assertEqual(resp.status_code, 200)  # should show /login directly
 
     def test_login_no_auth(self):
         resp = self.client.get("/monitor")
-        self.assertEqual(resp.status_code, 200) # should show /login directly
+        self.assertEqual(resp.status_code, 200)  # should show /login directly
 
     def test_login_auth(self):
         with app.app_context():
@@ -101,10 +102,10 @@ class TestLogin(BaseTestCase):
                 print(resp.location)
                 self.assertTrue(current_user.is_anonymous)
 
-    def tearDown(self):
+    @staticmethod
+    def tearDown():
         with app.app_context():
             db.drop_all()
-
 
 # class TestCreate(BaseTestCase):
 #     def tearDown(self):
@@ -164,4 +165,3 @@ class TestLogin(BaseTestCase):
 #
 #     def test_remove_other_user_task(self):
 #         pass
-
