@@ -9,7 +9,7 @@ from nose.tools import nottest
 from app import socketio, app, db
 from app.main.models import Users
 from app.main.sockets import PhoneMap
-from test.test import BaseTestCase
+from test.test import BaseTestCase, delete_data
 
 
 class TestVanillaSockets(BaseTestCase):
@@ -104,16 +104,10 @@ class TestGetAndStartSockets(BaseTestCase):
                     content_type='multipart/form-data'
                 )
         self.assertEqual(resp.status_code, 302)
-        self.assertTrue(os.path.isfile(app.config['JS_FOLDER'] + '1.js'))
-        self.assertTrue(os.path.isfile(app.config['ZIP_FOLDER'] + '1.zip'))
-        self.assertTrue(os.path.isdir(app.config['ZIP_FOLDER'] + '1'))
+        self.assertTrue(os.path.isfile(os.path.join(app.config['JS_FOLDER'], '1.js')))
+        self.assertTrue(os.path.isfile(os.path.join(app.config['ZIP_FOLDER'], '1.zip')))
+        self.assertTrue(os.path.isdir(os.path.join(app.config['ZIP_FOLDER'], '1')))
         return resp
-
-    @nottest
-    def delete_data(self):
-        os.remove(app.config['JS_FOLDER'] + '1.js')
-        os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-        shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
 
     def test_get_and_start_code(self):
         with app.app_context():
@@ -199,7 +193,9 @@ class TestGetAndStartSockets(BaseTestCase):
                 self.assertEqual(received[1]['name'], "set_code")
 
     def tearDown(self):
-        self.delete_data()
+        delete_data(app.config["JS_FOLDER"])
+        delete_data(app.config["ZIP_FOLDER"])
+        delete_data(app.config["RES_FOLDER"])
         with app.app_context():
             db.drop_all()
 

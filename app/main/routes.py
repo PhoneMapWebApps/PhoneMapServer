@@ -151,7 +151,7 @@ def upload_file():
 @login_required
 def change_files(task_id):
     if not allowed_user(task_id):
-        return "You dont have access to this"
+        return ""
 
     js_file_tag = 'JS_FILE'
     zip_file_tag = 'ZIP_FILE'
@@ -163,8 +163,9 @@ def change_files(task_id):
         if not file_extension_okay(js_file.filename, 'js'):
             return redirect(url_for('main.index'))
 
-        flashmsg("Updating code for task" + task_id)
+        flashmsg("Updating code")
         sql.update_code_in_db(task_id, js_file)
+        flashmsg("Code updated successfully")
 
     if request_file_exists(request.files, zip_file_tag):
         # update data
@@ -173,8 +174,9 @@ def change_files(task_id):
         if not file_extension_okay(zip_file.filename, 'zip'):
             return redirect(url_for('main.index'))
 
-        flashmsg("Updating data for task" + task_id)
+        flashmsg("Updating data for task")
         sql.update_data_in_db(task_id, zip_file)
+        flashmsg("Data updated successfully")
 
     log('Updated task code or data, task id ' + task_id)
 
@@ -185,7 +187,7 @@ def change_files(task_id):
 @login_required
 def remove_task(task_id):
     if not allowed_user(task_id):
-        return "You dont have access to this"
+        return "You don't have access to this"
 
     sql.remove_from_db(task_id)
     return redirect(url_for('main.index'))

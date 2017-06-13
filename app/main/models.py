@@ -76,6 +76,7 @@ class SubTasks(db.Model):
     time_completed = Column(DateTime)
     in_progress = Column(Boolean)
     is_complete = Column(Boolean)
+    result = Column(Text)
 
     # subtask_id is autoincremented
     def __init__(self, task_id, data_file, time_submitted):
@@ -86,6 +87,7 @@ class SubTasks(db.Model):
         self.time_completed = None
         self.in_progress = False
         self.is_complete = False
+        self.result = ""
 
     def __repr__(self):
         return '<SubTask %r>' % self.subtask_id
@@ -114,11 +116,11 @@ class AndroidIDs(db.Model):
 
 class Users(db.Model):
     __tablename__ = "users"
-    user_id = db.Column(Integer, primary_key=True)
-    username = db.Column(String(255), unique=True)
-    fullname = db.Column(Text, nullable=False)
-    organisation = db.Column(Text, nullable=False)
-    password = db.Column(String, nullable=False)
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(255), unique=True)
+    fullname = Column(Text, nullable=False)
+    organisation = Column(Text, nullable=False)
+    password = Column(String, nullable=False)
 
     def __init__(self, username, password, fullname, organisation="None given"):
         self.username = username

@@ -7,7 +7,7 @@ from flask_login import current_user
 
 from app import app, db
 from app.main.models import Users
-from test.test import BaseTestCase
+from test.test import BaseTestCase, delete_data
 
 
 class TestTasks(BaseTestCase):
@@ -37,12 +37,12 @@ class TestTasks(BaseTestCase):
                         )
 
         self.assertEqual(resp.status_code, 302)
-        self.assertTrue(os.path.isfile(app.config['JS_FOLDER'] + '1.js'))
-        self.assertTrue(os.path.isfile(app.config['ZIP_FOLDER'] + '1.zip'))
-        self.assertTrue(os.path.isdir(app.config['ZIP_FOLDER'] + '1'))
-        os.remove(app.config['JS_FOLDER'] + '1.js')
-        os.remove(app.config['ZIP_FOLDER'] + '1.zip')
-        shutil.rmtree(app.config['ZIP_FOLDER'] + '1')
+        self.assertTrue(os.path.isfile(os.path.join(app.config['JS_FOLDER'], '1.js')))
+        self.assertTrue(os.path.isfile(os.path.join(app.config['ZIP_FOLDER'], '1.zip')))
+        self.assertTrue(os.path.isdir(os.path.join(app.config['ZIP_FOLDER'], '1')))
+        delete_data(app.config["JS_FOLDER"])
+        delete_data(app.config["ZIP_FOLDER"])
+        delete_data(app.config["RES_FOLDER"])
 
     def test_tasks(self):
         with app.app_context():

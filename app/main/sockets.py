@@ -1,3 +1,5 @@
+import os
+
 from flask import session, request
 from flask_socketio import Namespace, emit
 
@@ -37,15 +39,17 @@ def log_and_emit(data, broadcast):
     log(data)
 
 
-def send_code(data_file, task_id, task_name):
-    if not (data_file and task_id and task_name):
+def send_code(data_file_name, task_id, task_name):
+    if not (data_file_name and task_id and task_name):
         emit('no_tasks')
         log_and_emit(PhoneMap.SERVER_NO_TASKS, True)
         return
 
-    with open(app.config['JS_FOLDER'] + str(task_id) + ".js", "r") as js_file:
+    js_file_path = os.path.join(app.config['JS_FOLDER'], str(task_id) + ".js")
+    with open(js_file_path, "r") as js_file:
         js_data = js_file.read()
-    with open(app.config['ZIP_FOLDER'] + str(task_id) + "/" + data_file, "r") as data_file:
+    zip_file_path = os.path.join(app.config['ZIP_FOLDER'], str(task_id), data_file_name)
+    with open(zip_file_path, "r") as data_file:
         data = data_file.read()
     emit('set_code', {'code': js_data, 'data': data, 'task_name': task_name})
 
@@ -149,8 +153,9 @@ class PhoneMap(Namespace):
     @staticmethod
     def on_return(message):
         phone_id = message["id"]
-        sql.execution_complete(phone_id)
-        log_and_emit(phone_id + PhoneMap.CLIENT_FINISHED + message['return'], True)
+        res = message["return"]
+        sql.execution_complete(phone_id, res)
+        log_and_emit(phone_id + PhoneMap.CLIENT_FINISHED + res, True)
 
     @staticmethod
     def on_get_task_list(message):

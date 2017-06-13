@@ -5,7 +5,7 @@ from flask import current_app as app
 
 from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
-    remove_task_files
+    remove_task_files, create_res
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, Users
 
@@ -58,7 +58,7 @@ def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
 def remove_from_db(task_id):
     task = Tasks.query.get(task_id)
     db.session.delete(task)
-    remove_task_files(task_id, app.config['JS_FOLDER'], app.config['ZIP_FOLDER'])
+    remove_task_files(task_id, app.config['JS_FOLDER'], app.config['ZIP_FOLDER'], app.config['RES_FOLDER'])
     db.session.commit()
 
 
@@ -85,7 +85,7 @@ def update_code_in_db(task_id, js_file):
 def update_data_in_db(task_id, zip_file):
     save_and_extract_zip(task_id, zip_file, app.config['ZIP_FOLDER'])
     subtasks = SubTasks.query.filter_by(task_id=task_id).all()
-    print(subtasks)
+
     for subtask in subtasks:
         db.session.delete(subtask)
     create_subtasks(task_id)
@@ -102,7 +102,7 @@ def update_data_in_db(task_id, zip_file):
 
 # NOTE DOES NOT SET PERSISTENCE -> does not commit
 def create_subtasks(task_id):
-    directory = app.config['ZIP_FOLDER'] + str(task_id)
+    directory = os.path.join(app.config['ZIP_FOLDER'], str(task_id))
     # TODO: NO SUBDIRECTORIES (YET?)
     for filename in os.listdir(directory):
         subtask = SubTasks(task_id, filename, datetime.utcnow())
@@ -230,37 +230,47 @@ def stop_execution(android_id):
     phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
         subtask = SubTasks.query.get(phone.subtask_id)
-        # task = Tasks.query.filter_by(task_id=subtask.task_id).first()
+        task = Tasks.query.filter_by(task_id=subtask.task_id).first()
 
         phone.is_processing = False
         subtask.in_progress = False
         subtask.time_started = None
-        # TODO: update task process + start time if no other processes running it (loop?)
+        # NOTE: usees filter() not filter_by(), so as to be able to use | operator.
+        # Has a different syntax than filter_by(), double check if changed.
+        subtasks = SubTasks.query.filter(SubTasks.task_id == subtask.task_id,
+                                         (SubTasks.in_progress | SubTasks.is_complete)).all()
+        # then need to set task to not running
+        if not subtasks:
+            task.in_progress = False
+            task.time_started = None
         db.session.commit()
 
 
-def execution_complete(android_id):
+def execution_complete(android_id, result):
     phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
         subtask = SubTasks.query.get(phone.subtask_id)
         if not subtask.is_complete:
-            task = Tasks.query.get(subtask.task_id)
+            task_id = subtask.task_id
+            task = Tasks.query.get(task_id)
+
+            time = datetime.utcnow()
 
             phone.is_processing = False
             subtask.in_progress = False
             subtask.is_complete = True
-            subtask.time_completed = datetime.utcnow()
+            subtask.time_completed = time
+            subtask.result = result
 
-            subtasks = SubTasks.query.filter_by(task_id=subtask.task_id).all()
-            for sub in subtasks:
-                if not sub.is_complete:
-                    # dont set task as complete, return now instead
-                    db.session.commit()
-                    return
+            subtasks = SubTasks.query.filter_by(task_id=task_id, is_complete=False).all()
+            # if no incomplete subtasks, finished, so update status and generate results
+            if not subtasks:
+                task.in_progress = False
+                task.is_complete = True
+                task.time_completed = time
+                compl_sub_tasks = SubTasks.query.filter_by(task_id=task_id).all()
 
-            task.in_progress = False
-            task.is_complete = True
-            task.time_completed = datetime.utcnow()
+                create_res(app.config["RES_FOLDER"], task_id, compl_sub_tasks)
 
             db.session.commit()
 

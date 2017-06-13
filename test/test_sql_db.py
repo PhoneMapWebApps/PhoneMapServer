@@ -1,26 +1,10 @@
-import os
-import shutil
 from datetime import datetime
 
-from nose.tools import nottest
 
 from app import app, db
 from app.main import sql
 from app.main.models import AndroidIDs, SubTasks
-from test.test import BaseTestCase
-
-
-@nottest
-def delete_data(folder):
-    for root, dirs, files in os.walk(folder):
-        files = [f for f in files if not f[0] == '.']
-        dirs[:] = [d for d in dirs if not d[0] == '.']
-
-        for f in files:
-            os.unlink(os.path.join(root, f))
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d))
-
+from test.test import BaseTestCase, delete_data
 
 ROOT_ID = 1
 
@@ -30,6 +14,7 @@ class TestSQLdb(BaseTestCase):
     def tearDownClass(cls):
         delete_data(app.config['JS_FOLDER'])
         delete_data(app.config['ZIP_FOLDER'])
+        delete_data(app.config['RES_FOLDER'])
         with app.app_context():
             db.drop_all()
 
@@ -148,6 +133,7 @@ class TestGetCode(BaseTestCase):
     def tearDownClass(cls):
         delete_data(app.config['JS_FOLDER'])
         delete_data(app.config['ZIP_FOLDER'])
+        delete_data(app.config['RES_FOLDER'])
         with app.app_context():
             db.drop_all()
 

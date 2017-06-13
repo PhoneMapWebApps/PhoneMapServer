@@ -68,13 +68,29 @@ def save_and_extract_zip(task_id, zip_file, zip_path):
 
 
 def extract(zip_path, task_id):
-    if os.path.isdir(zip_path + str(task_id)):
-        shutil.rmtree(zip_path + str(task_id))
-    with zipfile.ZipFile(zip_path + str(task_id) + ".zip", "r") as zip_ref:
-        zip_ref.extractall(zip_path + str(task_id) + "/")
+    folder_path = os.path.join(zip_path, str(task_id))  # no trailing /
+    if os.path.isdir(folder_path):
+        shutil.rmtree(folder_path)
+    with zipfile.ZipFile(folder_path + ".zip", "r") as zip_ref:
+        zip_ref.extractall(os.path.join(folder_path, ""))
 
 
-def remove_task_files(task_id, js_folder, zip_folder):
-    os.remove(js_folder + str(task_id) + '.js')
-    os.remove(zip_folder + str(task_id) + '.zip')
-    shutil.rmtree(zip_folder + str(task_id))
+def remove_task_files(task_id, js_folder, zip_folder, res_folder):
+    os.remove(os.path.join(js_folder, str(task_id) + '.js'))
+    os.remove(os.path.join(zip_folder, str(task_id) + '.zip'))
+    os.remove(os.path.join(res_folder, str(task_id) + '.zip'))
+    shutil.rmtree(os.path.join(zip_folder, str(task_id)))
+    shutil.rmtree(os.path.join(res_folder, str(task_id)))
+
+
+def create_res(res_path, task_id, compl_subtasks):
+    folder_path = os.path.join(res_path, str(task_id))
+    os.makedirs(folder_path, exist_ok=True)
+
+    for idx, val in enumerate(compl_subtasks):
+        file_path = os.path.join(folder_path, str(idx) + ".txt")
+        with open(file_path, "w") as f:
+            f.write(val.result)
+
+    shutil.make_archive(folder_path, 'zip', folder_path)
+
