@@ -73,7 +73,9 @@ def add_user():
             log("User " + username + " already exists, please choose another name")
             return render_template("create.html", exists=True)
         else:
-            user = sql.add_user(username, password)
+            fullname = request.form["fullname"]
+            organisation = request.form["organisation"]
+            user = sql.add_user(username, password, fullname, organisation)
             login_user(user)
             return redirect(url_for("main.index"))
     else:

@@ -281,8 +281,8 @@ def does_user_exist(username):
     return False
 
 
-def add_user(username, password):
-    user = Users(username, password)
+def add_user(username, password, fullname, organisation):
+    user = Users(username, password, fullname, organisation)
     db.session.add(user)
     db.session.commit()
     return user

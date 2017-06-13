@@ -13,7 +13,7 @@ from test.test import BaseTestCase
 class TestTasks(BaseTestCase):
 
     def login(self):
-        user = Users("Test", "pw")
+        user = Users("Test", "pw", "So many test users")
         db.session.add(user)
         db.session.commit()
         resp = self.client.post(url_for('main.login'),
@@ -82,7 +82,7 @@ class TestLogin(BaseTestCase):
 
     def test_login_auth(self):
         with app.app_context():
-            user = Users("Test", "pw")
+            user = Users("Test", "pw", "Testus maximus")
             db.session.add(user)
             db.session.commit()
 

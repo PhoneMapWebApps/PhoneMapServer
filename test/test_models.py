@@ -48,7 +48,9 @@ class TestTasks(BaseTestCase):
                 "time_completed": "",
                 "in_progress": False,
                 "is_complete": False,
-                "task_desc": "Desc"}
+                "task_desc": "Desc",
+                "owner_fullname": "Admin",
+                "owner_org": "No Org"}
 
             self.assertEqual(task.to_json(), def_json)
 
@@ -130,29 +132,29 @@ class TestAndroidIDs(BaseTestCase):
 class TestUsers(BaseTestCase):
     def test_single_id(self):
         with app.app_context():
-            user1 = Users("My", "password")
+            user1 = Users("My", "password", "SomeGuy")
             db.session.add(user1)
             db.session.commit()
 
             users = Users.query.all()
             self.assertTrue(user1 in users)
-            self.assertEqual(len(users), 2) # +1 because of root user
+            self.assertEqual(len(users), 2)  # +1 because of root user
 
     def test_double_id(self):
         with app.app_context():
-            user1 = Users("123", "456")
-            user2 = Users("789", "101112")
+            user1 = Users("123", "456", "Tester01")
+            user2 = Users("789", "101112", "Tester02")
             db.session.add(user1)
             db.session.add(user2)
             db.session.commit()
 
             users = Users.query.all()
             self.assertTrue(user1 in users and user2 in users)
-            self.assertEqual(len(users), 3) # +1 because of root user
+            self.assertEqual(len(users), 3)  # +1 because of root user
 
     def test_active(self):
         with app.app_context():
-            user = Users("My", "password")
+            user = Users("My", "password", "Big Secret")
             db.session.add(user)
             db.session.commit()
 
@@ -160,7 +162,7 @@ class TestUsers(BaseTestCase):
 
     def test_authenticated(self):
         with app.app_context():
-            user = Users("My", "password")
+            user = Users("My", "password", "Small Secret")
             db.session.add(user)
             db.session.commit()
 
@@ -168,7 +170,7 @@ class TestUsers(BaseTestCase):
 
     def test_anonymous(self):
         with app.app_context():
-            user = Users("My", "password")
+            user = Users("My", "password", "Meh Secret")
             db.session.add(user)
             db.session.commit()
 
@@ -176,7 +178,7 @@ class TestUsers(BaseTestCase):
 
     def test_get_id(self):
         with app.app_context():
-            user = Users("My", "password")
+            user = Users("My", "password", "Bleh Secret")
             db.session.add(user)
             db.session.commit()
 
@@ -184,7 +186,7 @@ class TestUsers(BaseTestCase):
 
     def test_check_password(self):
         with app.app_context():
-            user = Users("My", "password")
+            user = Users("My", "password", "Alpha secret")
             db.session.add(user)
             db.session.commit()
 

@@ -35,6 +35,7 @@ class Tasks(db.Model):
         self.is_complete = False
 
     def to_json(self):
+        owner = Users.query.get(self.owner_id)
         submitted = strftime(self.TIME_FORMAT, self.time_submitted.timetuple())
         started = ""
         if self.time_started:
@@ -49,7 +50,9 @@ class Tasks(db.Model):
                 "time_completed": completed,
                 "in_progress": self.in_progress,
                 "is_complete": self.is_complete,
-                "task_desc": self.task_desc}
+                "task_desc": self.task_desc,
+                "owner_fullname": owner.fullname,
+                "owner_org": owner.organisation}
 
     def __repr__(self):
         return '<Task %r>' % self.task_id
@@ -113,10 +116,14 @@ class Users(db.Model):
     __tablename__ = "users"
     user_id = db.Column(Integer, primary_key=True)
     username = db.Column(String(255), unique=True)
+    fullname = db.Column(Text, nullable=False)
+    organisation = db.Column(Text, nullable=False)
     password = db.Column(String, nullable=False)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, fullname, organisation="None given"):
         self.username = username
+        self.fullname = fullname
+        self.organisation = organisation
         self.set_password(password)
 
     def __repr__(self):

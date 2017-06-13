@@ -82,7 +82,7 @@ class TestVanillaSockets(BaseTestCase):
 class TestGetAndStartSockets(BaseTestCase):
     @nottest
     def login_and_upload_data(self):
-        user = Users("Test", "pw")
+        user = Users("Test", "pw", "MEGAAAA USERRRR")
         db.session.add(user)
         db.session.commit()
         resp = self.client.post(url_for('main.login'),
