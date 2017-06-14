@@ -141,6 +141,18 @@ class BrowserSpace(MainSpace):
              {'number': len(clients),
               'count': session['receive_count']})
 
+    @staticmethod
+    def on_get_user_tasks():
+        if not current_user.is_active:
+            return
+
+        if current_user.username == "root":  # admin user
+            tasks = sql.get_all_tasks()
+        else:
+            tasks = sql.get_user_tasks(current_user.user_id)
+
+        emit('user_tasks', tasks)
+
 
 class PhoneSpace(MainSpace):
     @staticmethod
@@ -231,17 +243,7 @@ class PhoneSpace(MainSpace):
         tasks_finished += 1
         log_and_emit(phone_id + BrowserSpace.CLIENT_FINISHED + res, True)
 
-    @staticmethod
-    def on_get_user_tasks():
-        if not current_user.is_active:
-            return
 
-        if current_user.username == "root":  # admin user
-            tasks = sql.get_all_tasks()
-        else:
-            tasks = sql.get_user_tasks(current_user.user_id)
-
-        emit('user_tasks', tasks)
 
 
 socketio.on_namespace(PhoneSpace('/phone'))
