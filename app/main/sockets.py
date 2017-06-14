@@ -234,7 +234,7 @@ class PhoneSpace(MainSpace):
     @staticmethod
     def on_get_user_tasks():
         if not current_user.is_active:
-            pass
+            return
 
         if current_user.username == "root":  # admin user
             tasks = sql.get_all_tasks()
