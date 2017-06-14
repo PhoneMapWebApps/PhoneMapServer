@@ -1,7 +1,5 @@
 import os
 
-import shutil
-
 from flask import url_for
 from flask_login import current_user
 from nose.tools import nottest
@@ -154,25 +152,6 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(received[1]['name'], "set_code")
 
-    def test_get_latest_code(self):
-        with app.app_context():
-            with self.client:
-                self.login_and_upload_data()
-                client = socketio.test_client(app, "/phone")
-                # clear received queue
-                client.get_received("/phone")
-
-                client.emit("get_latest_code", {"id": "TestID"}, namespace="/phone")
-
-                received = client.get_received("/phone")
-                print(received)
-
-                self.assertEqual(len(received), 2)  # broadcast + confirmation
-                self.assertEqual(received[0]['name'], "my_response")
-                # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
-
-                self.assertEqual(received[1]['name'], "set_code")
-
     def test_get_code_by_id(self):
         with app.app_context():
             with self.client:
@@ -207,21 +186,6 @@ class TestAPISockets(BaseTestCase):
         client.get_received("/phone")
 
         client.emit("get_code", {"id": "TestID"}, namespace="/phone")
-
-        received = client.get_received("/phone")
-
-        self.assertEqual(len(received), 3)  # broadcast + confirmation
-        self.assertEqual(received[0]['name'], "my_response")
-        # TODO self.assertEqual(received[0]['args'][0]["data"], "Someone asked for code")
-        self.assertEqual(received[1]['name'], "no_tasks")
-        self.assertEqual(received[2]['name'], "my_response")
-
-    def test_get_latest_code_no_tasks(self):
-        client = socketio.test_client(app, "/phone")
-        # clear received queue
-        client.get_received("/phone")
-
-        client.emit("get_latest_code", {"id": "TestID"}, namespace="/phone")
 
         received = client.get_received("/phone")
 
@@ -305,13 +269,13 @@ class TestAPISockets(BaseTestCase):
     #     self.assertEqual(received[0]['name'], "error")
 
     def test_get_task_list(self):
-        client = socketio.test_client(app, "/browser")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/browser")
+        client.get_received("/phone")
 
-        client.emit("get_task_list", namespace="/browser")
+        client.emit("get_task_list", namespace="/phone")
 
-        received = client.get_received("/browser")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 2)
         self.assertEqual(received[0]['name'], "my_response")

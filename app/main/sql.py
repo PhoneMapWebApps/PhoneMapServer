@@ -16,10 +16,7 @@ def get_task(task_id):
     return Tasks.query.get(task_id)
 
 
-def get_user(user_id):
-    return Users.query.get(user_id)
-
-
+# possible tasks -> for phone use
 def get_task_list():
     # ensure some ID is obtained from phone
     # get_phone(id, sess_id)
@@ -28,6 +25,7 @@ def get_task_list():
 
 
 def get_user_tasks(user_id):
+    """ Tasks viewable for a web user (eg his own, or all if root)"""
     if user_id == 1:  # 1 is root, gets all tasks
         values = Tasks.query.all()
     else:
@@ -36,6 +34,7 @@ def get_user_tasks(user_id):
 
 
 def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
+    """ Creates a task and all its subtasks given the data"""
     task = Tasks(user_id, datetime.utcnow(), task_name, task_desc)
 
     db.session.add(task)
@@ -55,14 +54,28 @@ def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
     return task.task_id
 
 
+# NOTE DOES NOT SET PERSISTENCE -> does not commit
+def create_subtasks(task_id):
+    """ Creates individual subtasks given a parent task_id """
+    directory = os.path.join(app.config['ZIP_FOLDER'], str(task_id))
+    # TODO: NO SUBDIRECTORIES (YET?)
+    for filename in os.listdir(directory):
+        subtask = SubTasks(task_id, filename, datetime.utcnow())
+        db.session.add(subtask)
+
+
 def remove_from_db(task_id):
+    """ Removes a task and all relevant data from the server -> including any
+    subtasks and files."""
     task = Tasks.query.get(task_id)
     db.session.delete(task)
-    remove_task_files(task_id, app.config['JS_FOLDER'], app.config['ZIP_FOLDER'], app.config['RES_FOLDER'])
+    remove_task_files(task_id, app.config['JS_FOLDER'],
+                      app.config['ZIP_FOLDER'], app.config['RES_FOLDER'])
     db.session.commit()
 
 
 def update_code_in_db(task_id, js_file):
+    """ Changes the code a task refers to"""
     save_and_extract_js(task_id, js_file, app.config['JS_FOLDER'])
     subtasks = SubTasks.query.filter_by(task_id=task_id).all()
 
@@ -83,6 +96,8 @@ def update_code_in_db(task_id, js_file):
 
 
 def update_data_in_db(task_id, zip_file):
+    """ Changes the data a task refers to + deletes all subtasks
+    + recreates them from the new data"""
     save_and_extract_zip(task_id, zip_file, app.config['ZIP_FOLDER'])
     subtasks = SubTasks.query.filter_by(task_id=task_id).all()
 
@@ -100,19 +115,11 @@ def update_data_in_db(task_id, zip_file):
     db.session.commit()
 
 
-# NOTE DOES NOT SET PERSISTENCE -> does not commit
-def create_subtasks(task_id):
-    directory = os.path.join(app.config['ZIP_FOLDER'], str(task_id))
-    # TODO: NO SUBDIRECTORIES (YET?)
-    for filename in os.listdir(directory):
-        subtask = SubTasks(task_id, filename, datetime.utcnow())
-        db.session.add(subtask)
-
-
 def get_phone(android_id, session_id):
+    """ Check if phone already exists, if not add it to the DB with a session ID"""
     phone = AndroidIDs.query.get(android_id)
     if not phone:
-        log("Phone has never been seen before, adding phone to DB " + android_id + " " + session_id)
+        log("Phone has never been seen before, adding to DB " + android_id + " " + session_id)
         phone = AndroidIDs(android_id, session_id)
         db.session.add(phone)
         db.session.commit()
@@ -120,6 +127,7 @@ def get_phone(android_id, session_id):
 
 
 def get_subtask_by_task_id(android_id, session_id, task_id):
+    """ Gets a prefered subtask for android_id given the specified task_id"""
     phone = get_phone(android_id, session_id)
 
     # NOTE: task query only required for the start_task func
@@ -129,7 +137,8 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
             it doesnt exist.")
         return None, None, None
 
-    subtask = SubTasks.query.filter_by(task_id=task_id, is_complete=False, in_progress=False).first()
+    subtask = SubTasks.query.\
+        filter_by(task_id=task_id, is_complete=False, in_progress=False).first()
     if not subtask:
         log("Selected task " + str(task_id) + " already has all tasks in progress.")
         return None, None, None
@@ -142,43 +151,20 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     return subtask.data_file, subtask.task_id, task.task_name
 
 
-# order reverse -> run latest submissions first
-def get_latest_subtask(android_id, session_id):
-    phone = get_phone(android_id, session_id)
-
-    subtask = SubTasks.query.order_by(SubTasks.subtask_id.desc()). \
-        filter_by(is_complete=False, in_progress=False).first()
-
-    if not subtask:
-        log("No more tasks!")
-        return None, None, None
-
-    task = Tasks.query.get(subtask.task_id)
-
-    # set correct values of session id and subtask_id in phone DB
-    phone.session_id = session_id
-    phone.subtask_id = subtask.subtask_id
-    db.session.commit()
-
-    return subtask.data_file, subtask.task_id, task.task_name
-
-
-# Returns a tuple of (data file, task id) for the next subtask to be
-# done by the phone specified by android_id.
 def get_next_subtask(android_id, session_id):
+    """Returns a tuple of (data file, task id, task name) for the next subtask to be
+        done by the phone specified by android_id."""
     phone = get_phone(android_id, session_id)
 
     # Proposed change below is relevant to these 4 lines.
-    incomplete_tasks = Tasks.query.filter_by(is_complete=False).all()
-    if not incomplete_tasks:
+    task = Tasks.query.filter_by(is_complete=False).order_by(Tasks.task_id.asc()).first()
+    if not task:
         log("No more tasks!")
         return None, None, None
 
-    # TODO: Must add an "endorsed_task(s)" field (or equivalent) to AndroidIDs table.
-    endorsed_task_id = incomplete_tasks[0].task_id
-    endorsed_task_name = incomplete_tasks[0].task_name
-
-    subtask = fetch_incomplete_subtask(endorsed_task_id)
+    subtask = SubTasks.query.\
+        filter_by(task_id=task.task_id, is_complete=False, in_progress=False). \
+        order_by(SubTasks.subtask_id).first()
 
     if not subtask:
         # TODO: Send a "task(s) complete" message, which causes "All tasks done!"
@@ -190,16 +176,11 @@ def get_next_subtask(android_id, session_id):
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, endorsed_task_id, endorsed_task_name
-
-
-def fetch_incomplete_subtask(task_id):
-    return SubTasks.query. \
-        filter_by(task_id=task_id, is_complete=False, in_progress=False). \
-        order_by(SubTasks.subtask_id).first()
+    return subtask.data_file, task.task_id, task.task_name
 
 
 def start_task(android_id):
+    """ Marks the phone as started executing in the DB"""
     phone = AndroidIDs.query.get(android_id)
     if not phone:
         log("Phone not found - " + android_id)
@@ -227,6 +208,7 @@ def start_task(android_id):
 
 
 def stop_execution(android_id):
+    """ Marks the phone as not executing anymore"""
     phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
         subtask = SubTasks.query.get(phone.subtask_id)
@@ -247,6 +229,7 @@ def stop_execution(android_id):
 
 
 def execution_complete(android_id, result):
+    """ Marks the calculation as complete, saving the results into the db"""
     phone = AndroidIDs.query.get(android_id)
     if phone and phone.is_processing:
         subtask = SubTasks.query.get(phone.subtask_id)
@@ -276,12 +259,19 @@ def execution_complete(android_id, result):
 
 
 def disconnected(session_id):
+    """ Marks a phone as disconnected in the android ID database"""
     phone = AndroidIDs.query.filter_by(session_id=session_id).first()
     if phone:
         phone.is_connected = False
-        phone.session_id = None  # NOTE: SQL implementation dependent. OK with PostGreSQL
+        phone.session_id = None
 
         db.session.commit()
+
+
+# USERS
+
+def get_user(user_id):
+    return Users.query.get(user_id)
 
 
 def authenticate_user(username, password):

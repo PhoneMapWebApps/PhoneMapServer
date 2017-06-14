@@ -1,23 +1,15 @@
 from urllib.parse import urlparse, urljoin
 
-from flask import request, render_template, redirect, jsonify, url_for
+from flask import request, render_template, redirect, jsonify, url_for, flash
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import login_manager
 from app.main import sql
-from app.main.files import request_file_exists, file_extension_okay
+from app.main.files import request_file_exists, file_extension_okay, flashmsg
 from app.main.logger import log, log_filename
 from app.main.sockets import code_available, update_task_list
-from flask import flash
 
 from . import main as app
-
-
-def flashmsg(msg):
-    try:
-        flash(msg)
-    except RuntimeError:
-        pass
 
 
 @app.route('/monitor')

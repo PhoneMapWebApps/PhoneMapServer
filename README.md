@@ -67,9 +67,7 @@ Go into the PhoneMapServer directory and in terminal run `python3 -m "nose"`
 This will return the next data to be crunched for the oldest task.
 May also respond with a `no_tasks` in the event that no more tasks are available.
 
-`get_latest_code`: Responds in the same way as `get_code`, but will with the data for the latest newest task as opposed to the oldest.
-
-`get_code_by_id`: Same response as `gget_code`. Must be sent with a `task_id` arg so as to specify which task is desired, instead of first/last which are obtained with `get_code` and `get_latest_code`.
+`get_code_by_id`: Same response as `get_code`. Must be sent with a `task_id` arg so as to specify which task is desired, instead of first task available obtained from`get_code`.
 
 `start_code`: Marks the code as started in the database. required for submission, and should follow a successful `get_code` call.
 May respond with a `stop_executing` in unexpected scenarios; eg the code you have just started has already been 

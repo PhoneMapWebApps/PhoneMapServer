@@ -1,7 +1,5 @@
 import os
 
-import shutil
-
 from flask import url_for
 from flask_login import current_user
 
@@ -52,14 +50,14 @@ class TestTasks(BaseTestCase):
         self.assert200(resp)
 
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 
 
 class TestIndex(BaseTestCase):
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 
@@ -103,7 +101,7 @@ class TestLogin(BaseTestCase):
                 self.assertTrue(current_user.is_anonymous)
 
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 

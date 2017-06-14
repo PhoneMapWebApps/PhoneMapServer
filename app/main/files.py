@@ -89,8 +89,7 @@ def create_res(res_path, task_id, compl_subtasks):
 
     for idx, val in enumerate(compl_subtasks):
         file_path = os.path.join(folder_path, str(idx) + ".txt")
-        with open(file_path, "w") as f:
-            f.write(val.result)
+        with open(file_path, "w") as res_file:
+            res_file.write(val.result)
 
     shutil.make_archive(folder_path, 'zip', folder_path)
-

@@ -1,6 +1,6 @@
 import os
 
-from flask import session, request, jsonify
+from flask import session, request
 from flask_login import current_user
 from flask_socketio import Namespace, emit, join_room
 
@@ -115,25 +115,9 @@ class BrowserSpace(MainSpace):
 
     @staticmethod
     def on_disconnect():
-        sql.disconnected(request.sid)
         log(BrowserSpace.CLIENT_DISCNCT_MSG + request.sid)
         emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
                              'count': 0})
-
-    @staticmethod
-    def on_get_task_list():
-        session['receive_count'] = session.get('receive_count', 0) + 1
-
-        task_list = sql.get_task_list()
-
-        emit('my_response',
-             {'data': "Sending a task list",
-              'count': session['receive_count']},
-             broadcast=True)
-
-        emit('task_list',
-             {'list': task_list,
-              'count': session['receive_count']})
 
     @staticmethod
     def on_running():
@@ -175,20 +159,28 @@ class PhoneSpace(MainSpace):
         emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
                              'count': 0})
 
+# TODO: refactor android to use this socket instead of HTTP
+    @staticmethod
+    def on_get_task_list(message=None):
+        session['receive_count'] = session.get('receive_count', 0) + 1
+
+        task_list = sql.get_task_list()
+
+        emit('my_response',
+             {'data': "Sending a task list",
+              'count': session['receive_count']},
+             broadcast=True)
+
+        emit('task_list',
+             {'list': task_list,
+              'count': session['receive_count']})
+
     @staticmethod
     def on_get_code(message):
         phone_id = message["id"]
         log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
 
         data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
-        send_code(data_file, task_id, task_name)
-
-    @staticmethod
-    def on_get_latest_code(message):
-        phone_id = message["id"]
-        log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
-
-        data_file, task_id, task_name = sql.get_latest_subtask(phone_id, request.sid)
         send_code(data_file, task_id, task_name)
 
     @staticmethod

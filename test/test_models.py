@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import strftime
 
 from sqlalchemy.exc import IntegrityError
 
@@ -33,28 +32,8 @@ class TestTasks(BaseTestCase):
             self.assertTrue(task in tasks and task2 in tasks)
             self.assertEqual(len(tasks), 2)
 
-    def test_to_json(self):
-        with app.app_context():
-            time = datetime.utcnow()
-            task = Tasks(ROOT_ID, time, "Task", "Desc")
-            db.session.add(task)
-            db.session.commit()
-
-            def_json = {"task_id": 1,
-                        "task_name": "Task",
-                        "time_submitted": strftime(task.TIME_FORMAT, time.timetuple()),
-                        "time_started": "",
-                        "time_completed": "",
-                        "in_progress": False,
-                        "is_complete": False,
-                        "task_desc": "Desc",
-                        "owner_fullname": "Admin",
-                        "owner_org": "No Org"}
-
-            self.assertEqual(task.to_json(), def_json)
-
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 
@@ -97,7 +76,7 @@ class TestSubTasks(BaseTestCase):
             self.assertTrue(subtask in subtasks and subtask2 in subtasks)
 
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 
@@ -126,7 +105,7 @@ class TestAndroidIDs(BaseTestCase):
             self.assertTrue(id1 in ids and id2 in ids)
 
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()
 
@@ -195,6 +174,6 @@ class TestUsers(BaseTestCase):
             user.check_password("password")
 
     @staticmethod
-    def tearDown():
+    def tearDown(**kwargs):
         with app.app_context():
             db.drop_all()

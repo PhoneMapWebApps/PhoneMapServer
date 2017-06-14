@@ -16,7 +16,7 @@ class Tasks(db.Model):
                                  ondelete="CASCADE"),
                       nullable=False)
     task_name = Column(String(255), nullable=False)
-    task_desc = Column(Text, nullable=False)  # is empty string null in SQL?
+    task_desc = Column(Text, nullable=False)
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -24,7 +24,8 @@ class Tasks(db.Model):
     is_complete = Column(Boolean)
 
     # task_id is autoincremented
-    def __init__(self, owner_id, time_submitted, task_name="No Name Given", task_desc="No Desc Given"):
+    def __init__(self, owner_id, time_submitted,
+                 task_name="No Name Given", task_desc="No Desc Given"):
         self.owner_id = owner_id
         self.task_name = task_name
         self.task_desc = task_desc
@@ -43,6 +44,12 @@ class Tasks(db.Model):
         completed = ""
         if self.time_completed:
             completed = strftime(self.TIME_FORMAT, self.time_completed.timetuple())
+
+        total_subtasks = SubTasks.query.filter_by(task_id=self.task_id).count()
+        progress_subtasks = SubTasks.query.\
+            filter_by(task_id=self.task_id, in_progress=True).count()
+        completed_subtasks = SubTasks.query.\
+            filter_by(task_id=self.task_id, is_complete=True).count()
         return {"task_id": self.task_id,
                 "task_name": self.task_name,
                 "time_submitted": submitted,
@@ -51,6 +58,9 @@ class Tasks(db.Model):
                 "in_progress": self.in_progress,
                 "is_complete": self.is_complete,
                 "task_desc": self.task_desc,
+                "total_subtasks": total_subtasks,
+                "progress_subtasks": progress_subtasks,
+                "completed_subtasks": completed_subtasks,
                 "owner_fullname": owner.fullname,
                 "owner_org": owner.organisation}
 
