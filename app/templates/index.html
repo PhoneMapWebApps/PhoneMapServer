@@ -102,6 +102,56 @@
                 socket.emit('my_event', {data: 'I\'m connected!'});
             });
 
+            socket.on('user_tasks', function(data) {
+                data.forEach(function(task) {
+                    if(task.in_progress)
+                        var task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
+                    else if(task.is_complete)
+                        var task_status_str = '<td>Complete!</td>';
+                    else
+                        var task_status_str = '<td>Ready</td>';
+
+                    $('#tasklist').append(
+
+                      '<tr id=\"' + task.task_id + '\">' +
+                         '<td><button class="expand_btn" name=""' +
+                                      'value=" " data-href="#content' + task.task_id + '">' +
+                              '<img src="static/more.png" style="width:16px;height:16px;">' +
+                          '</button></td>' +
+                          '<td>' + task.task_name + '</td>' +
+                          task_status_str +
+                          '<td>' + task.time_submitted + '</td>' +
+                          '<td>' + task.time_started + '</td>' +
+                          '<td>' + task.time_completed + '</td>' +
+                          '<!--<td><img src="static/android-close.png" style="width:16px;height:16px;"></td>-->' +
+                          '<td> <form id="delete_task"  action="tasks/del/' + task.task_id + '" method="POST" enctype="multipart/form-data">' +
+                          '    <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />' +
+                          '</form></td>' +
+                      '</tr>'
+
+                    );
+
+                    $('.taskcontents').append(
+                        '<div class="task_list" id="content' + task.task_id + '">' +
+                        '    <p><b>Description:</b>' + task.task_desc + '</p>' +
+                        '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
+                        '          <b>Amend uploaded code or data:</b>' +
+                        '          <label class="btn btn-default btn-file">' +
+                        '              Select replacement JS code <input type="file" name="JS_FILE" style="display: none;">' +
+                        '          </label>' +
+                        '          <label class="btn btn-default btn-file">' +
+                        '              Select replacement data archive <input type="file" name="ZIP_FILE" style="display: none;">' +
+                        '          </label>&nbsp;&nbsp;' +
+                        '          <label class="btn btn-primary btn-file">' +
+                        '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
+                        '          </label>' +
+                        '      </form>' +
+                        '</div>'
+                    );
+                });
+
+            });
+
             // Interval function that tests message latency by sending a "ping"
             // message. The server then responds with a "pong" message and the
             // round trip time is measured.
@@ -125,7 +175,7 @@
             });
 
 
-            $(".expand_btn").button().click(function() {
+            $(document).on("click", ".expand_btn", function() {
                 var row = $(this).closest('tr');
                 var content = $(this).data("href");
 
@@ -153,6 +203,7 @@
 
             $(document).ready(function () {
                 $('#msgmodal').modal('show');
+                socket.emit('get_user_tasks');
             });
         });
 
@@ -239,7 +290,7 @@
     <div class="container-fluid new_task_lighter">
       <div class="row">
         <div class="col-sm-12">
-          <table class="table table-striped">
+          <table class="table table-striped" id="tasklist">
               <thead>
                   <th>Expand</th>
                   <th>Task name</th>
@@ -250,50 +301,9 @@
                   <th>Remove task</th>
               </thead>
               <tbody>
-                  {% for task in task_list %}
-                      <tr id="{{ task.task_id }}">
-                          <td><button class="expand_btn" name=""
-                                      value=" " data-href="#content{{ task.task_id }}">
-                              <img src="static/more.png" style="width:16px;height:16px;">
-                          </button></td>
-                          <td>{{ task.task_name }}</td>
-                          {% if task.in_progress %}
-                              <td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>
-                          {% elif task.is_complete %}
-                              <td>Complete!</td>
-                          {% else %}
-                              <td>Ready</td>
-                          {% endif %}
-                          <td>{{ task.time_submitted }}</td>
-                          <td>{{ task.time_started }}</td>
-                          <td>{{ task.time_completed }}</td>
-                          <!--<td><img src="static/android-close.png" style="width:16px;height:16px;"></td>-->
-                          <td> <form id="delete_task"  action="tasks/del/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
-                              <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />
-                          </form></td>
-                      </tr
-                         >
-                  {% endfor %}
               </tbody>
           </table>
-
-          {% for task in task_list %}
-          <div class="task_list" id="content{{ task.task_id }}">
-              <p><b>Description:</b> {{ task.task_desc }}</p>
-                <form class="form-inline" id="update_data" action="tasks/{{ task.task_id }}" method="POST" enctype="multipart/form-data">
-                    <b>Amend uploaded code or data:</b>
-                    <label class="btn btn-default btn-file">
-                        Select replacement JS code <input type="file" name="JS_FILE" style="display: none;">
-                    </label>
-                    <label class="btn btn-default btn-file">
-                        Select replacement data archive <input type="file" name="ZIP_FILE" style="display: none;">
-                    </label>&nbsp;&nbsp;
-                    <label class="btn btn-primary btn-file">
-                        Reupload Files <input type="submit" value="Reupload files" style="display: none;">
-                    </label>
-                </form>
-          </div>
-          {% endfor %}
+          <div class="taskcontents"></div>
         </div>
       </div>
     </div>

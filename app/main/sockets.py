@@ -1,7 +1,8 @@
 import os
 
-from flask import session, request
-from flask_socketio import Namespace, emit
+from flask import session, request, jsonify
+from flask_login import current_user
+from flask_socketio import Namespace, emit, join_room
 
 from app.main import sql
 from app.main.logger import log
@@ -74,6 +75,8 @@ class PhoneMap(Namespace):
         log(PhoneMap.CLIENT_CONNECT_MSG + request.sid)
         emit('my_response', {'data': PhoneMap.SERVER_RESPONSE_CON_OK,
                              'count': 0})
+        if current_user.is_active:
+            join_room(current_user.user_id)
 
     @staticmethod
     def on_disconnect():
@@ -171,6 +174,18 @@ class PhoneMap(Namespace):
         emit('task_list',
              {'list': task_list,
               'count': session['receive_count']})
+
+    @staticmethod
+    def on_get_user_tasks():
+        if not current_user.is_active:
+            pass
+
+        if current_user.username == "root":  # admin user
+            tasks = sql.get_all_tasks()
+        else:
+            tasks = sql.get_user_tasks(current_user.user_id)
+
+        emit('user_tasks', tasks)
 
 
 socketio.on_namespace(PhoneMap('/test'))
