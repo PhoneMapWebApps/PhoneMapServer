@@ -93,11 +93,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    if current_user.username == "root":  # admin user
-        tasks = sql.get_all_tasks()
-    else:
-        tasks = sql.get_user_tasks(current_user.user_id)
-    return render_template('index.html', task_list=tasks)
+    return render_template('index.html')
 
 
 @app.route('/tasklist')

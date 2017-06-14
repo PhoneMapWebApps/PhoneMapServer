@@ -1,7 +1,8 @@
 import os
 
-from flask import session, request
-from flask_socketio import Namespace, emit
+from flask import session, request, jsonify
+from flask_login import current_user
+from flask_socketio import Namespace, emit, join_room
 
 from app.main import sql
 from app.main.logger import log
@@ -109,6 +110,8 @@ class BrowserSpace(MainSpace):
 
         emit('my_response', {'data': BrowserSpace.SERVER_RESPONSE_CON_OK,
                              'count': 0})
+        if current_user.is_active:
+            join_room(current_user.user_id)
 
     @staticmethod
     def on_disconnect():
@@ -227,6 +230,18 @@ class PhoneSpace(MainSpace):
         sql.execution_complete(phone_id, res)
         tasks_finished += 1
         log_and_emit(phone_id + BrowserSpace.CLIENT_FINISHED + res, True)
+
+    @staticmethod
+    def on_get_user_tasks():
+        if not current_user.is_active:
+            pass
+
+        if current_user.username == "root":  # admin user
+            tasks = sql.get_all_tasks()
+        else:
+            tasks = sql.get_user_tasks(current_user.user_id)
+
+        emit('user_tasks', tasks)
 
 
 socketio.on_namespace(PhoneSpace('/phone'))
