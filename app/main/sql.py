@@ -7,7 +7,9 @@ from app import db
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files, create_res
 from app.main.logger import log
-from app.main.models import Tasks, SubTasks, AndroidIDs, Users
+from app.main.models import Tasks, SubTasks, AndroidIDs, Users, Stats
+
+KEEP_LAST = 50
 
 
 def get_task(task_id):
@@ -146,7 +148,7 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
 def get_latest_subtask(android_id, session_id):
     phone = get_phone(android_id, session_id)
 
-    subtask = SubTasks.query.order_by(SubTasks.subtask_id.desc()).\
+    subtask = SubTasks.query.order_by(SubTasks.subtask_id.desc()). \
         filter_by(is_complete=False, in_progress=False).first()
 
     if not subtask:
@@ -304,3 +306,21 @@ def add_user(username, password, fullname, organisation):
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def log_phone(num_phones, num_finished):
+    num_processing = AndroidIDs.query.filter_by(is_processing=True).count()
+    avail_tasks = Tasks.query.filter_by(is_complete=False).count()
+    phone_num = Stats(datetime.utcnow(), num_phones, num_finished, num_processing, avail_tasks)
+    db.session.add(phone_num)
+    db.session.flush()
+    # while bigger than KEEP_LAST, order by oldest first (smallest) and delete that elem
+    while len(Stats.query.all()) > KEEP_LAST:
+        query = Stats.query.order_by(Stats.time.asc()).first()
+        db.session.delete(query)
+    db.session.commit()
+
+
+def get_phone_data():
+    data = Stats.query.limit(10).all()
+    return [val.to_json() for val in data]

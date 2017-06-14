@@ -7,12 +7,24 @@ from app.main import sql
 from app.main.logger import log
 from .. import socketio, app
 
+thread = None
+
+clients = []
+tasks_finished = 0
+
 
 def background_thread():
-    pass
+    global tasks_finished
+    while True:
+        # TODO: save client length to DB every minute
+        socketio.sleep(5)
+        print("\n\nBG thread adding to DB every 60 Sec as usual")
+        print(len(clients))
+        print(clients)
+        with app.app_context():
+            sql.log_phone(len(clients), tasks_finished)
+            tasks_finished = 0
 
-
-thread = None
 
 # TODO: reenable error handler later
 # @socketio.on_error("/test")
@@ -28,7 +40,9 @@ thread = None
 
 
 def code_available():
-    emit("code_available", broadcast=True, namespace="/test")
+    emit("code_available", broadcast=True, namespace="/phone")
+    # NOTE: only sending to phone, not browser because not needed
+    # emit("code_available", broadcast=True, namespace="/browser")
 
 
 def log_and_emit(data, broadcast):
@@ -42,7 +56,7 @@ def log_and_emit(data, broadcast):
 def send_code(data_file_name, task_id, task_name):
     if not (data_file_name and task_id and task_name):
         emit('no_tasks')
-        log_and_emit(PhoneMap.SERVER_NO_TASKS, True)
+        log_and_emit(BrowserSpace.SERVER_NO_TASKS, True)
         return
 
     js_file_path = os.path.join(app.config['JS_FOLDER'], str(task_id) + ".js")
@@ -54,7 +68,7 @@ def send_code(data_file_name, task_id, task_name):
     emit('set_code', {'code': js_data, 'data': data, 'task_name': task_name})
 
 
-class PhoneMap(Namespace):
+class MainSpace(Namespace):
     CLIENT_CONNECT_MSG = "New agent has connected with request ID: "
     CLIENT_DISCNCT_MSG = "Agent has disconnected, request ID: "
     CLIENT_GET_CODE = "Agent has asked for code, agent ID: "
@@ -65,22 +79,6 @@ class PhoneMap(Namespace):
     SERVER_NO_TASKS = "Client requested code, but no tasks are available! Agent ID: "
 
     SERVER_RESPONSE_CON_OK = "CON_OK"
-
-    @staticmethod
-    def on_connect():
-        global thread
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
-        log(PhoneMap.CLIENT_CONNECT_MSG + request.sid)
-        emit('my_response', {'data': PhoneMap.SERVER_RESPONSE_CON_OK,
-                             'count': 0})
-
-    @staticmethod
-    def on_disconnect():
-        sql.disconnected(request.sid)
-        log(PhoneMap.CLIENT_DISCNCT_MSG + request.sid)
-        emit('my_response', {'data': PhoneMap.CLIENT_DISCNCT_MSG + request.sid,
-                             'count': 0})
 
     @staticmethod
     def on_my_ping():
@@ -95,9 +93,80 @@ class PhoneMap(Namespace):
         log_and_emit(message['data'], True)
 
     @staticmethod
+    def on_get_phones():
+        stuff = sql.get_phone_data()
+        print(stuff)
+        emit('phone_data', {'data': stuff})
+
+
+class BrowserSpace(MainSpace):
+    @staticmethod
+    def on_connect():
+        global thread
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+        log(BrowserSpace.CLIENT_CONNECT_MSG + request.sid)
+
+        emit('my_response', {'data': BrowserSpace.SERVER_RESPONSE_CON_OK,
+                             'count': 0})
+
+    @staticmethod
+    def on_disconnect():
+        sql.disconnected(request.sid)
+        log(BrowserSpace.CLIENT_DISCNCT_MSG + request.sid)
+        emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
+                             'count': 0})
+
+    @staticmethod
+    def on_get_task_list():
+        session['receive_count'] = session.get('receive_count', 0) + 1
+
+        task_list = sql.get_task_list()
+
+        emit('my_response',
+             {'data': "Sending a task list",
+              'count': session['receive_count']},
+             broadcast=True)
+
+        emit('task_list',
+             {'list': task_list,
+              'count': session['receive_count']})
+
+    @staticmethod
+    def on_running():
+        emit('running',
+             {'number': len(clients),
+              'count': session['receive_count']})
+
+
+class PhoneSpace(MainSpace):
+    @staticmethod
+    def on_connect():
+        global thread
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+        log(BrowserSpace.CLIENT_CONNECT_MSG + request.sid)
+
+        # add phone to the running list!
+        clients.append(request.sid)
+
+        emit('my_response', {'data': BrowserSpace.SERVER_RESPONSE_CON_OK,
+                             'count': 0})
+
+    @staticmethod
+    def on_disconnect():
+        sql.disconnected(request.sid)
+        log(BrowserSpace.CLIENT_DISCNCT_MSG + request.sid)
+
+        clients.remove(request.sid)
+
+        emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
+                             'count': 0})
+
+    @staticmethod
     def on_get_code(message):
         phone_id = message["id"]
-        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
 
         data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
         send_code(data_file, task_id, task_name)
@@ -105,7 +174,7 @@ class PhoneMap(Namespace):
     @staticmethod
     def on_get_latest_code(message):
         phone_id = message["id"]
-        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
 
         data_file, task_id, task_name = sql.get_latest_subtask(phone_id, request.sid)
         send_code(data_file, task_id, task_name)
@@ -113,7 +182,7 @@ class PhoneMap(Namespace):
     @staticmethod
     def on_get_code_by_id(message):
         phone_id = message["id"]
-        log_and_emit(PhoneMap.CLIENT_GET_CODE + phone_id, True)
+        log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
         requested_task_id = message["task_id"]
 
         # Force task -> if true:
@@ -139,38 +208,26 @@ class PhoneMap(Namespace):
         phone_id = message["id"]
 
         if sql.start_task(phone_id):
-            log_and_emit(PhoneMap.CLIENT_CODE_START + phone_id, True)
+            log_and_emit(BrowserSpace.CLIENT_CODE_START + phone_id, True)
         else:
-            log_and_emit(PhoneMap.CLIENT_WRONG_START + phone_id, True)
+            log_and_emit(BrowserSpace.CLIENT_WRONG_START + phone_id, True)
             emit('stop_executing')
 
     @staticmethod
     def on_execution_failed(message):
         phone_id = message["id"]
         sql.stop_execution(phone_id)
-        log_and_emit(phone_id + PhoneMap.CLIENT_ERROR_EXEC + message['exception'], True)
+        log_and_emit(phone_id + BrowserSpace.CLIENT_ERROR_EXEC + message['exception'], True)
 
     @staticmethod
     def on_return(message):
+        global tasks_finished
         phone_id = message["id"]
         res = message["return"]
         sql.execution_complete(phone_id, res)
-        log_and_emit(phone_id + PhoneMap.CLIENT_FINISHED + res, True)
-
-    @staticmethod
-    def on_get_task_list(message):
-        session['receive_count'] = session.get('receive_count', 0) + 1
-
-        task_list = sql.get_task_list()
-
-        emit('my_response',
-             {'data': "Sending a task list",
-              'count': session['receive_count']},
-             broadcast=True)
-
-        emit('task_list',
-             {'list': task_list,
-              'count': session['receive_count']})
+        tasks_finished += 1
+        log_and_emit(phone_id + BrowserSpace.CLIENT_FINISHED + res, True)
 
 
-socketio.on_namespace(PhoneMap('/test'))
+socketio.on_namespace(PhoneSpace('/phone'))
+socketio.on_namespace(BrowserSpace('/browser'))

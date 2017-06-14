@@ -90,16 +90,16 @@
             // Socket.IO will multiplex all those connections on a single
             // physical channel. If you don't care about multiple channels, you
             // can set the namespace to an empty string.
-            namespace = '/test';
+            browserspace = '/browser';
             // Connect to the Socket.IO server.
             // The connection URL has the following format:
             //     http[s]://<domain>:<port>[/<namespace>]
-            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            var browsersocket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + browserspace);
             // Event handler for new connections.
             // The callback function is invoked when a connection with the
             // server is established.
-            socket.on('connect', function() {
-                socket.emit('my_event', {data: 'I\'m connected!'});
+            browsersocket.on('connect', function() {
+                browsersocket.emit('my_event', {data: 'I\'m connected!'});
             });
 
             // Interval function that tests message latency by sending a "ping"
@@ -109,12 +109,12 @@
             var start_time;
             window.setInterval(function() {
                 start_time = (new Date).getTime();
-                socket.emit('my_ping');
+                browsersocket.emit('my_ping');
             }, 1000);
             // Handler for the "pong" message. When the pong is received, the
             // time from the ping is stored, and the average of the last 30
             // samples is average and displayed.
-            socket.on('my_pong', function() {
+            browsersocket.on('my_pong', function() {
                 var latency = (new Date).getTime() - start_time;
                 ping_pong_times.push(latency);
                 ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples

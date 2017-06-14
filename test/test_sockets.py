@@ -8,44 +8,44 @@ from nose.tools import nottest
 
 from app import socketio, app, db
 from app.main.models import Users
-from app.main.sockets import PhoneMap
+from app.main.sockets import BrowserSpace
 from test.test import BaseTestCase, delete_data
 
 
 class TestVanillaSockets(BaseTestCase):
     def test_connect(self):
-        client = socketio.test_client(app, "/test")
-        received = client.get_received("/test")
+        client = socketio.test_client(app, "/phone")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 1)
-        self.assertEqual(received[0]["args"][0]["data"], PhoneMap.SERVER_RESPONSE_CON_OK)
-        client.disconnect("/test")
+        self.assertEqual(received[0]["args"][0]["data"], BrowserSpace.SERVER_RESPONSE_CON_OK)
+        client.disconnect("/phone")
 
     def test_disconnect_reconnect(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
         # reconnect
-        client.disconnect("/test")
-        client.connect("/test")
-        received = client.get_received("/test")
+        client.disconnect("/phone")
+        client.connect("/phone")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 2)
         self.assertEqual(received[0]["name"], "my_response")
-        self.assertEqual(received[1]["args"][0]["data"], PhoneMap.SERVER_RESPONSE_CON_OK)
+        self.assertEqual(received[1]["args"][0]["data"], BrowserSpace.SERVER_RESPONSE_CON_OK)
 
-        client.emit("my_event", {"data": "junk"}, namespace="/test")
-        snd_received = client.get_received("/test")
+        client.emit("my_event", {"data": "junk"}, namespace="/phone")
+        snd_received = client.get_received("/phone")
 
         self.assertEqual(len(snd_received), 1)
         self.assertEqual(len(snd_received[0]["args"]), 1)
         self.assertEqual(snd_received[0]["args"][0]["data"], "junk")
 
     def test_emit(self):
-        client = socketio.test_client(app, "/test")
-        client.get_received("/test")
-        client.emit("my_event", {"data": "this is good data"}, namespace="/test")
-        received = client.get_received("/test")
+        client = socketio.test_client(app, "/phone")
+        client.get_received("/phone")
+        client.emit("my_event", {"data": "this is good data"}, namespace="/phone")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 1)
         self.assertEqual(len(received[0]["args"]), 1)
@@ -53,17 +53,17 @@ class TestVanillaSockets(BaseTestCase):
         self.assertEqual(received[0]["args"][0]["data"], "this is good data")
 
     def test_broadcast(self):
-        client1 = socketio.test_client(app, "/test")
-        client2 = socketio.test_client(app, "/test")
+        client1 = socketio.test_client(app, "/phone")
+        client2 = socketio.test_client(app, "/phone")
         client3 = socketio.test_client(app)  # other ns, wont receive
 
-        client1.get_received("/test")
-        client2.get_received("/test")
+        client1.get_received("/phone")
+        client2.get_received("/phone")
         client3.get_received()
 
-        client1.emit("my_broadcast_event", {"data": "42"}, namespace="/test")
-        received_1 = client1.get_received("/test")
-        received_2 = client2.get_received("/test")
+        client1.emit("my_broadcast_event", {"data": "42"}, namespace="/phone")
+        received_1 = client1.get_received("/phone")
+        received_2 = client2.get_received("/phone")
 
         self.assertFalse(client3.get_received())
         self.assertEqual(len(received_1), 1)
@@ -113,13 +113,13 @@ class TestGetAndStartSockets(BaseTestCase):
         with app.app_context():
             with self.client:
                 self.login_and_upload_data()
-                client = socketio.test_client(app, "/test")
+                client = socketio.test_client(app, "/phone")
                 # clear received queue
-                client.get_received("/test")
+                client.get_received("/phone")
 
-                client.emit("get_code", {"id": "TestID"}, namespace="/test")
+                client.emit("get_code", {"id": "TestID"}, namespace="/phone")
 
-                received = client.get_received("/test")
+                received = client.get_received("/phone")
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
                 self.assertEqual(received[0]['name'], "my_response")
@@ -127,9 +127,9 @@ class TestGetAndStartSockets(BaseTestCase):
 
                 self.assertEqual(received[1]['name'], "set_code")
 
-                client.emit("start_code", {"id": "TestID"}, namespace="/test")
+                client.emit("start_code", {"id": "TestID"}, namespace="/phone")
 
-                received = client.get_received("/test")
+                received = client.get_received("/phone")
 
                 self.assertEqual(len(received), 1)
                 self.assertEqual(received[0]['name'], "my_response")
@@ -139,13 +139,13 @@ class TestGetAndStartSockets(BaseTestCase):
         with app.app_context():
             with self.client:
                 self.login_and_upload_data()
-                client = socketio.test_client(app, "/test")
+                client = socketio.test_client(app, "/phone")
                 # clear received queue
-                client.get_received("/test")
+                client.get_received("/phone")
 
-                client.emit("get_code", {"id": "TestID"}, namespace="/test")
+                client.emit("get_code", {"id": "TestID"}, namespace="/phone")
 
-                received = client.get_received("/test")
+                received = client.get_received("/phone")
                 print(received)
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
@@ -158,13 +158,13 @@ class TestGetAndStartSockets(BaseTestCase):
         with app.app_context():
             with self.client:
                 self.login_and_upload_data()
-                client = socketio.test_client(app, "/test")
+                client = socketio.test_client(app, "/phone")
                 # clear received queue
-                client.get_received("/test")
+                client.get_received("/phone")
 
-                client.emit("get_latest_code", {"id": "TestID"}, namespace="/test")
+                client.emit("get_latest_code", {"id": "TestID"}, namespace="/phone")
 
-                received = client.get_received("/test")
+                received = client.get_received("/phone")
                 print(received)
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
@@ -177,13 +177,13 @@ class TestGetAndStartSockets(BaseTestCase):
         with app.app_context():
             with self.client:
                 self.login_and_upload_data()
-                client = socketio.test_client(app, "/test")
+                client = socketio.test_client(app, "/phone")
                 # clear received queue
-                client.get_received("/test")
+                client.get_received("/phone")
 
-                client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/test")
+                client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/phone")
 
-                received = client.get_received("/test")
+                received = client.get_received("/phone")
                 print(received)
 
                 self.assertEqual(len(received), 2)  # broadcast + confirmation
@@ -202,13 +202,13 @@ class TestGetAndStartSockets(BaseTestCase):
 
 class TestAPISockets(BaseTestCase):
     def test_get_code_no_tasks(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
-        client.emit("get_code", {"id": "TestID"}, namespace="/test")
+        client.emit("get_code", {"id": "TestID"}, namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 3)  # broadcast + confirmation
         self.assertEqual(received[0]['name'], "my_response")
@@ -217,13 +217,13 @@ class TestAPISockets(BaseTestCase):
         self.assertEqual(received[2]['name'], "my_response")
 
     def test_get_latest_code_no_tasks(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
-        client.emit("get_latest_code", {"id": "TestID"}, namespace="/test")
+        client.emit("get_latest_code", {"id": "TestID"}, namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 3)  # broadcast + confirmation
         self.assertEqual(received[0]['name'], "my_response")
@@ -232,13 +232,13 @@ class TestAPISockets(BaseTestCase):
         self.assertEqual(received[2]['name'], "my_response")
 
     def test_get_code_by_id_no_tasks(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
-        client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/test")
+        client.emit("get_code_by_id", {"id": "TestID", "task_id": 1}, namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 3)  # broadcast + confirmation
         self.assertEqual(received[0]['name'], "my_response")
@@ -247,28 +247,28 @@ class TestAPISockets(BaseTestCase):
         self.assertEqual(received[2]['name'], "my_response")
 
     def test_start_code_stop_executing(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
-        client.emit("start_code", {"id": "TestID"}, namespace="/test")
+        client.emit("start_code", {"id": "TestID"}, namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
         self.assertEqual(len(received), 2)
         self.assertEqual(received[0]['name'], "my_response")
         self.assertEqual(received[1]["name"], "stop_executing")
         self.assertEqual(received[1]["args"], [None])
 
     def test_execution_failed(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
         client.emit("execution_failed",
                     {"id": "TestID", "exception": "you done goofed"},
-                    namespace="/test")
+                    namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]['name'], "my_response")
@@ -276,15 +276,15 @@ class TestAPISockets(BaseTestCase):
         # TODO                  "Client failed executing with stack trace: you done goofed")
 
     def test_return(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/phone")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/phone")
 
         client.emit("return",
                     {"id": "TestID", "return": "It's bigger on the inside!"},
-                    namespace="/test")
+                    namespace="/phone")
 
-        received = client.get_received("/test")
+        received = client.get_received("/phone")
 
         self.assertEqual(len(received), 1)
         self.assertEqual(received[0]['name'], "my_response")
@@ -293,25 +293,25 @@ class TestAPISockets(BaseTestCase):
 
     # TODO: reenable error handler
     # def test_bad_return(self):
-    #     client = socketio.test_client(app, "/test")
+    #     client = socketio.test_client(app, "/phone")
     #     # clear received queue
-    #     client.get_received("/test")
+    #     client.get_received("/phone")
     #
-    #     client.emit("return", {"id": "TestID"}, namespace="/test")
+    #     client.emit("return", {"id": "TestID"}, namespace="/phone")
     #
-    #     received = client.get_received("/test")
+    #     received = client.get_received("/phone")
     #
     #     self.assertEqual(len(received), 1)
     #     self.assertEqual(received[0]['name'], "error")
 
     def test_get_task_list(self):
-        client = socketio.test_client(app, "/test")
+        client = socketio.test_client(app, "/browser")
         # clear received queue
-        client.get_received("/test")
+        client.get_received("/browser")
 
-        client.emit("get_task_list", {"id": "TestID"}, namespace="/test")
+        client.emit("get_task_list", namespace="/browser")
 
-        received = client.get_received("/test")
+        received = client.get_received("/browser")
 
         self.assertEqual(len(received), 2)
         self.assertEqual(received[0]['name'], "my_response")

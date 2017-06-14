@@ -129,7 +129,7 @@ class Users(db.Model):
         self.set_password(password)
 
     def __repr__(self):
-        return "%d/%s" % (self.user_id, self.username)
+        return "%s/%s" % (self.user_id, self.username)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -162,3 +162,31 @@ class Users(db.Model):
         if equal is NotImplemented:
             return NotImplemented
         return not equal
+
+
+class Stats(db.Model):
+    TIME_FORMAT = "%b %d %Y %H:%M:%S"
+    __tablename__ = "stats"
+    time = Column(DateTime, nullable=False, primary_key=True)
+    connected = Column(Integer, nullable=False)
+    completed = Column(Integer, nullable=False)
+    processing = Column(Integer, nullable=False)
+    free_tasks = Column(Integer, nullable=False)
+
+    def __init__(self, time, connected, finished, processing, free_tasks):
+        self.time = time
+        self.connected = connected
+        self.completed = finished
+        self.processing = processing
+        self.free_tasks = free_tasks
+
+    def __repr__(self):
+        return '<Stats at %s>' % self.time
+
+    def to_json(self):
+        time = strftime(self.TIME_FORMAT, self.time.timetuple())
+        return {"time": time,
+                "connected": self.connected,
+                "completed": self.completed,
+                "processing": self.processing,
+                "free_tasks": self.free_tasks}

@@ -79,37 +79,44 @@
             // Socket.IO will multiplex all those connections on a single
             // physical channel. If you don't care about multiple channels, you
             // can set the namespace to an empty string.
-            namespace = '/test';
+            browserspace = '/browser';
+            phonespace = '/phone';
             // Connect to the Socket.IO server.
             // The connection URL has the following format:
             //     http[s]://<domain>:<port>[/<namespace>]
-            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            var browsersocket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + browserspace);
+            var phonesocket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + phonespace);
             // Event handler for new connections.
             // The callback function is invoked when a connection with the
             // server is established.
-            socket.on('connect', function() {
-                socket.emit('my_event', {data: 'Browser is connected!'});
+            browsersocket.on('connect', function() {
+                browsersocket.emit('my_event', {data: 'Browser is connected!'});
             });
             // Event handler for server sent data.
             // The callback function is invoked whenever the server emits data
             // to the client. The data is then displayed in the "Received"
             // section of the page.
-            socket.on('my_response', function(msg) {
+            browsersocket.on('my_response', function(msg) {
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
                 $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
-            socket.on('set_code', function(msg) {
+            browsersocket.on('phone_data', function(msg) {
+                $('#log').append('<br>' + $('<div/>').text('Received a bunch of data for plotting ' + msg.data).html());
+                $("#log").scrollTop($("#log")[0].scrollHeight);
+            });
+
+            phonesocket.on('set_code', function(msg) {
               $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
               $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
-            socket.on('no_tasks', function() {
+            phonesocket.on('no_tasks', function() {
               $('#log').append('<br>' + $('<div/>').text('No more tasks available for you!').html());
               $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
-            socket.on('task_list', function(msg) {
+            phonesocket.on('task_list', function(msg) {
               $('#log').append('<br>' + $('<div/>').text('Received a list of tasks!' ).html());
               list = msg.list;
               for(var i = 0, size = list.length; i < size ; i++){
@@ -127,12 +134,12 @@
             var start_time;
             window.setInterval(function() {
                 start_time = (new Date).getTime();
-                socket.emit('my_ping');
+                browsersocket.emit('my_ping');
             }, 1000);
             // Handler for the "pong" message. When the pong is received, the
             // time from the ping is stored, and the average of the last 30
             // samples is average and displayed.
-            socket.on('my_pong', function() {
+            browsersocket.on('my_pong', function() {
                 var latency = (new Date).getTime() - start_time;
                 ping_pong_times.push(latency);
                 ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
@@ -149,23 +156,28 @@
            //     return false;
            // });
            $('form#get_code').submit(function(event) {
-               socket.emit('get_code', {id: "DB Master Paul"});
+               phonesocket.emit('get_code', {id: "DB Master Paul"});
                return false;
            });
            $('form#start_code').submit(function(event) {
-               socket.emit('start_code', {id: "DB Master Paul"});
+               phonesocket.emit('start_code', {id: "DB Master Paul"});
                return false;
            });
            $('form#stop_code').submit(function(event) {
-               socket.emit('execution_failed', {id: "DB Master Paul", exception: "I asked for shaken, not stirred."});
+               phonesocket.emit('execution_failed', {id: "DB Master Paul", exception: "I asked for shaken, not stirred."});
                return false;
            });
            $('form#return_code').submit(function(event) {
-               socket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               phonesocket.emit('return', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
                return false;
            });
           $('form#get_task_list').submit(function(event) {
-               socket.emit('get_task_list', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               phonesocket.emit('get_task_list', {id: "DB Master Paul", return:"The name is Bond, James Bond."});
+               return false;
+           });
+
+          $('form#get_phone_data').submit(function(event) {
+               browsersocket.emit('get_phones');
                return false;
            });
         });
@@ -211,6 +223,9 @@
           </form>
           <form id="get_task_list" method="POST" action="#">
             <input class="btn btn-default" type="submit" value="Simulate get list of tasks">
+          </form>
+          <form id="get_phone_data" method="POST" action="#">
+            <input class="btn btn-default" type="submit" value="Get phone data">
           </form>
         </div>
       </div>
