@@ -17,11 +17,7 @@ tasks_finished = 0
 def background_thread():
     global tasks_finished
     while True:
-        # TODO: save client length to DB every minute
-        socketio.sleep(5)
-        print("\n\nBG thread adding to DB every 60 Sec as usual")
-        print(len(clients))
-        print(clients)
+        socketio.sleep(60)
         with app.app_context():
             sql.log_phone(len(clients), tasks_finished)
             tasks_finished = 0
@@ -41,9 +37,13 @@ def background_thread():
 
 
 def code_available():
+    # phone gets new tasks to process
     emit("code_available", broadcast=True, namespace="/phone")
-    # NOTE: only sending to phone, not browser because not needed
-    # emit("code_available", broadcast=True, namespace="/browser")
+
+
+def update_task_list():
+    # client gets new task list
+    emit("new_tasks", broadcast=True, namespace="/browser")
 
 
 def log_and_emit(data, broadcast):
@@ -143,13 +143,10 @@ class BrowserSpace(MainSpace):
 
     @staticmethod
     def on_get_user_tasks():
-        if not current_user.is_active:
+        if not current_user.is_authenticated:
             return
 
-        if current_user.username == "root":  # admin user
-            tasks = sql.get_all_tasks()
-        else:
-            tasks = sql.get_user_tasks(current_user.user_id)
+        tasks = sql.get_user_tasks(current_user.user_id)
 
         emit('user_tasks', tasks)
 
@@ -242,8 +239,6 @@ class PhoneSpace(MainSpace):
         sql.execution_complete(phone_id, res)
         tasks_finished += 1
         log_and_emit(phone_id + BrowserSpace.CLIENT_FINISHED + res, True)
-
-
 
 
 socketio.on_namespace(PhoneSpace('/phone'))

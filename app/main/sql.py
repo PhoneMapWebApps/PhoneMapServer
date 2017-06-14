@@ -27,13 +27,11 @@ def get_task_list():
     return [val.to_json() for val in values]
 
 
-def get_all_tasks():
-    values = Tasks.query.all()
-    return [val.to_json() for val in values]
-
-
 def get_user_tasks(user_id):
-    values = Tasks.query.filter_by(owner_id=user_id).all()
+    if user_id == 1:  # 1 is root, gets all tasks
+        values = Tasks.query.all()
+    else:
+        values = Tasks.query.filter_by(owner_id=user_id).all()
     return [val.to_json() for val in values]
 
 

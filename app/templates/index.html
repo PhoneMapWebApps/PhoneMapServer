@@ -102,7 +102,12 @@
                 browsersocket.emit('my_event', {data: 'I\'m connected!'});
             });
 
+            browsersocket.on('new_tasks', function() {
+                browsersocket.emit('get_user_tasks');
+            });
+
             browsersocket.on('user_tasks', function(data) {
+                $('#tasklist tbody tr').remove()
                 data.forEach(function(task) {
                     if(task.in_progress)
                         var task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
@@ -133,7 +138,7 @@
 
                     $('.taskcontents').append(
                         '<div class="task_list" id="content' + task.task_id + '">' +
-                        '    <p><b>Description:</b>' + task.task_desc + '</p>' +
+                        '    <p><b>Description: </b>' + task.task_desc + '</p>' +
                         '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
                         '          <b>Amend uploaded code or data:</b>' +
                         '          <label class="btn btn-default btn-file">' +
