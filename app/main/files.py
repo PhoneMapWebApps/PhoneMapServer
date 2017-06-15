@@ -78,9 +78,14 @@ def extract(zip_path, task_id):
 def remove_task_files(task_id, js_folder, zip_folder, res_folder):
     os.remove(os.path.join(js_folder, str(task_id) + '.js'))
     os.remove(os.path.join(zip_folder, str(task_id) + '.zip'))
-    os.remove(os.path.join(res_folder, str(task_id) + '.zip'))
+    try:
+        os.remove(os.path.join(res_folder, str(task_id) + '.zip'))
+    except FileNotFoundError:
+        pass
+    else:
+        shutil.rmtree(os.path.join(res_folder, str(task_id)))
+
     shutil.rmtree(os.path.join(zip_folder, str(task_id)))
-    shutil.rmtree(os.path.join(res_folder, str(task_id)))
 
 
 def create_res(res_path, task_id, compl_subtasks):

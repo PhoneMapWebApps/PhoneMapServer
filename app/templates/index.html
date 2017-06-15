@@ -101,8 +101,9 @@
                 browsersocket.emit('my_event', {data: 'I\'m connected!'});
             });
 
-            browsersocket.on('new_tasks', function() {
-                browsersocket.emit('get_user_tasks');
+            browsersocket.on('new_tasks', function(data) {
+                if (data["task_id"] == -1)
+                    browsersocket.emit('get_user_tasks');
             });
 
             var task_contents = {};

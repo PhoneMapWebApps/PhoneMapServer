@@ -36,11 +36,11 @@ def code_available():
     # phone gets new tasks to process
     emit("code_available", broadcast=True, namespace="/phone")
 
-
-def update_task_list():
+UPDATE_ALL_TASKS = -1
+def update_task_list(taskid):
     # client gets new task list
-    emit("new_tasks", namespace="/browser", room=current_user.user_id)
-    emit("new_tasks", namespace="/browser", room=ROOT_ID)
+    emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
+    emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
 
 
 def log_and_emit(data, broadcast):
