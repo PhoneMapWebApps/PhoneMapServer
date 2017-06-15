@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from flask import session, request
 from flask_login import current_user
@@ -6,7 +7,6 @@ from flask_socketio import Namespace, emit, join_room
 
 from app.main import sql, stats
 from app.main.logger import log
-from app.main.sql import ROOT_ID
 from .. import socketio, app
 
 thread = None
@@ -14,33 +14,36 @@ thread = None
 clients = []
 tasks_finished = 0
 
+ROOT_ID = 1
+ALL_TASKS = -1
 
 def background_thread():
     pass
 
 
 # TODO: reenable error handler later
-# @socketio.on_error("/test")
-# def on_error(value):
-#     if isinstance(value, KeyError):
-#         log("KeyError caught")
-#         print(value)
-#         emit("error", {'error': "A KeyError has occured. The required data "
-#                                 "was not passed, or passed with the wrong names"})
-#     else:
-#         print(value)
-#         raise value
+@socketio.on_error("/browser")
+def on_error(value):
+    if isinstance(value, KeyError):
+        log("KeyError caught")
+        print(value)
+        emit("error", {'error': "A KeyError has occured. The required data "
+                                "was not passed, or passed with the wrong names"})
+    else:
+        print(value)
+        raise(value)
 
 
 def code_available():
     # phone gets new tasks to process
     emit("code_available", broadcast=True, namespace="/phone")
 
-UPDATE_ALL_TASKS = -1
+
 def update_task_list(taskid):
     # client gets new task list
     emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
-    emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
+    if current_user.user_id != ROOT_ID:
+        emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
 
 
 def log_and_emit(data, broadcast):
@@ -84,6 +87,7 @@ class MainSpace(Namespace):
 
     @staticmethod
     def on_my_event(message):
+        print('Emiting ' + message['data'])
         log_and_emit(message['data'], False)
 
     @staticmethod
@@ -126,8 +130,19 @@ class BrowserSpace(MainSpace):
             return
 
         tasks = sql.get_user_tasks(current_user.user_id)
+        emit('user_tasks', {'data' : tasks, 'replace':False})
 
-        emit('user_tasks', tasks)
+    @staticmethod
+    def on_get_user_task_by_id(message):
+        if not current_user.is_authenticated:
+            return
+
+        task = sql.get_user_tasks(current_user.user_id, message["data"])
+        if not task:
+            emit('user_tasks', {'remove':True, 'task_id':message["data"]});
+            return
+
+        emit('user_tasks', {'data' : task, 'replace':True, 'remove' : False})
 
 
 class PhoneSpace(MainSpace):
@@ -158,6 +173,7 @@ class PhoneSpace(MainSpace):
     @staticmethod
     def on_get_task_list(message=None):
         stats.incworkers(1)
+        update_task_list(1)
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         task_list = sql.get_task_list()
