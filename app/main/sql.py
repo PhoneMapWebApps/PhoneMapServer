@@ -4,13 +4,11 @@ from datetime import datetime
 from flask import current_app as app
 
 from app import db
+from app.main import stats
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files, create_res
 from app.main.logger import log
-from app.main.models import Tasks, SubTasks, AndroidIDs, Users, Stats
-
-KEEP_LAST = 50
-
+from app.main.models import Tasks, SubTasks, AndroidIDs, Users
 
 def get_task(task_id):
     return Tasks.query.get(task_id)
@@ -204,6 +202,7 @@ def start_task(android_id):
     subtask.time_started = datetime.utcnow()
 
     db.session.commit()
+    stats.incworkers(task.task_id)
     return True
 
 
@@ -226,6 +225,7 @@ def stop_execution(android_id):
             task.in_progress = False
             task.time_started = None
         db.session.commit()
+        stats.decworkers(task.task_id)
 
 
 def execution_complete(android_id, result):
@@ -256,6 +256,7 @@ def execution_complete(android_id, result):
                 create_res(app.config["RES_FOLDER"], task_id, compl_sub_tasks)
 
             db.session.commit()
+            stats.decworkers(task.task_id)
 
 
 def disconnected(session_id):
@@ -294,21 +295,3 @@ def add_user(username, password, fullname, organisation):
     db.session.add(user)
     db.session.commit()
     return user
-
-
-def log_phone(num_phones, num_finished):
-    num_processing = AndroidIDs.query.filter_by(is_processing=True).count()
-    avail_tasks = Tasks.query.filter_by(is_complete=False).count()
-    phone_num = Stats(datetime.utcnow(), num_phones, num_finished, num_processing, avail_tasks)
-    db.session.add(phone_num)
-    db.session.flush()
-    # while bigger than KEEP_LAST, order by oldest first (smallest) and delete that elem
-    while len(Stats.query.all()) > KEEP_LAST:
-        query = Stats.query.order_by(Stats.time.asc()).first()
-        db.session.delete(query)
-    db.session.commit()
-
-
-def get_phone_data():
-    data = Stats.query.limit(10).all()
-    return [val.to_json() for val in data]

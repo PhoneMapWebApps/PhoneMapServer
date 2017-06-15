@@ -1,6 +1,7 @@
 from time import strftime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -174,29 +175,18 @@ class Users(db.Model):
         return not equal
 
 
-class Stats(db.Model):
-    TIME_FORMAT = "%b %d %Y %H:%M:%S"
-    __tablename__ = "stats"
-    time = Column(DateTime, nullable=False, primary_key=True)
-    connected = Column(Integer, nullable=False)
-    completed = Column(Integer, nullable=False)
-    processing = Column(Integer, nullable=False)
-    free_tasks = Column(Integer, nullable=False)
+class TaskStats(db.Model):
+    __tablename__ = "task_stats"
+    task_id = Column(Integer, nullable=False, primary_key=True)
+    worker_stats = Column(JSONB, nullable=False)
 
-    def __init__(self, time, connected, finished, processing, free_tasks):
-        self.time = time
-        self.connected = connected
-        self.completed = finished
-        self.processing = processing
-        self.free_tasks = free_tasks
+    def __init__(self, task_id):
+        self.task_id = task_id
+        self.worker_stats = {}
 
     def __repr__(self):
-        return '<Stats at %s>' % self.time
+        return '<Task stats id %r>' % self.task_id
 
     def to_json(self):
-        time = strftime(self.TIME_FORMAT, self.time.timetuple())
-        return {"time": time,
-                "connected": self.connected,
-                "completed": self.completed,
-                "processing": self.processing,
-                "free_tasks": self.free_tasks}
+        return {"task_id": self.task_id,
+                "worker_stats" : self.worker_stats}

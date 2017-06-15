@@ -4,7 +4,7 @@ from flask import session, request
 from flask_login import current_user
 from flask_socketio import Namespace, emit, join_room
 
-from app.main import sql
+from app.main import sql, stats
 from app.main.logger import log
 from .. import socketio, app
 
@@ -15,12 +15,7 @@ tasks_finished = 0
 
 
 def background_thread():
-    global tasks_finished
-    while True:
-        socketio.sleep(60)
-        with app.app_context():
-            sql.log_phone(len(clients), tasks_finished)
-            tasks_finished = 0
+    pass
 
 
 # TODO: reenable error handler later
@@ -95,9 +90,7 @@ class MainSpace(Namespace):
 
     @staticmethod
     def on_get_phones():
-        stuff = sql.get_phone_data()
-        print(stuff)
-        emit('phone_data', {'data': stuff})
+        emit('phone_data', {'data': stats.get_workertimes_json()})
 
 
 class BrowserSpace(MainSpace):
@@ -162,6 +155,7 @@ class PhoneSpace(MainSpace):
 # TODO: refactor android to use this socket instead of HTTP
     @staticmethod
     def on_get_task_list(message=None):
+        stats.incworkers(1)
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         task_list = sql.get_task_list()

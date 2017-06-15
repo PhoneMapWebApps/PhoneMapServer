@@ -10,7 +10,6 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 app = Flask(__name__)
 
-
 def create_app(debug=False, testing=False):
     if testing:
         if os.path.isfile("config.py"):

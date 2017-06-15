@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SciRunner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -72,12 +73,6 @@
             vertical-align: top;
         }
 
-       [id*=content] {
-            background-color: #7c9bad;
-            position: absolute;
-            display: none;
-        }
-
         input[type=text], select {
             color: black;
         }
@@ -106,53 +101,109 @@
                 browsersocket.emit('get_user_tasks');
             });
 
+            var task_contents = [];
+            var task_charts = [];
             browsersocket.on('user_tasks', function(data) {
-                $('#tasklist tbody tr').remove()
-                data.forEach(function(task) {
-                    if(task.in_progress)
-                        var task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
-                    else if(task.is_complete)
-                        var task_status_str = '<td>Complete!</td>';
-                    else
-                        var task_status_str = '<td>Ready</td>';
 
-                    $('#tasklist').append(
+                browsersocket.emit('get_phones');
 
-                      '<tr id=\"' + task.task_id + '\">' +
-                         '<td><button class="expand_btn" name=""' +
-                                      'value=" " data-href="#content' + task.task_id + '">' +
-                              '<img src="static/more.png" style="width:16px;height:16px;">' +
-                          '</button></td>' +
-                          '<td>' + task.task_name + '</td>' +
-                          task_status_str +
-                          '<td>' + task.time_submitted + '</td>' +
-                          '<td>' + task.time_started + '</td>' +
-                          '<td>' + task.time_completed + '</td>' +
-                          '<!--<td><img src="static/android-close.png" style="width:16px;height:16px;"></td>-->' +
-                          '<td> <form id="delete_task"  action="tasks/del/' + task.task_id + '" method="POST" enctype="multipart/form-data">' +
-                          '    <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />' +
-                          '</form></td>' +
-                      '</tr>'
+                browsersocket.on('phone_data', function(stats) {
+                  stats_json = JSON.parse(stats["data"]);
+                  $('#tasklist tbody tr').remove();
 
-                    );
+                  data.forEach(function(task) {
+                      var task_status_str = '';
 
-                    $('.taskcontents').append(
-                        '<div class="task_list" id="content' + task.task_id + '">' +
-                        '    <p><b>Description: </b>' + task.task_desc + '</p>' +
-                        '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
-                        '          <b>Amend uploaded code or data:</b>' +
-                        '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement JS code <input type="file" name="JS_FILE" style="display: none;">' +
-                        '          </label>' +
-                        '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement data archive <input type="file" name="ZIP_FILE" style="display: none;">' +
-                        '          </label>&nbsp;&nbsp;' +
-                        '          <label class="btn btn-primary btn-file">' +
-                        '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
-                        '          </label>' +
-                        '      </form>' +
-                        '</div>'
-                    );
+                      if(task.in_progress)
+                          task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
+                      else if(task.is_complete)
+                          task_status_str = '<td>Complete!</td>';
+                      else
+                          task_status_str = '<td>Ready</td>';
+
+                      $('#tasklist').append(
+
+                        '<tr id=\"' + task.task_id + '\">' +
+                           '<td><button class="expand_btn" name=""' +
+                                        'value=" " id="content' + task.task_id + '">' +
+                                '<img src="static/more.png" style="width:16px;height:16px;">' +
+                            '</button></td>' +
+                            '<td>' + task.task_name + '</td>' +
+                            task_status_str +
+                            '<td>' + task.time_submitted + '</td>' +
+                            '<td>' + task.time_started + '</td>' +
+                            '<td>' + task.time_completed + '</td>' +
+                            '<td> <form id="delete_task"  action="tasks/del/' + task.task_id + '" method="POST" enctype="multipart/form-data">' +
+                            '    <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />' +
+                            '</form></td>' +
+                        '</tr>'
+                      );
+
+                      var task_expanded = $(
+                          '<div id="content' + task.task_id + '" style="display: none;">' +
+                          '    <p><b>Description: </b>' + task.task_desc + '</p>' +
+                          '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
+                          '          <b>Amend uploaded code or data:</b>' +
+                          '          <label class="btn btn-default btn-file">' +
+                          '              Select replacement JS code <input type="file" name="JS_FILE" style="display: none;">' +
+                          '          </label>' +
+                          '          <label class="btn btn-default btn-file">' +
+                          '              Select replacement data archive <input type="file" name="ZIP_FILE" style="display: none;">' +
+                          '          </label>&nbsp;&nbsp;' +
+                          '          <label class="btn btn-primary btn-file">' +
+                          '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
+                          '          </label>' +
+                          '      </form>' +
+                          '</div>'
+                      );
+
+                      task_contents.push(task_expanded);
+
+                      var chart_container = $('<div class="chart-container" style="margin-top:20px; position: relative; height:15vh; width:80vw"></div>');
+                      var cur_chart = $('<canvas width="1000" height="100" id="chart' + task.task_id + '"></canvas>');
+                      task_charts.push(cur_chart);
+
+                      $(chart_container).append(cur_chart);
+                      $(task_expanded).append(chart_container);
+                      var ctx = $(cur_chart)[0].getContext('2d');
+
+                      var datapoints = [];
+                      var labels = $.map(stats_json[task.task_id], function(item){
+                          datapoints.push(item[1]);
+                          return item[0];
+                      });
+
+                      var chart = new Chart(ctx, {
+                          // The type of chart we want to create
+                          type: 'line',
+
+                          // The data for our dataset
+                          data: {
+                              labels: labels,
+                              datasets: [{
+                                  label: "Number of active workers",
+                                  backgroundColor: 'rgb(176,196,222)',
+                                  borderColor: 'rgb(255,0,0)',
+                                  data: datapoints,
+                              }]
+                          },
+
+                          // Configuration options go here
+                          options: {
+                              scales: {
+                                  yAxes: [{
+                                      ticks: {
+                                          beginAtZero:true
+                                      }
+                                  }]
+                              }
+                          }
+                      });
+
+                      $('#tasklist > tbody').append('<tr><td colspan="7">').append(task_expanded);
+                      $('#tasklist > tbody').find('td:last').append(task_expanded);
+                      $('#tasklist > tbody').append('</td></tr>');
+                  });
                 });
 
             });
@@ -180,26 +231,9 @@
             });
 
 
-            $(document).on("click", ".expand_btn", function() {
-                var row = $(this).closest('tr');
-                var content = $(this).data("href");
-
-                if ($(content).is(":visible")) {
-                   $(row).css({"height" : "auto"});
-                   $(content).css({"display" : "none", "left": "auto", "top" : "auto"});
-               } else  {
-                   $("tr").css({"height" : "auto"});
-                   var conH = $(content).height();
-                   var rowH = $(row).height();
-                   var updatedHeight = conH + rowH + 25;
-                   $(row).css({"height" : updatedHeight});
-                   var left = $(row).position().left + 25;
-                var top = $(row).position().top + rowH + 'px';
-                   $("[id*=content]").css({"display" : "none", "left": "auto", "top" : "auto"});
-                   $(content).css({"display" : "block", "left": left, "top" : top});
-                   var newBg = $(row).css("background-color");
-                   $(content).css({"background-color" : newBg});
-               }
+            $(document).on("click", ".expand_btn", function(event) {
+              task_contents[$(this).attr('id').substr(7) - 1].slideToggle("slow");
+              event.preventDefault();
             });
 
             $( '.fileinput').change(function(){
@@ -308,7 +342,6 @@
               <tbody>
               </tbody>
           </table>
-          <div class="taskcontents"></div>
         </div>
       </div>
     </div>
