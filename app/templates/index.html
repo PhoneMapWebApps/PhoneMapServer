@@ -77,6 +77,10 @@
             color: black;
         }
 
+        .fa-input {
+          font-family: FontAwesome, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
     </style>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
@@ -124,9 +128,9 @@
                       $('#tasklist').append(
 
                         '<tr id=\"' + task.task_id + '\">' +
-                           '<td><button class="expand_btn" name=""' +
+                           '<td><button class="expand_btn btn btn-default" name=""' +
                                         'value=" " id="content' + task.task_id + '">' +
-                                '<img src="static/more.png" style="width:16px;height:16px;">' +
+                                '<i class="fa fa-ellipsis-h" style="font-size:16px"></i>' +
                             '</button></td>' +
                             '<td>' + task.task_name + '</td>' +
                             task_status_str +
@@ -134,7 +138,7 @@
                             '<td>' + task.time_started + '</td>' +
                             '<td>' + task.time_completed + '</td>' +
                             '<td> <form id="delete_task"  action="tasks/del/' + task.task_id + '" method="POST" enctype="multipart/form-data">' +
-                            '    <input type="image" src="static/android-close.png" alt="Submit Form" style="width:16px;height:16px;" />' +
+                            '    <input type="submit" class="fa btn btn-default" value="&#xf00d;" alt="Submit Form"/>' +
                             '</form></td>' +
                         '</tr>'
                       );
@@ -232,8 +236,8 @@
 
 
             $(document).on("click", ".expand_btn", function(event) {
-              task_contents[$(this).attr('id').substr(7)].slideToggle("slow");
               event.preventDefault();
+              task_contents[$(this).attr('id').substr(7)].slideToggle("slow");
             });
 
             $( '.fileinput').change(function(){
