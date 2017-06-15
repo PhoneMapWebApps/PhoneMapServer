@@ -1,7 +1,7 @@
 from time import strftime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, ARRAY, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSON
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -178,7 +178,7 @@ class Users(db.Model):
 class TaskStats(db.Model):
     __tablename__ = "task_stats"
     task_id = Column(Integer, nullable=False, primary_key=True)
-    worker_stats = Column(JSONB, nullable=False)
+    worker_stats = Column(JSON, nullable=False)
 
     def __init__(self, task_id):
         self.task_id = task_id
