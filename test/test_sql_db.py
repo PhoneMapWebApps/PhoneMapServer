@@ -3,9 +3,8 @@ from datetime import datetime
 from app import app, db
 from app.main import sql
 from app.main.models import AndroidIDs, SubTasks
+from app.main.sql import ROOT_ID
 from test.test import BaseTestCase, delete_data
-
-ROOT_ID = 1
 
 
 class TestSQLdb(BaseTestCase):

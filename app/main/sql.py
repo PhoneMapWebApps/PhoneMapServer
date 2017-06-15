@@ -13,6 +13,8 @@ from app.main.models import Tasks, SubTasks, AndroidIDs, Users
 def get_task(task_id):
     return Tasks.query.get(task_id)
 
+ROOT_ID = 1
+
 
 # possible tasks -> for phone use
 def get_task_list():

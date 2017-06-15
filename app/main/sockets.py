@@ -6,6 +6,7 @@ from flask_socketio import Namespace, emit, join_room
 
 from app.main import sql, stats
 from app.main.logger import log
+from app.main.sql import ROOT_ID
 from .. import socketio, app
 
 thread = None
@@ -38,7 +39,8 @@ def code_available():
 
 def update_task_list():
     # client gets new task list
-    emit("new_tasks", broadcast=True, namespace="/browser")
+    emit("new_tasks", namespace="/browser", room=current_user.user_id)
+    emit("new_tasks", namespace="/browser", room=ROOT_ID)
 
 
 def log_and_emit(data, broadcast):
