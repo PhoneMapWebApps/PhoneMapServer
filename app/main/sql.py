@@ -31,7 +31,7 @@ def get_user_tasks(user_id, task_id = ALL_TASKS):
         if task_id == ALL_TASKS:
             values = Tasks.query.filter_by(owner_id=user_id).all()
         else:
-            values = Tasks.query.get(owner_id=user_id, task_id = task_id)
+            values = Tasks.query.filter(owner_id=user_id).filter(task_id = task_id)
             return values.to_json()
 
     return [val.to_json() for val in values]

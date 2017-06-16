@@ -45,6 +45,10 @@ def update_task_list(taskid):
     if current_user.user_id != ROOT_ID:
         emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
 
+def delete_task(taskid):
+    emit("del_task", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
+    if current_user.user_id != ROOT_ID:
+        emit("del_task", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
 
 def log_and_emit(data, broadcast):
     session['receive_count'] = session.get('receive_count', 0) + 1
@@ -87,7 +91,6 @@ class MainSpace(Namespace):
 
     @staticmethod
     def on_my_event(message):
-        print('Emiting ' + message['data'])
         log_and_emit(message['data'], False)
 
     @staticmethod
@@ -130,7 +133,7 @@ class BrowserSpace(MainSpace):
             return
 
         tasks = sql.get_user_tasks(current_user.user_id)
-        emit('user_tasks', {'data' : tasks, 'replace':False})
+        emit('user_tasks', {'data' : tasks, 'replace':False, 'remove':False})
 
     @staticmethod
     def on_get_user_task_by_id(message):
@@ -141,7 +144,6 @@ class BrowserSpace(MainSpace):
         if not task:
             emit('user_tasks', {'remove':True, 'task_id':message["data"]});
             return
-
         emit('user_tasks', {'data' : task, 'replace':True, 'remove' : False})
 
 

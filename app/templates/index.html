@@ -93,13 +93,6 @@
             });
 
             browsersocket.on('new_tasks', function(data) {
-                /*if (data["remove"]) {
-                    task_entries[String(data["task_id"])].remove();
-                    task_contents[String(data["task_id"])].remove();
-                    task_charts[String(data["task_id"])].remove();
-                    return;
-                }*/
-
                 if (data["task_id"] == -1) {
                     browsersocket.emit('get_user_tasks');
                 } else {
@@ -160,17 +153,17 @@
                         '</div>' +
                         '</td></tr>');
 
-                task_entries[String(task.task_id)] = $(task_table_entry_str);
-
                 var shouldShow = false;
                 if(replace) {
-                    task_entries[String(task.task_id)].replaceWith($(task_entries[String(task.task_id)]));
+                    task_entries[String(task.task_id)].replaceWith(task_table_entry_str);
                     if(task_contents[String(task.task_id)].find('div').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
                 } else {
-                    $('#tasklist').append($(task_entries[String(task.task_id)]));
+                    task_entries[String(task.task_id)] = $(task_table_entry_str).appendTo($('#tasklist'));
                 }
+
+                //task_entries[String(task.task_id)] = $(task_table_entry_str);
 
                 var task_canvas = $('<canvas width="1000px" height="250px" id="chart' + task.task_id + '"></canvas>');
                 //$(chart_container).insertAfter($(task_expanded_entry_str).find('div'));
@@ -224,6 +217,13 @@
                    }
                 //}
             }
+
+            browsersocket.on('del_task', function(data) {
+                    $("#task" + data["task_id"]).remove();
+                    task_entries[String(data["task_id"])].find('tr').remove();
+                    task_contents[String(data["task_id"])].remove();
+                    task_charts[String(data["task_id"])].destroy();
+            });
 
             browsersocket.on('user_tasks', function(data) {
                 browsersocket.emit('get_phones');
