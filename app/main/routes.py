@@ -8,7 +8,7 @@ from app import login_manager, app
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay, flashmsg
 from app.main.logger import log, log_filename
-from app.main.sockets import code_available, update_task_list, UPDATE_ALL_TASKS
+from app.main.sockets import code_available, update_task_list, ALL_TASKS, delete_task
 
 # from . import main as app
 
@@ -131,7 +131,7 @@ def upload_file():
     sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
     log('Uploaded new task ' + task_name + ' (' + js_file.filename + ' ' + zip_file.filename + ')')
 
-    update_task_list(UPDATE_ALL_TASKS)
+    update_task_list(ALL_TASKS)
 
     if no_tasks_currently:
         code_available()
@@ -182,6 +182,7 @@ def remove_task(task_id):
         return "You don't have access to this"
 
     sql.remove_from_db(task_id)
+    delete_task(task_id)
     return redirect(url_for('main.index'))
 
 

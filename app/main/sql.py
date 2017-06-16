@@ -9,12 +9,11 @@ from app.main.files import save_and_extract_files, save_and_extract_js, save_and
     remove_task_files, create_res
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, Users
+from app.main.sockets import update_task_list, ALL_TASKS
+
 
 def get_task(task_id):
     return Tasks.query.get(task_id)
-
-ROOT_ID = 1
-
 
 # possible tasks -> for phone use
 def get_task_list():
@@ -24,12 +23,17 @@ def get_task_list():
     return [val.to_json() for val in values]
 
 
-def get_user_tasks(user_id):
+def get_user_tasks(user_id, task_id = ALL_TASKS):
     """ Tasks viewable for a web user (eg his own, or all if root)"""
     if user_id == 1:  # 1 is root, gets all tasks
         values = Tasks.query.all()
     else:
-        values = Tasks.query.filter_by(owner_id=user_id).all()
+        if task_id == ALL_TASKS:
+            values = Tasks.query.filter_by(owner_id=user_id).all()
+        else:
+            values = Tasks.query.filter(owner_id=user_id).filter(task_id = task_id)
+            return values.to_json()
+
     return [val.to_json() for val in values]
 
 
@@ -205,6 +209,7 @@ def start_task(android_id):
 
     db.session.commit()
     stats.incworkers(task.task_id)
+    update_task_list(task.task_id)
     return True
 
 
@@ -228,6 +233,7 @@ def stop_execution(android_id):
             task.time_started = None
         db.session.commit()
         stats.decworkers(task.task_id)
+        update_task_list(task.task_id)
 
 
 def execution_complete(android_id, result):
@@ -259,6 +265,7 @@ def execution_complete(android_id, result):
 
             db.session.commit()
             stats.decworkers(task.task_id)
+            update_task_list(task.task_id)
 
 
 def disconnected(session_id):
