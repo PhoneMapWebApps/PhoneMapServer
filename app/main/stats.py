@@ -53,7 +53,7 @@ class StatsManager:
 
     def get_workertimes_json(self):
         # if server was reloaded or crashed, lookup these from DB
-        if not self.dict_numworkers:
+        if len(self.dict_numworkers) <= 1:
             stats_all = TaskStats.query.all()
             for task_stat in stats_all:
                 dict = task_stat.worker_stats
