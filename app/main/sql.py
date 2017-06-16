@@ -8,12 +8,14 @@ from app.main import stats
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
     remove_task_files, create_res
 from app.main.logger import log
-from app.main.models import Tasks, SubTasks, AndroidIDs, Users
-from app.main.sockets import update_task_list, ALL_TASKS
+from app.main.models import Tasks, SubTasks, AndroidIDs, Users, TaskStats
+from app.main.sockets import update_task_list
+from app.main.stats import ALL_TASKS
 
 
 def get_task(task_id):
     return Tasks.query.get(task_id)
+
 
 # possible tasks -> for phone use
 def get_task_list():
@@ -23,15 +25,15 @@ def get_task_list():
     return [val.to_json() for val in values]
 
 
-def get_user_tasks(user_id, task_id = ALL_TASKS):
+def get_user_tasks(user_id, task_id=ALL_TASKS):
     """ Tasks viewable for a web user (eg his own, or all if root)"""
-    if user_id == 1:  # 1 is root, gets all tasks
+    if int(user_id) == 1:  # 1 is root, gets all tasks
         values = Tasks.query.all()
     else:
         if task_id == ALL_TASKS:
             values = Tasks.query.filter_by(owner_id=user_id).all()
         else:
-            values = Tasks.query.filter(owner_id=user_id).filter(task_id = task_id)
+            values = Tasks.query.filter(owner_id=user_id).filter(task_id=task_id)
             return values.to_json()
 
     return [val.to_json() for val in values]
@@ -73,6 +75,8 @@ def remove_from_db(task_id):
     subtasks and files."""
     task = Tasks.query.get(task_id)
     db.session.delete(task)
+    task_data = TaskStats.query.get(task_id)
+    db.session.delete(task_data)
     remove_task_files(task_id, app.config['JS_FOLDER'],
                       app.config['ZIP_FOLDER'], app.config['RES_FOLDER'])
     db.session.commit()

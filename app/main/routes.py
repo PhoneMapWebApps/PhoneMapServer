@@ -5,10 +5,11 @@ from flask import request, render_template, redirect, jsonify, url_for, flash, s
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import login_manager, app as config
-from app.main import sql
+from app.main import sql, stats
 from app.main.files import request_file_exists, file_extension_okay, flashmsg
 from app.main.logger import log, log_filename
-from app.main.sockets import code_available, update_task_list, ALL_TASKS, delete_task
+from app.main.sockets import code_available, update_task_list, delete_task
+from app.main.stats import ALL_TASKS
 
 from . import main as app
 
@@ -21,6 +22,8 @@ def monitor():
         log_lines = log_file.readlines()
     except FileNotFoundError:
         log_lines = ""
+
+    stats.get_workertimes_json()
 
     return render_template('monitor.html', console_old=log_lines)
 

@@ -1,5 +1,4 @@
 import os
-import traceback
 
 from flask import session, request
 from flask_login import current_user
@@ -15,7 +14,7 @@ clients = []
 tasks_finished = 0
 
 ROOT_ID = 1
-ALL_TASKS = -1
+
 
 def background_thread():
     pass
@@ -39,13 +38,14 @@ def code_available():
     emit("code_available", broadcast=True, namespace="/phone")
 
 
-def update_task_list(taskid):
+def update_task_list(task_id):
     if not current_user.is_authenticated:
         return
     # client gets new task list
-    emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
+    emit("new_tasks", {'task_id' : task_id}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
-        emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
+        emit("new_tasks", {'task_id' : task_id}, namespace="/browser", room=ROOT_ID)
+
 
 def delete_task(taskid):
     if not current_user.is_authenticated:
@@ -54,6 +54,7 @@ def delete_task(taskid):
     emit("del_task", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
         emit("del_task", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
+
 
 def log_and_emit(data, broadcast):
     session['receive_count'] = session.get('receive_count', 0) + 1
@@ -145,11 +146,11 @@ class BrowserSpace(MainSpace):
         if not current_user.is_authenticated:
             return
 
-        task = sql.get_user_tasks(current_user.user_id, message["data"])
+        task = sql.get_user_tasks(current_user.user_id, int(message["data"]))
         if not task:
-            emit('user_tasks', {'remove':True, 'task_id':message["data"]});
+            emit('user_tasks', {'remove': True, 'task_id': message["data"]})
             return
-        emit('user_tasks', {'data' : task, 'replace':True, 'remove' : False})
+        emit('user_tasks', {'data': task, 'replace': True, 'remove': False})
 
 
 class PhoneSpace(MainSpace):
