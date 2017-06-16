@@ -1,15 +1,16 @@
+import os
 from urllib.parse import urlparse, urljoin
 
-from flask import request, render_template, redirect, jsonify, url_for, flash
+from flask import request, render_template, redirect, jsonify, url_for, flash, send_file
 from flask_login import login_required, login_user, logout_user, current_user
 
-from app import login_manager
+from app import login_manager, app
 from app.main import sql
 from app.main.files import request_file_exists, file_extension_okay, flashmsg
 from app.main.logger import log, log_filename
 from app.main.sockets import code_available, update_task_list, UPDATE_ALL_TASKS
 
-from . import main as app
+# from . import main as app
 
 
 @app.route('/monitor')
@@ -182,6 +183,19 @@ def remove_task(task_id):
 
     sql.remove_from_db(task_id)
     return redirect(url_for('main.index'))
+
+
+@app.route('/tasks/get/<task_id>')
+@login_required
+def get_task(task_id):
+    if not allowed_user(task_id):
+        return "You don't have access to this"
+
+    try:
+        return send_file(os.path.join("..", app.config["RES_FOLDER"], task_id + ".zip"),
+                         attachment_filename='results.zip', as_attachment=True)
+    except Exception as e:
+        return str(e)
 
 
 @login_manager.user_loader

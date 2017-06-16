@@ -144,6 +144,11 @@
                         '</tr>'
                       );
 
+                      var possibleGetResultsButton = task.is_complete ?
+                          '<label>' +
+                          '<a class="btn btn-success" style="margin-left:10px;" href="/tasks/get/' + task.task_id + '">Get results</a>' +
+                          '</label>' : '';
+
                       var task_expanded = $(
                           '<div id="content' + task.task_id + '" style="display: none;">' +
                           '    <p><b>Description: </b>' + task.task_desc + '</p>' +
@@ -157,7 +162,7 @@
                           '          </label>&nbsp;&nbsp;' +
                           '          <label class="btn btn-primary btn-file">' +
                           '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
-                          '          </label>' +
+                          '          </label>' + possibleGetResultsButton +
                           '      </form>' +
                           '</div>'
                       );
