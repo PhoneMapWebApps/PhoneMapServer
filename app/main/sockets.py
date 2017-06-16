@@ -40,12 +40,17 @@ def code_available():
 
 
 def update_task_list(taskid):
+    if not current_user.is_authenticated:
+        return
     # client gets new task list
     emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
         emit("new_tasks", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
 
 def delete_task(taskid):
+    if not current_user.is_authenticated:
+        return
+    
     emit("del_task", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
         emit("del_task", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
@@ -174,8 +179,6 @@ class PhoneSpace(MainSpace):
 # TODO: refactor android to use this socket instead of HTTP
     @staticmethod
     def on_get_task_list(message=None):
-        stats.incworkers(1)
-        update_task_list(1)
         session['receive_count'] = session.get('receive_count', 0) + 1
 
         task_list = sql.get_task_list()
