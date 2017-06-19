@@ -23,7 +23,7 @@ class TestTasks(BaseTestCase):
                 print(current_user.username)
                 with open('test/resources/test.js', 'rb') as js_file:
                     with open('test/resources/test.zip', 'rb') as zip_file:
-                        with open('test/resources/martin.jpg') as pic:
+                        with open('test/resources/martin.jpg', 'rb') as pic:
                             resp = self.client.post(
                                 '/tasks',
                                 data=dict(
