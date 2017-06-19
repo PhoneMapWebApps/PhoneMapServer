@@ -40,7 +40,9 @@ def code_available():
 
 def update_task_list(task_id):
     if not current_user.is_authenticated:
+        emit("new_tasks", {'task_id': task_id}, namespace="/browser", broadcast=True)
         return
+
     # client gets new task list
     emit("new_tasks", {'task_id': task_id}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
