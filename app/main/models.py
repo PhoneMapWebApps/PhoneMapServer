@@ -53,6 +53,7 @@ class Tasks(db.Model):
         completed_subtasks = SubTasks.query.\
             filter_by(task_id=self.task_id, is_complete=True).count()
         return {"task_id": self.task_id,
+                "owner_id": owner.user_id,
                 "task_name": self.task_name,
                 "time_submitted": submitted,
                 "time_started": started,
@@ -64,9 +65,7 @@ class Tasks(db.Model):
                 "progress_subtasks": progress_subtasks,
                 "completed_subtasks": completed_subtasks,
                 "owner_fullname": owner.fullname,
-                "owner_org": owner.organisation,
-                "owner_pic": owner.pic_name,
-                "task_pic": self.pic_name}
+                "owner_org": owner.organisation}
 
     def __repr__(self):
         return '<Task %r>' % self.task_id
