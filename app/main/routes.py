@@ -1,12 +1,12 @@
 import os
 from urllib.parse import urlparse, urljoin
 
-from flask import request, render_template, redirect, jsonify, url_for, flash, send_file
+from flask import request, render_template, redirect, jsonify, url_for, flash, send_file, abort
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import login_manager, app as config
 from app.main import sql, stats
-from app.main.files import request_file_exists, file_extension_okay, flashmsg, save_pic
+from app.main.files import request_file_exists, file_extension_okay, flashmsg
 from app.main.logger import log, log_filename
 from app.main.sockets import code_available, update_task_list, delete_task
 from app.main.stats import ALL_TASKS
@@ -144,6 +144,8 @@ def get_user_pic(user_id):
     user = sql.get_user(user_id)
     if user:
         return send_file(os.path.join("..", config.config["USER_PICS"], user.pic_name), as_attachment=True)
+    else:
+        abort(404)
 
 
 @app.route('/task_pic/<task_id>')
@@ -151,6 +153,8 @@ def get_task_pic(task_id):
     task = sql.get_task(task_id)
     if task:
         return send_file(os.path.join("..", config.config["TASK_PICS"], task.pic_name), as_attachment=True)
+    else:
+        abort(404)
 
 
 # upload task to db
