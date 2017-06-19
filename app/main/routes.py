@@ -100,6 +100,15 @@ def get_task_list():
     return jsonify(task_list)
 
 
+@app.route('/user_pic/<user_id>')
+def get_user_pic(user_id):
+    user = sql.get_user(user_id)
+    if user.pic_given:
+        return send_file(os.path.join("..", config.config["USER_PICS"], user_id + ".jpg"), as_attachment=True)
+    else:
+        return send_file(os.path.join("..", config.config["USER_PICS"], "default.jpg"), as_attachment=True)
+
+
 # upload task to db
 @app.route('/tasks', methods=['POST'])
 @login_required
