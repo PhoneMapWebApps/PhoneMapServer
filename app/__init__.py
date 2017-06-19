@@ -36,7 +36,7 @@ def create_app(debug=False, testing=False):
     with app.app_context():
         db.create_all()
         from app.main.models import Users
-        if not Users.query.filter_by(username="root").first():
+        if not Users.query.get(1):  # 1 == root user
             root = Users("root", "toor", "Admin", "No Org")
             db.session.add(root)
             db.session.commit()

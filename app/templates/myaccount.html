@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <title>My account</title>
+    <style>
+      .login-form {
+        display: table;
+      }
+
+      .login-input {
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+
+      body {
+        /* Margin bottom by footer height */
+        margin-bottom: 60px;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* Set the fixed height of the footer here */
+        height: 80px;
+        background-color: #f5f5f5;
+      }
+
+      .container .text-muted {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+      <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">sciRunner Server internal alpha</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li><a href="/">Task manager</a></li>
+          <li class="active"><a href="/">Server monitor</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="/myaccount">My account</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+  <div class="container-fluid">
+  <section class="login-form col-sm-3 col-sm-offset-5">
+    <div class="login-input">
+        <div class="row">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png">
+            <img style="display:block;" width="100%" height="100%" class="text-center" src="static/motto.png">
+            <br/>
+
+                  {% if success %}
+        <div class="modal fade" id="msgmodal" role="dialog">
+          <div class="modal-dialog modal-bg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Server response</h4>
+              </div>
+              <div class="modal-body">
+                  {{ success }} <br/>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+            <form action="/myaccount", method="post" enctype="multipart/form-data">
+                <img style="border: #000000 4px outset; display:block;" width="100%" height="100%" class="text-center" src="pictures/user/{{ current_user.pic_name }}">
+                <input type="hidden" name="update_type" value="picture">
+                <label class="btn btn-default btn-file">
+                      Choose another picture<input type="file" name="picture" accept="image/*" style="display: none;">
+                </label>
+                <input class="btn btn-default" type=submit value="Change user picture">
+
+            </form>
+        <br>
+
+            <form action="/myaccount", method="post">
+                <input type="hidden" name="update_type" value="username">
+                <div class="form-group">
+                  <label for="username">Your current user name: {{ current_user.username }}</label>
+                  <input class="form-control" id="username" type=text name=username>
+                </div>
+                <input class="btn btn-default" type=submit value="Change username">
+            </form>
+        <br>
+
+            <form action="/myaccount", method="post">
+                <input type="hidden" name="update_type" value="fullname">
+                <div class="form-group">
+                  <label for="fullname">Your current full name: {{ current_user.fullname }}</label>
+                  <input class="form-control" id="fullname" type=text name=fullname>
+                </div>
+                <input class="btn btn-default" type=submit value="Change full name">
+            </form>
+        <br>
+
+            <form action="/myaccount", method="post">
+                <input type="hidden" name="update_type" value="organisation">
+                <div class="form-group">
+                  <label for="organisation">Your current organisation: {{ current_user.organisation }}</label>
+                  <input class="form-control" id="password" type=text name=organisation>
+                </div>
+                <input class="btn btn-default" type=submit value="Change organisation">
+            </form>
+        <br>
+
+            <form action="/myaccount", method="post">
+                <input type="hidden" name="update_type" value="password">
+                <div class="form-group">
+                  <label for="password">Change password</label>
+                  <input class="form-control" id="password" type=password name=password>
+                </div>
+                <input class="btn btn-default" type=submit value="Change password">
+            </form>
+
+            <br/>
+            {% if error %}
+              <div class="alert alert-dismissable alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
+                {{ error }}
+              </div>
+            {% endif %}
+            {% if success %}
+              <div class="alert alert-dismissable alert-success fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
+                {{ success }}
+              </div>
+            {% endif %}
+
+            <br/>
+          </div>
+    </div>
+  </section>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted text-center">Copyright (c) sciRunner Team 2017, All rights reserved.</p>
+    </div>
+  </footer>
+
+  </body>
+</html>

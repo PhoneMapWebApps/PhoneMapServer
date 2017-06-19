@@ -94,6 +94,45 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/pictures/user/<pic_name>')
+@login_required
+def pics(pic_name):
+    return send_file(os.path.join("..", config.config["USER_PICS"], pic_name))
+
+
+@app.route('/myaccount', methods=["GET", "POST"])
+@login_required
+def change_user():
+    user_id = current_user.user_id
+    if request.method == "POST":
+        type = request.values["update_type"]
+        if type == "picture":
+            user_pic = request.files["picture"]
+            sql.set_pic(user_id, user_pic)
+
+        elif type == "username":
+            new_name = request.values["username"]
+            if sql.does_user_exist(new_name):
+                return render_template('myaccount.html', error="Username already taken! please try again")
+            sql.set_username(user_id, new_name)
+
+        elif type == "fullname":
+            new_fullname = request.values["fullname"]
+            sql.set_fullname(user_id, new_fullname)
+
+        elif type == "organisation":
+            new_org = request.values["organisation"]
+            sql.set_org(user_id, new_org)
+
+        elif type == "password":
+            new_pw = request.values["password"]
+            sql.set_password(user_id, new_pw)
+
+        return render_template('myaccount.html', success="Successfully updated!")
+    else:
+        return render_template('myaccount.html')
+
+
 @app.route('/tasklist')
 def get_task_list():
     task_list = sql.get_task_list()

@@ -291,10 +291,37 @@ def get_user(user_id):
     return Users.query.get(user_id)
 
 
+def set_username(user_id, username):
+    Users.query.get(user_id).username = username
+    db.session.commit()
+
+
+def set_fullname(user_id, fullname):
+    Users.query.get(user_id).fullname = fullname
+    db.session.commit()
+
+
+def set_org(user_id, organisation):
+    Users.query.get(user_id).organisation = organisation
+    db.session.commit()
+
+
+def set_password(user_id, new_password):
+    Users.query.get(user_id).set_password(new_password)
+    db.session.commit()
+
+
+def set_pic(user_id, user_pic):
+    user = get_user(user_id)
+    if user_pic:
+        extension = save_pic(user_id, user_pic, app.config["USER_PICS"])
+        user.pic_name = str(user_id) + extension
+    db.session.commit()
+
+
 def authenticate_user(username, password):
     user = Users.query.filter_by(username=username).first()
     if user and user.check_password(password):
-        db.session.commit()
         return user
     return None
 
