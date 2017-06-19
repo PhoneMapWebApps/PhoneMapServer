@@ -58,12 +58,13 @@ def save_and_extract_js(task_id, js_file, js_path):
 
 
 def save_pic(name, pic, pic_path):
-    extension = pic.filename.rsplit('.', 1)[1].lower()
-    pic_filename = str(name) + "." + extension
+    extension = "." + pic.filename.rsplit('.', 1)[1].lower()
+    pic_filename = str(name) + extension
     if hasattr(pic, 'save'):
         pic.save(os.path.join(pic_path, pic_filename))
     else:
         shutil.copyfile(pic.name, os.path.join(pic_path, pic_filename))
+    return extension
 
 
 def save_and_extract_zip(task_id, zip_file, zip_path):

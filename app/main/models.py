@@ -23,7 +23,7 @@ class Tasks(db.Model):
     time_completed = Column(DateTime)
     in_progress = Column(Boolean)
     is_complete = Column(Boolean)
-    pic_given = Column(Boolean, nullable=False, default=False)
+    pic_name = Column(String(255), nullable=False, default="default.jpg")
 
     # task_id is autoincremented
     def __init__(self, owner_id, time_submitted,
@@ -133,7 +133,7 @@ class Users(db.Model):
     fullname = Column(Text, nullable=False)
     organisation = Column(Text, nullable=False)
     password = Column(String, nullable=False)
-    pic_given = Column(Boolean, nullable=False, default=False)
+    pic_name = Column(String(255), nullable=False, default="default.jpg")
 
     def __init__(self, username, password, fullname, organisation="None given"):
         self.username = username

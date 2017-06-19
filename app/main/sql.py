@@ -50,8 +50,8 @@ def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic):
 
     log('Saving and extracting...')
     if task_pic:
-        save_pic(task.task_id, task_pic, app.config['TASK_PICS'])
-        task.pic_given = True
+        extension = save_pic(task.task_id, task_pic, app.config['TASK_PICS'])
+        task.pic_name = str(task.task_id) + extension
     save_and_extract_files(task.task_id, js_file, zip_file,
                            app.config['JS_FOLDER'],
                            app.config['ZIP_FOLDER'])
@@ -311,8 +311,8 @@ def add_user(username, password, fullname, organisation, user_pic):
     db.session.add(user)
     db.session.flush()
     if user_pic:
-        save_pic(user.user_id, user_pic, app.config["USER_PICS"])
-        user.pic_given = True
+        extension = save_pic(user.user_id, user_pic, app.config["USER_PICS"])
+        user.pic_name = str(user.user_id) + extension
     db.session.commit()
 
     return user

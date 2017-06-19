@@ -100,26 +100,18 @@ def get_task_list():
     return jsonify(task_list)
 
 
-# TODO: NOT JUST JPG
 @app.route('/user_pic/<user_id>')
 def get_user_pic(user_id):
     user = sql.get_user(user_id)
     if user:
-        if user.pic_given:
-            return send_file(os.path.join("..", config.config["USER_PICS"], user_id + ".jpg"), as_attachment=True)
-        else:
-            return send_file(os.path.join("..", config.config["USER_PICS"], "default.jpg"), as_attachment=True)
+        return send_file(os.path.join("..", config.config["USER_PICS"], user.pic_name), as_attachment=True)
 
 
-# TODO: NOT JUST JPEG
 @app.route('/task_pic/<task_id>')
 def get_task_pic(task_id):
     task = sql.get_task(task_id)
     if task:
-        if task.pic_given:
-            return send_file(os.path.join("..", config.config["TASK_PICS"], task_id + ".jpg"), as_attachment=True)
-        else:
-            return send_file(os.path.join("..", config.config["TASK_PICS"], "default.jpg"), as_attachment=True)
+        return send_file(os.path.join("..", config.config["TASK_PICS"], task.pic_name), as_attachment=True)
 
 
 # upload task to db
