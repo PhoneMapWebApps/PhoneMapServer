@@ -45,7 +45,7 @@ def save_and_extract_files(task_id, js_file, zip_file, js_path, zip_path):
     save_and_extract_js(task_id, js_file, js_path)
     save_and_extract_zip(task_id, zip_file, zip_path)
 
-    flashmsg("Successfully uploaded JS and ZIP files, as well as set task name and description")
+    flashmsg("Successfully uploaded picture, JS, and ZIP files, as well as set task name and description")
 
 
 def save_and_extract_js(task_id, js_file, js_path):
@@ -58,7 +58,8 @@ def save_and_extract_js(task_id, js_file, js_path):
 
 
 def save_pic(name, pic, pic_path):
-    pic_filename = str(name) + ".jpg"  # or png?
+    extension = pic.filename.rsplit('.', 1)[1].lower()
+    pic_filename = str(name) + "." + extension
     if hasattr(pic, 'save'):
         pic.save(os.path.join(pic_path, pic_filename))
     else:

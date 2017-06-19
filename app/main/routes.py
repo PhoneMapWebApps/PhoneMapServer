@@ -100,13 +100,26 @@ def get_task_list():
     return jsonify(task_list)
 
 
+# TODO: NOT JUST JPG
 @app.route('/user_pic/<user_id>')
 def get_user_pic(user_id):
     user = sql.get_user(user_id)
-    if user.pic_given:
-        return send_file(os.path.join("..", config.config["USER_PICS"], user_id + ".jpg"), as_attachment=True)
-    else:
-        return send_file(os.path.join("..", config.config["USER_PICS"], "default.jpg"), as_attachment=True)
+    if user:
+        if user.pic_given:
+            return send_file(os.path.join("..", config.config["USER_PICS"], user_id + ".jpg"), as_attachment=True)
+        else:
+            return send_file(os.path.join("..", config.config["USER_PICS"], "default.jpg"), as_attachment=True)
+
+
+# TODO: NOT JUST JPEG
+@app.route('/task_pic/<task_id>')
+def get_task_pic(task_id):
+    task = sql.get_task(task_id)
+    if task:
+        if task.pic_given:
+            return send_file(os.path.join("..", config.config["TASK_PICS"], task_id + ".jpg"), as_attachment=True)
+        else:
+            return send_file(os.path.join("..", config.config["TASK_PICS"], "default.jpg"), as_attachment=True)
 
 
 # upload task to db
@@ -117,6 +130,7 @@ def upload_file():
     zip_file_tag = 'ZIP_FILE'
     task_name_tag = 'TASK_NAME'
     task_desc_tag = 'TASK_DESC'
+    task_img_tag = 'TASK_PIC'
 
     flash('Checking file existence...')
     if not request_file_exists(request.files, js_file_tag):
@@ -126,6 +140,7 @@ def upload_file():
 
     js_file = request.files[js_file_tag]
     zip_file = request.files[zip_file_tag]
+    task_pic = request.files[task_img_tag]
     task_name = request.values[task_name_tag]
     task_desc = request.values[task_desc_tag]
 
@@ -142,7 +157,7 @@ def upload_file():
 
     no_tasks_currently = not sql.get_task_list()
     # adds to DB and extracts
-    sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc)
+    sql.add_to_db(current_user.user_id, js_file, zip_file, task_name, task_desc, task_pic)
     log('Uploaded new task ' + task_name + ' (' + js_file.filename + ' ' + zip_file.filename + ')')
 
     update_task_list(ALL_TASKS)

@@ -23,6 +23,7 @@ class Tasks(db.Model):
     time_completed = Column(DateTime)
     in_progress = Column(Boolean)
     is_complete = Column(Boolean)
+    pic_given = Column(Boolean, nullable=False, default=False)
 
     # task_id is autoincremented
     def __init__(self, owner_id, time_submitted,

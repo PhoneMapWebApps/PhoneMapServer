@@ -39,7 +39,7 @@ def get_user_tasks(user_id, task_id=ALL_TASKS):
     return [val.to_json() for val in values]
 
 
-def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
+def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic):
     """ Creates a task and all its subtasks given the data"""
     task = Tasks(user_id, datetime.utcnow(), task_name, task_desc)
 
@@ -49,6 +49,9 @@ def add_to_db(user_id, js_file, zip_file, task_name, task_desc):
     db.session.flush()
 
     log('Saving and extracting...')
+    if task_pic:
+        save_pic(task.task_id, task_pic, app.config['TASK_PICS'])
+        task.pic_given = True
     save_and_extract_files(task.task_id, js_file, zip_file,
                            app.config['JS_FOLDER'],
                            app.config['ZIP_FOLDER'])
