@@ -57,6 +57,14 @@ def save_and_extract_js(task_id, js_file, js_path):
         shutil.copyfile(js_file.name, os.path.join(js_path, js_filename))
 
 
+def save_pic(name, pic, pic_path):
+    pic_filename = str(name) + ".jpg"  # or png?
+    if hasattr(pic, 'save'):
+        pic.save(os.path.join(pic_path, pic_filename))
+    else:
+        shutil.copyfile(pic.name, os.path.join(pic_path, pic_filename))
+
+
 def save_and_extract_zip(task_id, zip_file, zip_path):
     zip_filename = str(task_id) + ".zip"
     # TODO: fix tests to use FileStorage and not a reader -> remove this IF statement

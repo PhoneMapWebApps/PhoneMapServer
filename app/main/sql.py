@@ -6,7 +6,7 @@ from flask import current_app as app
 from app import db
 from app.main import stats
 from app.main.files import save_and_extract_files, save_and_extract_js, save_and_extract_zip, \
-    remove_task_files, create_res
+    remove_task_files, create_res, save_pic
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, Users, TaskStats
 from app.main.sockets import update_task_list
@@ -303,8 +303,13 @@ def does_user_exist(username):
     return False
 
 
-def add_user(username, password, fullname, organisation):
+def add_user(username, password, fullname, organisation, user_pic):
     user = Users(username, password, fullname, organisation)
     db.session.add(user)
+    db.session.flush()
+    if user_pic:
+        save_pic(user.user_id, user_pic, app.config["USER_PICS"])
+        user.pic_given = True
     db.session.commit()
+
     return user

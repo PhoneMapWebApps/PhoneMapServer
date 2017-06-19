@@ -21,16 +21,16 @@ def background_thread():
 
 
 # TODO: reenable error handler later
-@socketio.on_error("/browser")
-def on_error(value):
-    if isinstance(value, KeyError):
-        log("KeyError caught")
-        print(value)
-        emit("error", {'error': "A KeyError has occured. The required data "
-                                "was not passed, or passed with the wrong names"})
-    else:
-        print(value)
-        raise(value)
+# @socketio.on_error("/browser")
+# def on_error(value):
+#     if isinstance(value, KeyError):
+#         log("KeyError caught")
+#         print(value)
+#         emit("error", {'error': "A KeyError has occured. The required data "
+#                                 "was not passed, or passed with the wrong names"})
+#     else:
+#         print(value)
+#         raise(value)
 
 
 def code_available():
@@ -42,18 +42,18 @@ def update_task_list(task_id):
     if not current_user.is_authenticated:
         return
     # client gets new task list
-    emit("new_tasks", {'task_id' : task_id}, namespace="/browser", room=current_user.user_id)
+    emit("new_tasks", {'task_id': task_id}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
-        emit("new_tasks", {'task_id' : task_id}, namespace="/browser", room=ROOT_ID)
+        emit("new_tasks", {'task_id': task_id}, namespace="/browser", room=ROOT_ID)
 
 
 def delete_task(taskid):
     if not current_user.is_authenticated:
         return
-    
-    emit("del_task", {'task_id' : taskid}, namespace="/browser", room=current_user.user_id)
+
+    emit("del_task", {'task_id': taskid}, namespace="/browser", room=current_user.user_id)
     if current_user.user_id != ROOT_ID:
-        emit("del_task", {'task_id' : taskid}, namespace="/browser", room=ROOT_ID)
+        emit("del_task", {'task_id': taskid}, namespace="/browser", room=ROOT_ID)
 
 
 def log_and_emit(data, broadcast):
@@ -139,7 +139,7 @@ class BrowserSpace(MainSpace):
             return
 
         tasks = sql.get_user_tasks(current_user.user_id)
-        emit('user_tasks', {'data' : tasks, 'replace':False, 'remove':False})
+        emit('user_tasks', {'data': tasks, 'replace': False, 'remove': False})
 
     @staticmethod
     def on_get_user_task_by_id(message):
@@ -177,7 +177,7 @@ class PhoneSpace(MainSpace):
         emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
                              'count': 0})
 
-# TODO: refactor android to use this socket instead of HTTP
+    # TODO: refactor android to use this socket instead of HTTP
     @staticmethod
     def on_get_task_list(message=None):
         session['receive_count'] = session.get('receive_count', 0) + 1

@@ -6,7 +6,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 
 from app import login_manager, app as config
 from app.main import sql, stats
-from app.main.files import request_file_exists, file_extension_okay, flashmsg
+from app.main.files import request_file_exists, file_extension_okay, flashmsg, save_pic
 from app.main.logger import log, log_filename
 from app.main.sockets import code_available, update_task_list, delete_task
 from app.main.stats import ALL_TASKS
@@ -58,19 +58,21 @@ def add_user():
     if request.method == "POST":
         username = request.form['username']
         if username == "":
-            return render_template("create.html", issue=True)
+            return render_template("create.html", issue="You can't use an empty username!")
         password = request.form['password']
         if len(password) < 6:
-            return render_template("create.html", issue=True)
+            return render_template("create.html", issue="Your password is under 6 characters long "
+                                                        "- please make it longer")
 
         exists = sql.does_user_exist(username)
         if exists:
-            log("User " + username + " already exists, please choose another name")
-            return render_template("create.html", exists=True)
+            return render_template("create.html", issue="Username already exists, please "
+                                                        "use another!")
         else:
             fullname = request.form["fullname"]
             organisation = request.form["organisation"]
-            user = sql.add_user(username, password, fullname, organisation)
+            user_pic = request.files["picture"]
+            user = sql.add_user(username, password, fullname, organisation, user_pic)
             login_user(user)
             return redirect(url_for("main.index"))
     else:

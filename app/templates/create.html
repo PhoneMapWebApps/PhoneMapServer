@@ -54,7 +54,7 @@
             <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png">
             <img style="display:block;" width="100%" height="100%" class="text-center" src="static/motto.png">
             <br/>
-            <form action="/create" method="post">
+            <form action="/create" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                   <label for="username">Your new user name</label>
                   <input class="form-control" id="username" type=text name=username>
@@ -71,19 +71,16 @@
                   <label for="password">Password</label>
                   <input class="form-control" id="password" type=password name=password>
                 </div>
+                  <label class="btn btn-default btn-file">
+                      Select user picture <input type="file" name="picture" accept="image/*" style="display: none;">
+                  </label>
                 <input class="btn btn-default" type=submit value="Create and login">
             </form>
             <br/>
-            {% if exists %}
-              <div class="alert alert-dismissable alert-danger fade in">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
-                Username already exists!
-              </div>
-            {% endif %}
             {% if issue %}
               <div class="alert alert-dismissable alert-danger fade in">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">x</a>
-                Empty username provided or password is less than 6 characters long!
+                {{ issue }}
               </div>
             {% endif %}
             <br/>

@@ -8,6 +8,8 @@ class Config(object):
     JS_FOLDER = 'data/js/'
     ZIP_FOLDER = 'data/zip/'
     RES_FOLDER = 'data/results/'
+    USER_PICS = 'data/pictures/user'
+    TASK_PICS = 'data/pictures/tasks'
 
 
 class Production(Config):
@@ -27,5 +29,7 @@ class Testing(Config):
     JS_FOLDER = "test/upload/data/js/"
     ZIP_FOLDER = "test/upload/data/zip/"
     RES_FOLDER = "test/upload/data/results/"
+    USER_PICS = 'test/upload/data/pictures/user'
+    TASK_PICS = 'test/upload/data/pictures/tasks'
     # setup to work with circleCI
     SQLALCHEMY_DATABASE_URI = 'postgresql://ubuntu@localhost:5432/circle_test'

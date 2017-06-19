@@ -132,6 +132,7 @@ class Users(db.Model):
     fullname = Column(Text, nullable=False)
     organisation = Column(Text, nullable=False)
     password = Column(String, nullable=False)
+    pic_given = Column(Boolean, nullable=False, default=False)
 
     def __init__(self, username, password, fullname, organisation="None given"):
         self.username = username
