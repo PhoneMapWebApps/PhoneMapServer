@@ -23,16 +23,18 @@ class TestTasks(BaseTestCase):
                 print(current_user.username)
                 with open('test/resources/test.js', 'rb') as js_file:
                     with open('test/resources/test.zip', 'rb') as zip_file:
-                        resp = self.client.post(
-                            '/tasks',
-                            data=dict(
-                                JS_FILE=js_file,
-                                ZIP_FILE=zip_file,
-                                TASK_NAME="Some Test Task",
-                                TASK_DESC="Interesting description"
-                            ),
-                            content_type='multipart/form-data'
-                        )
+                        with open('test/resources/martin.jpg') as pic:
+                            resp = self.client.post(
+                                '/tasks',
+                                data=dict(
+                                    TASK_PIC=pic,
+                                    JS_FILE=js_file,
+                                    ZIP_FILE=zip_file,
+                                    TASK_NAME="Some Test Task",
+                                    TASK_DESC="Interesting description"
+                                ),
+                                content_type='multipart/form-data'
+                            )
 
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(os.path.isfile(os.path.join(app.config['JS_FOLDER'], '1.js')))

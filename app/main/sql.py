@@ -39,7 +39,7 @@ def get_user_tasks(user_id, task_id=ALL_TASKS):
     return [val.to_json() for val in values]
 
 
-def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic):
+def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic=None):
     """ Creates a task and all its subtasks given the data"""
     task = Tasks(user_id, datetime.utcnow(), task_name, task_desc)
 

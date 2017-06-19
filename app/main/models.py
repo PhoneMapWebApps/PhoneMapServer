@@ -64,7 +64,9 @@ class Tasks(db.Model):
                 "progress_subtasks": progress_subtasks,
                 "completed_subtasks": completed_subtasks,
                 "owner_fullname": owner.fullname,
-                "owner_org": owner.organisation}
+                "owner_org": owner.organisation,
+                "owner_pic": owner.pic_name,
+                "task_pic": self.pic_name}
 
     def __repr__(self):
         return '<Task %r>' % self.task_id
@@ -191,4 +193,4 @@ class TaskStats(db.Model):
 
     def to_json(self):
         return {"task_id": self.task_id,
-                "worker_stats" : self.worker_stats}
+                "worker_stats": self.worker_stats}
