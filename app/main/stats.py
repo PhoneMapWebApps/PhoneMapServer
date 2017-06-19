@@ -17,38 +17,75 @@ class StatsManager:
     STAT_HISTORY = 50
 
     def __init__(self):
+        time = datetime.utcnow()
+        time_str = strftime(self.TIME_FORMAT, time.timetuple())
+
         self.dict_numworkers = {}
         self.dict_worker_stats = defaultdict(list)
         self.dict_numworkers[ALL_TASKS] = 0
+        self.dict_worker_stats[ALL_TASKS].append((time_str, self.dict_numworkers[ALL_TASKS]))
+
+    # DOES NOT COMMIT - is done later
+    def init_stats(self, task_id):
+        time = datetime.utcnow()
+        time_str = strftime(self.TIME_FORMAT, time.timetuple())
+
+        all_tasks = TaskStats.query.get(ALL_TASKS)
+        if not all_tasks:
+            all_tasks = TaskStats(ALL_TASKS)
+            db.session.add(all_tasks)
+
+        self.dict_numworkers[task_id] = 0
+
+        curtask = TaskStats(task_id)
+
+        curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
+        all_tasks.worker_stats[time_str] = self.dict_numworkers[ALL_TASKS]
+
+        self.dict_worker_stats[task_id].append((time_str, self.dict_numworkers[task_id]))
+
+        db.session.add(curtask)
+        flag_modified(curtask, "worker_stats")
+        flag_modified(all_tasks, "worker_stats")
 
     def incworkers(self, task_id):
         time = datetime.utcnow()
-        time_dict = strftime(self.TIME_FORMAT, time.timetuple())
+        time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
-        if not curtask:
-            curtask = TaskStats(task_id)
-            db.session.add(curtask)
-            db.session.commit()
-            self.dict_numworkers[task_id] = 0
+        all_tasks = TaskStats.query.get(ALL_TASKS)
 
         self.dict_numworkers[task_id] += 1
         self.dict_numworkers[ALL_TASKS] += 1  # total
-        curtask.worker_stats[time_dict] = self.dict_numworkers[task_id]
-        self.dict_worker_stats[task_id].append((time_dict, self.dict_numworkers[task_id]))
+
+        curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
+        all_tasks.worker_stats[time_str] = self.dict_numworkers[ALL_TASKS]
+
+        self.dict_worker_stats[task_id].append((time_str, self.dict_numworkers[task_id]))
+        self.dict_worker_stats[ALL_TASKS].append((time_str, self.dict_numworkers[ALL_TASKS]))
+
         flag_modified(curtask, "worker_stats")
+        flag_modified(all_tasks, "worker_stats")
         db.session.commit()
 
     def decworkers(self, task_id):
         time = datetime.utcnow()
-        time_dict = strftime(self.TIME_FORMAT, time.timetuple())
+        time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
+        all_tasks = TaskStats.query.get(task_id)
+
         self.dict_numworkers[task_id] -= 1
         self.dict_numworkers[ALL_TASKS] -= 1  # total
-        curtask.worker_stats[time_dict] = self.dict_numworkers[task_id]
-        self.dict_worker_stats[task_id].append((time_dict, self.dict_numworkers[task_id]))
+
+        curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
+        all_tasks.worker_stats[time_str] = self.dict_numworkers[ALL_TASKS]
+
+        self.dict_worker_stats[task_id].append((time_str, self.dict_numworkers[task_id]))
+        self.dict_worker_stats[ALL_TASKS].append((time_str, self.dict_numworkers[ALL_TASKS]))
+
         flag_modified(curtask, "worker_stats")
+        flag_modified(all_tasks, "worker_stats")
         db.session.commit()
 
     def get_workertimes_json(self):

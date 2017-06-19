@@ -58,8 +58,11 @@ def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic=None):
 
     create_subtasks(task.task_id)
 
+    stats.init_stats(task.task_id)
+
     # make persistent
     db.session.commit()
+
     return task.task_id
 
 
