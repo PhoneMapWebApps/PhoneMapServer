@@ -20,6 +20,7 @@ class StatsManager:
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
+        self.dict_phoneids = {}
         self.dict_numworkers = {}
         self.dict_worker_stats = defaultdict(list)
         self.dict_numworkers[ALL_TASKS] = 0
@@ -36,6 +37,7 @@ class StatsManager:
             db.session.add(all_tasks)
 
         self.dict_numworkers[task_id] = 0
+        self.dict_phoneids[task_id] = ""
 
         curtask = TaskStats(task_id)
 
@@ -48,7 +50,10 @@ class StatsManager:
         flag_modified(curtask, "worker_stats")
         flag_modified(all_tasks, "worker_stats")
 
-    def incworkers(self, task_id):
+    def incworkers(self, task_id, android_id):
+        #if self.dict_phoneids[task_id] == android_id:
+        #    return
+
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
@@ -56,6 +61,7 @@ class StatsManager:
         all_tasks = TaskStats.query.get(ALL_TASKS)
 
         self.dict_numworkers[task_id] += 1
+        self.dict_phoneids[task_id] = android_id
         self.dict_numworkers[ALL_TASKS] += 1  # total
 
         curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
@@ -68,12 +74,20 @@ class StatsManager:
         flag_modified(all_tasks, "worker_stats")
         db.session.commit()
 
-    def decworkers(self, task_id):
+    def decworkers(self, task_id, android_id):
+        #if self.dict_phoneids[task_id] == android_id:
+        #    return
+
+        if self.dict_numworkers[task_id] <= 0:
+            return
+
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
-        all_tasks = TaskStats.query.get(task_id)
+        all_tasks = TaskStats.query.get(ALL_TASKS)
+
+        self.dict_phoneids[task_id] = android_id
 
         self.dict_numworkers[task_id] -= 1
         self.dict_numworkers[ALL_TASKS] -= 1  # total
@@ -86,6 +100,19 @@ class StatsManager:
 
         flag_modified(curtask, "worker_stats")
         flag_modified(all_tasks, "worker_stats")
+        db.session.commit()
+
+    def finish(self, task_id):
+        time = datetime.utcnow()
+        time_str = strftime(self.TIME_FORMAT, time.timetuple())
+
+        curtask = TaskStats.query.get(task_id)
+
+        self.dict_numworkers[task_id] = 0
+        curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
+        self.dict_worker_stats[task_id].append((time_str, self.dict_numworkers[task_id]))
+
+        flag_modified(curtask, "worker_stats")
         db.session.commit()
 
     def get_workertimes_json(self):
