@@ -74,9 +74,6 @@ class StatsManager:
         db.session.commit()
 
     def decworkers(self, task_id, android_id):
-        if android_id in self.dict_phoneids[task_id]:
-            return
-
         if self.dict_numworkers[task_id] <= 0:
             return
 
@@ -87,6 +84,7 @@ class StatsManager:
         all_tasks = TaskStats.query.get(ALL_TASKS)
 
         self.dict_phoneids[task_id] = android_id
+        self.dict_phoneids[task_id].remove(android_id)
 
         self.dict_numworkers[task_id] -= 1
         self.dict_numworkers[ALL_TASKS] -= 1  # total

@@ -307,7 +307,7 @@ def disconnected(session_id):
 
         db.session.commit()
 
-        subtaskID = phone.task_id
+        subtaskID = phone.subtask_id
         taskID = SubTasks.query.get(subtaskID).task_id
         stats.decworkers(taskID, phone.android_id)
         update_task_list(taskID)
