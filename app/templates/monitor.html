@@ -107,7 +107,7 @@
             });
 
             phonesocket.on('set_code', function(msg) {
-              $('#log').append('<br>' + $('<div/>').text('Received some code ' + msg.code + " and " + msg.data ).html());
+              $('#log').append('<br>' + $('<div/>').text('Received some code and data').html());
               $("#log").scrollTop($("#log")[0].scrollHeight);
             });
 
