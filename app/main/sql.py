@@ -148,7 +148,7 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     if phone.subtask_id:
         curr_sub = SubTasks.query.get(phone.subtask_id)
 
-        if curr_sub and not curr_sub.is_complete:
+        if curr_sub and not curr_sub.is_complete and not curr_sub.has_failed:
             curr_task = Tasks.query.get(curr_sub.task_id)
             return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
 
@@ -181,7 +181,7 @@ def get_next_subtask(android_id, session_id):
     if phone.subtask_id:
         curr_sub = SubTasks.query.get(phone.subtask_id)
 
-        if curr_sub and not curr_sub.is_complete:
+        if curr_sub and not curr_sub.is_complete and not curr_sub.has_failed:
             curr_task = Tasks.query.get(curr_sub.task_id)
             return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
 
