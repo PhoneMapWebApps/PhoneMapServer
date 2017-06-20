@@ -111,10 +111,10 @@
 
                 var task_status_str = '';
 
-                if(task.in_progress)
-                    task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
-                else if(task.is_complete)
+                if(task.is_complete)
                     task_status_str = '<td>Complete!</td>';
+                else if(task.in_progress)
+                    task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
                 else
                     task_status_str = '<td>Ready</td>';
 
