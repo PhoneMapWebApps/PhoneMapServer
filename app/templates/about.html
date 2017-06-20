@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <title>SciRunner Login</title>
+    <style>
+      .login-form {
+        display: table;
+      }
+
+      .login-input {
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+
+      body {
+        /* Margin bottom by footer height */
+        margin-bottom: 60px;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* Set the fixed height of the footer here */
+        height: 80px;
+        background-color: #f5f5f5;
+      }
+
+      .container .text-muted {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+      <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">sciRunner Server internal alpha</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li><a href="/">Task manager</a></li>
+          <li class="active"><a href="/">Server monitor</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="/myaccount">My account</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+  <div class="container-fluid">
+  <p>
+
+      Each submitted tasks should consist of one javascript file and multipe other
+files enclosed in one zip folder. When the code runs it is passed the contents
+or one file as the 'data' parameter.
+      <br></br>
+
+The code is executed using LiquidCore library which is used to communicate
+between the code and the host app.
+      <br></br>
+The code should contain two listeners: 'onStart' and 'onDelete':
+      <br></br>
+LiquidCore.on('onStart', function(data) {});
+LiquidCore.on('onDestroy', function(force_stop) {});
+      <ul>
+      <li>The onStart listener is passed one parameter, this are the contents of one
+ data file.</li>
+      <li>The onDestroy listener is passed one parameter, it is a boolean value
+ specifying whether the onDestroy was called by the system.</li>
+  </ul>
+{#<br>#}
+{# - The onStart listener is passed one parameter, this are the contents of one#}
+{# data file.#}
+{#<br>#}
+{# - The onDestroy listener is passed one parameter, it is a boolean value#}
+{# specifying whether the onDestroy was called by the system.#}
+
+  </p>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted text-center">Copyright (c) sciRunner Team 2017, All rights reserved.</p>
+    </div>
+  </footer>
+
+  </body>
+</html>
