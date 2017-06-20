@@ -10,9 +10,6 @@ from .. import socketio, app
 
 thread = None
 
-clients = []
-tasks_finished = 0
-
 ROOT_ID = 1
 
 
@@ -130,12 +127,6 @@ class BrowserSpace(MainSpace):
                              'count': 0})
 
     @staticmethod
-    def on_running():
-        emit('running',
-             {'number': len(clients),
-              'count': session['receive_count']})
-
-    @staticmethod
     def on_get_user_tasks():
         if not current_user.is_authenticated:
             return
@@ -151,6 +142,10 @@ class BrowserSpace(MainSpace):
             return
         emit('user_tasks', {'data': task, 'replace': True, 'remove': False}, namespace="/browser", broadcast=True)
 
+    @staticmethod
+    def on_retry_failed(message):
+        sql.restart_failed_tasks(int(message["data"]))
+
 
 class PhoneSpace(MainSpace):
     @staticmethod
@@ -160,9 +155,6 @@ class PhoneSpace(MainSpace):
             thread = socketio.start_background_task(target=background_thread)
         log(BrowserSpace.CLIENT_CONNECT_MSG + request.sid)
 
-        # add phone to the running list!
-        clients.append(request.sid)
-
         emit('my_response', {'data': BrowserSpace.SERVER_RESPONSE_CON_OK,
                              'count': 0})
 
@@ -170,8 +162,6 @@ class PhoneSpace(MainSpace):
     def on_disconnect():
         sql.disconnected(request.sid)
         log(BrowserSpace.CLIENT_DISCNCT_MSG + request.sid)
-
-        clients.remove(request.sid)
 
         emit('my_response', {'data': BrowserSpace.CLIENT_DISCNCT_MSG + request.sid,
                              'count': 0})
@@ -242,12 +232,15 @@ class PhoneSpace(MainSpace):
 
     @staticmethod
     def on_return(message):
-        global tasks_finished
         phone_id = message["id"]
         res = message["return"]
         sql.execution_complete(phone_id, res)
-        tasks_finished += 1
-        log_and_emit(phone_id + BrowserSpace.CLIENT_FINISHED + res, True)
+
+        session['receive_count'] = session.get('receive_count', 0) + 1
+        emit('my_response',
+             {'data': "A subtask has finished", 'count': session['receive_count']},
+             broadcast=True)
+        log("TASK RETURNED")
 
 
 socketio.on_namespace(PhoneSpace('/phone'))
