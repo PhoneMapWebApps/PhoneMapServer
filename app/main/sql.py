@@ -83,8 +83,9 @@ def remove_from_db(task_id):
     db.session.delete(task)
     task_data = TaskStats.query.get(task_id)
     db.session.delete(task_data)
-    remove_task_files(task_id, app.config['JS_FOLDER'],
-                      app.config['ZIP_FOLDER'], app.config['RES_FOLDER'])
+    remove_task_files(task_id, task.pic_name, app.config['JS_FOLDER'],
+                      app.config['ZIP_FOLDER'], app.config['RES_FOLDER'], app.config['TASK_PICS'])
+
     db.session.commit()
 
 
