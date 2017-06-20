@@ -34,6 +34,12 @@ def is_safe_url(next_url):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
+@app.route('/about')
+@login_required
+def about():
+    return render_template("about.html")
+
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == 'POST':
