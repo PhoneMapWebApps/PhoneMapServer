@@ -155,10 +155,10 @@
                         '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
                         '          <b>Amend uploaded code or data:</b>' +
                         '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement JS code <input type="file" name="JS_FILE" style="display: none;">' +
+                        '              Select replacement JS code <input type="file" name="JS_FILE" accept="application/javascript" style="display: none;">' +
                         '          </label>' +
                         '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement data archive <input type="file" name="ZIP_FILE" style="display: none;">' +
+                        '              Select replacement data archive <input type="file" name="ZIP_FILE" accept="application/zip" style="display: none;">' +
                         '          </label>&nbsp;&nbsp;' +
                         '          <label class="btn btn-primary btn-file">' +
                         '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
@@ -170,7 +170,6 @@
                 var shouldShow = false;
                 if(replace) {
                     task_entries[String(task.task_id)].replaceWith(task_table_entry_str);
-                    $('#task' + String(task.task_id)).replaceWith(task_table_entry_str);
                     if(task_contents[String(task.task_id)].find('div').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
