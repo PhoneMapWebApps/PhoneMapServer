@@ -154,9 +154,9 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
 
     # NOTE: task query only required for the start_task func
     task = Tasks.query.get(task_id)
-    if not task or task.is_complete:
-        log("Selected task " + str(task_id) + " is unavailable! Either it is already finished, or "
-                                              "it doesnt exist.")
+    if not task or task.is_complete or task.some_failed:
+        log("Selected task " + str(task_id) + " is unavailable! Either it is already finished,"
+                                              " is failing, or it doesnt exist.")
         return None, None, None
 
     subtask = SubTasks.query.\
@@ -185,8 +185,7 @@ def get_next_subtask(android_id, session_id):
             curr_task = Tasks.query.get(curr_sub.task_id)
             return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
 
-    # Proposed change below is relevant to these 4 lines.
-    task = Tasks.query.filter_by(is_complete=False).order_by(Tasks.task_id.asc()).first()
+    task = Tasks.query.filter_by(is_complete=False, some_failed=False).order_by(Tasks.task_id.asc()).first()
     if not task:
         log("No more tasks!")
         return None, None, None
