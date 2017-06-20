@@ -109,6 +109,10 @@
                     return;
                 }
 
+                if (replace && !(task.task_id in task_entries)) {
+                    return;
+                }
+
                 var task_status_str = '';
 
                 if(task.is_complete)

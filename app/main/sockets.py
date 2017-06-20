@@ -145,14 +145,12 @@ class BrowserSpace(MainSpace):
 
     @staticmethod
     def on_get_user_task_by_id(message):
-        if not current_user.is_authenticated:
+        task = sql.get_task(int(message["data"]))
+        if not task:
+            emit('user_tasks', {'remove': True, 'task_id': message["data"]}, namespace="/browser", broadcast=True)
             return
 
-        task = sql.get_user_tasks(current_user.user_id, int(message["data"]))
-        if not task:
-            emit('user_tasks', {'remove': True, 'task_id': message["data"]})
-            return
-        emit('user_tasks', {'data': task, 'replace': True, 'remove': False})
+        emit('user_tasks', {'data': task, 'replace': True, 'remove': False}, namespace="/browser", broadcast=True)
 
 
 class PhoneSpace(MainSpace):
