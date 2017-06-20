@@ -104,7 +104,7 @@ def remove_task_files(task_id, pic_name, js_folder, zip_folder, res_folder, pics
 def create_res(res_path, task_id, compl_subtasks):
     folder_path = os.path.join(res_path, str(task_id))
     if os.path.isdir(folder_path):
-        os.remove(folder_path)
+        shutil.rmtree(folder_path)
 
     os.makedirs(folder_path)
 
