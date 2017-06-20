@@ -20,7 +20,7 @@ class StatsManager:
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
-        self.dict_phoneids = {}
+        self.dict_phoneids = defaultdict(list)
         self.dict_numworkers = {}
         self.dict_worker_stats = defaultdict(list)
         self.dict_numworkers[ALL_TASKS] = 0
@@ -37,7 +37,6 @@ class StatsManager:
             db.session.add(all_tasks)
 
         self.dict_numworkers[task_id] = 0
-        self.dict_phoneids[task_id] = []
         curtask = TaskStats(task_id)
 
         curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
