@@ -103,7 +103,10 @@ def remove_task_files(task_id, pic_name, js_folder, zip_folder, res_folder, pics
 
 def create_res(res_path, task_id, compl_subtasks):
     folder_path = os.path.join(res_path, str(task_id))
-    os.makedirs(folder_path, exist_ok=True)
+    if os.path.isdir(folder_path):
+        os.remove(folder_path)
+
+    os.makedirs(folder_path)
 
     for idx, val in enumerate(compl_subtasks):
         file_path = os.path.join(folder_path, str(idx) + ".txt")
