@@ -138,13 +138,13 @@ class BrowserSpace(MainSpace):
     def on_get_user_task_by_id(message):
         task = [sql.get_task(int(message["data"])).to_json()]
         if not task:
-            emit('user_tasks', {'remove': True, 'task_id': message["data"]}, namespace="/browser", broadcast=True)
+            emit('user_tasks', {'remove': True, 'task_id': message["data"]}, broadcast=True)
             return
-        emit('user_tasks', {'data': task, 'replace': True, 'remove': False}, namespace="/browser", broadcast=True)
+        emit('user_tasks', {'data': task, 'replace': True, 'remove': False}, broadcast=True)
 
     @staticmethod
     def on_retry_failed(message):
-        sql.restart_failed_tasks(int(message["data"]))
+        sql.restart_failed_tasks(int(message["failed_task_id"]))
 
 
 class PhoneSpace(MainSpace):
