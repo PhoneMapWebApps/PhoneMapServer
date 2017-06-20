@@ -170,6 +170,7 @@
                 var shouldShow = false;
                 if(replace) {
                     task_entries[String(task.task_id)].replaceWith(task_table_entry_str);
+                    $('#task' + String(task.task_id)).replaceWith(task_table_entry_str);
                     if(task_contents[String(task.task_id)].find('div').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
