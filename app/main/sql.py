@@ -234,7 +234,6 @@ def start_task(android_id):
 
     db.session.commit()
     stats.incworkers(task.task_id, android_id)
-    update_task_list(task.task_id)
     return True
 
 

@@ -8,6 +8,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from app import db
 from app.main.models import TaskStats
+from app.main.sockets import update_task_list
 
 ALL_TASKS = -1
 
@@ -71,6 +72,7 @@ class StatsManager:
         flag_modified(curtask, "worker_stats")
         flag_modified(all_tasks, "worker_stats")
         db.session.commit()
+        update_task_list(task_id)
 
     def decworkers(self, task_id, android_id):
         if task_id in self.dict_numworkers:
