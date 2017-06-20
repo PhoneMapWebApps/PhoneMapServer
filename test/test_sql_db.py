@@ -34,7 +34,7 @@ class TestSQLdb(BaseTestCase):
             old_nTasks = SubTasks.query.count()
             with open('test/resources/test.js', 'rb') as js_file:
                 with open('test/resources/test.zip', 'rb') as zip_file:
-                    submission_time = datetime.utcnow()
+                    submission_time = datetime.now()
                     val = sql.add_to_db(ROOT_ID, js_file, zip_file, "Task", "Desc")
 
             self.assertIsNotNone(val)

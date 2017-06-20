@@ -17,7 +17,7 @@ class StatsManager:
     STAT_HISTORY = 50
 
     def __init__(self):
-        time = datetime.utcnow()
+        time = datetime.now()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         self.dict_phoneids = defaultdict(list)
@@ -28,7 +28,7 @@ class StatsManager:
 
     # DOES NOT COMMIT - is done later
     def init_stats(self, task_id):
-        time = datetime.utcnow()
+        time = datetime.now()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         all_tasks = TaskStats.query.get(ALL_TASKS)
@@ -52,7 +52,7 @@ class StatsManager:
         if android_id in self.dict_phoneids[task_id]:
             return False
 
-        time = datetime.utcnow()
+        time = datetime.now()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
@@ -78,7 +78,7 @@ class StatsManager:
             if self.dict_numworkers[task_id] <= 0:
                 return
 
-        time = datetime.utcnow()
+        time = datetime.now()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
@@ -100,7 +100,7 @@ class StatsManager:
         db.session.commit()
 
     def finish(self, task_id):
-        time = datetime.utcnow()
+        time = datetime.now()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
         curtask = TaskStats.query.get(task_id)
