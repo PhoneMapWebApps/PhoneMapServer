@@ -162,7 +162,7 @@ class TestGetCode(BaseTestCase):
         self.assertIsNotNone(task_name)
         self.assertIsNotNone(task_name_2)
         self.assertEqual(task_id, 1)
-        self.assertEqual(task_id_2, 2)
+        self.assertEqual(task_id_2, 1)
 
 
 # class TestUserAuth(BaseTestCase):

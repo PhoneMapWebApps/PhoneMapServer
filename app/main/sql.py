@@ -144,10 +144,12 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     """ Gets a prefered subtask for android_id given the specified task_id"""
     phone = get_phone(android_id, session_id)
 
-    # TODO: implement this check
-    # curr_sub = SubTasks.query.get(phone.subtask_id)
-    # if not curr_sub.is_complete:
-    #     pass
+    if phone.subtask_id:
+        curr_sub = SubTasks.query.get(phone.subtask_id)
+
+        if curr_sub and not curr_sub.is_complete:
+            curr_task = Tasks.query.get(curr_sub.task_id)
+            return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
 
     # NOTE: task query only required for the start_task func
     task = Tasks.query.get(task_id)
@@ -175,10 +177,12 @@ def get_next_subtask(android_id, session_id):
         done by the phone specified by android_id."""
     phone = get_phone(android_id, session_id)
 
-    # TODO: implement this check
-    # curr_sub = SubTasks.query.get(phone.subtask_id)
-    # if not curr_sub.is_complete:
-    #     pass
+    if phone.subtask_id:
+        curr_sub = SubTasks.query.get(phone.subtask_id)
+
+        if curr_sub and not curr_sub.is_complete:
+            curr_task = Tasks.query.get(curr_sub.task_id)
+            return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
 
     # Proposed change below is relevant to these 4 lines.
     task = Tasks.query.filter_by(is_complete=False).order_by(Tasks.task_id.asc()).first()
