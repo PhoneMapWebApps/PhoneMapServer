@@ -295,8 +295,6 @@ def execution_complete(android_id, result):
                 update_task_list(task.task_id)
             else:
                 db.session.commit()
-                stats.decworkers(task.task_id, android_id)
-                update_task_list(task.task_id)
 
 
 def disconnected(session_id):
@@ -307,6 +305,11 @@ def disconnected(session_id):
         phone.session_id = None
 
         db.session.commit()
+
+        subtaskID = phone.task_id
+        taskID = SubTasks.query.get(subtaskID).task_id
+        stats.decworkers(taskID, phone.android_id)
+        update_task_list(taskID)
 
 
 # USERS

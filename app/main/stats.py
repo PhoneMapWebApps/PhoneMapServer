@@ -37,8 +37,7 @@ class StatsManager:
             db.session.add(all_tasks)
 
         self.dict_numworkers[task_id] = 0
-        self.dict_phoneids[task_id] = ""
-
+        self.dict_phoneids[task_id] = []
         curtask = TaskStats(task_id)
 
         curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
@@ -51,8 +50,8 @@ class StatsManager:
         flag_modified(all_tasks, "worker_stats")
 
     def incworkers(self, task_id, android_id):
-        #if self.dict_phoneids[task_id] == android_id:
-        #    return
+        if android_id in self.dict_phoneids[task_id]:
+            return
 
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
@@ -61,7 +60,7 @@ class StatsManager:
         all_tasks = TaskStats.query.get(ALL_TASKS)
 
         self.dict_numworkers[task_id] += 1
-        self.dict_phoneids[task_id] = android_id
+        self.dict_phoneids[task_id].append(android_id)
         self.dict_numworkers[ALL_TASKS] += 1  # total
 
         curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
@@ -75,8 +74,8 @@ class StatsManager:
         db.session.commit()
 
     def decworkers(self, task_id, android_id):
-        #if self.dict_phoneids[task_id] == android_id:
-        #    return
+        if android_id in self.dict_phoneids[task_id]:
+            return
 
         if self.dict_numworkers[task_id] <= 0:
             return
