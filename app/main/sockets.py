@@ -152,6 +152,10 @@ class BrowserSpace(MainSpace):
 
         emit('user_tasks', {'data': task, 'replace': True, 'remove': False}, namespace="/browser", broadcast=True)
 
+    @staticmethod
+    def on_retry_failed(message):
+        sql.restart_failed_tasks(int(message["data"]))
+
 
 class PhoneSpace(MainSpace):
     @staticmethod

@@ -144,6 +144,11 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     """ Gets a prefered subtask for android_id given the specified task_id"""
     phone = get_phone(android_id, session_id)
 
+    # TODO: implement this check
+    # curr_sub = SubTasks.query.get(phone.subtask_id)
+    # if not curr_sub.is_complete:
+    #     pass
+
     # NOTE: task query only required for the start_task func
     task = Tasks.query.get(task_id)
     if not task or task.is_complete:
@@ -152,7 +157,7 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
         return None, None, None
 
     subtask = SubTasks.query.\
-        filter_by(task_id=task_id, is_complete=False, in_progress=False).first()
+        filter_by(task_id=task_id, is_complete=False, in_progress=False, has_failed=False).first()
     if not subtask:
         log("Selected task " + str(task_id) + " already has all tasks in progress.")
         return None, None, None
@@ -170,6 +175,11 @@ def get_next_subtask(android_id, session_id):
         done by the phone specified by android_id."""
     phone = get_phone(android_id, session_id)
 
+    # TODO: implement this check
+    # curr_sub = SubTasks.query.get(phone.subtask_id)
+    # if not curr_sub.is_complete:
+    #     pass
+
     # Proposed change below is relevant to these 4 lines.
     task = Tasks.query.filter_by(is_complete=False).order_by(Tasks.task_id.asc()).first()
     if not task:
@@ -177,7 +187,7 @@ def get_next_subtask(android_id, session_id):
         return None, None, None
 
     subtask = SubTasks.query.\
-        filter_by(task_id=task.task_id, is_complete=False, in_progress=False). \
+        filter_by(task_id=task.task_id, is_complete=False, in_progress=False, has_failed=False). \
         order_by(SubTasks.subtask_id).first()
 
     if not subtask:
@@ -232,9 +242,12 @@ def stop_execution(android_id):
 
         phone.is_processing = False
         subtask.in_progress = False
+        subtask.has_failed = True
         subtask.time_started = None
-        # NOTE: usees filter() not filter_by(), so as to be able to use | operator.
-        # Has a different syntax than filter_by(), double check if changed.
+        task.some_failed = True
+        # NOTE: uses filter() not filter_by(), so as to be able to use | operator.
+        # NOTE2:Has a different syntax than filter_by(), double check if changed.
+        # finds all subtasks and checks if any are running/completed to update the parent task
         subtasks = SubTasks.query.filter(SubTasks.task_id == subtask.task_id,
                                          (SubTasks.in_progress | SubTasks.is_complete)).all()
         # then need to set task to not running
@@ -346,3 +359,12 @@ def add_user(username, password, fullname, organisation, user_pic):
     db.session.commit()
 
     return user
+
+
+def restart_failed_tasks(task_id):
+    task = Tasks.query.get(task_id)
+    subtasks = SubTasks.query.filter_by(task_id=task_id, has_failed=True).all()
+    for subtask in subtasks:
+        subtask.has_failed = False
+    task.some_failed = False
+    db.session.commit()

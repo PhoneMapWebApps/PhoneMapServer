@@ -23,6 +23,7 @@ class Tasks(db.Model):
     time_completed = Column(DateTime)
     in_progress = Column(Boolean)
     is_complete = Column(Boolean)
+    some_failed = Column(Boolean, default=False)
     pic_name = Column(String(255), nullable=False, default="default.jpg")
 
     # task_id is autoincremented
@@ -60,6 +61,7 @@ class Tasks(db.Model):
                 "time_completed": completed,
                 "in_progress": self.in_progress,
                 "is_complete": self.is_complete,
+                "some_failed": self.some_failed,
                 "task_desc": self.task_desc,
                 "total_subtasks": total_subtasks,
                 "progress_subtasks": progress_subtasks,
@@ -89,6 +91,7 @@ class SubTasks(db.Model):
     time_completed = Column(DateTime)
     in_progress = Column(Boolean)
     is_complete = Column(Boolean)
+    has_failed = Column(Boolean, default=False)
     result = Column(Text)
 
     # subtask_id is autoincremented

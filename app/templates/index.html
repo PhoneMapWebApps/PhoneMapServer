@@ -143,6 +143,11 @@
                           '<label>' +
                           '<a class="btn btn-success" style="margin-left:10px;" href="/tasks/get/' + task.task_id + '">Get results</a>' +
                           '</label>' : '';
+
+                var possibleRetryButton = task.some_failed ?
+                          '' +
+                          '<button type="button" class="retry btn btn-warning" style="margin-left:10px;" id="retry' + task.task_id + '">Retry failed tasks</button>' +
+                          '' : '';
                 var task_expanded_entry_str = $(
                         '<tr id="content' + task.task_id + '"><td colspan="7">' +
                         '<div style="display: none;">' +
@@ -157,7 +162,7 @@
                         '          </label>&nbsp;&nbsp;' +
                         '          <label class="btn btn-primary btn-file">' +
                         '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
-                        '          </label>' + possibleGetResultsButton +
+                        '          </label>' + possibleGetResultsButton + possibleRetryButton +
                         '      </form>' +
                         '</div>' +
                         '</td></tr>');
@@ -275,6 +280,11 @@
               event.preventDefault();
               task_contents[$(this).attr('id').substr(7)].find("div").slideToggle();
             //  task_contents[$(this).attr('id').substr(7)].find("div.chart-container").toggle();
+            });
+
+            $(document).on("click", ".retry", function(event) {
+              alert($(this).attr('id').substr(5));
+              browsersocket.emit('retry_failed');
             });
 
             $( '.fileinput').change(function(){
