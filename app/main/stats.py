@@ -73,8 +73,9 @@ class StatsManager:
         db.session.commit()
 
     def decworkers(self, task_id, android_id):
-        if self.dict_numworkers[task_id] <= 0:
-            return
+        if task_id in self.dict_numworkers:
+            if self.dict_numworkers[task_id] <= 0:
+                return
 
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
