@@ -82,7 +82,6 @@ class StatsManager:
         curtask = TaskStats.query.get(task_id)
         all_tasks = TaskStats.query.get(ALL_TASKS)
 
-        self.dict_phoneids[task_id] = android_id
         self.dict_phoneids[task_id].remove(android_id)
 
         self.dict_numworkers[task_id] -= 1
