@@ -155,8 +155,8 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     # NOTE: task query only required for the start_task func
     task = Tasks.query.get(task_id)
     if not task or task.is_complete:
-        log("Selected task " + str(task_id) + " is unavailable! Either it is already finished, or \
-            it doesnt exist.")
+        log("Selected task " + str(task_id) + " is unavailable! Either it is already finished, or "
+                                              "it doesnt exist.")
         return None, None, None
 
     subtask = SubTasks.query.\
