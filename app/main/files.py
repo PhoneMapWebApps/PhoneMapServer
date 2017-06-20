@@ -85,7 +85,7 @@ def extract(zip_path, task_id):
         zip_ref.extractall(os.path.join(folder_path, ""))
 
 
-def remove_task_files(task_id, js_folder, zip_folder, res_folder):
+def remove_task_files(task_id, pic_name, js_folder, zip_folder, res_folder, pics_folder):
     os.remove(os.path.join(js_folder, str(task_id) + '.js'))
     os.remove(os.path.join(zip_folder, str(task_id) + '.zip'))
     try:
@@ -94,6 +94,9 @@ def remove_task_files(task_id, js_folder, zip_folder, res_folder):
         pass
     else:
         shutil.rmtree(os.path.join(res_folder, str(task_id)))
+
+    if pic_name != "default.jpg" and os.path.isfile(os.path.join(pics_folder, pic_name)):
+        os.remove(os.path.join(pics_folder, pic_name))
 
     shutil.rmtree(os.path.join(zip_folder, str(task_id)))
 
