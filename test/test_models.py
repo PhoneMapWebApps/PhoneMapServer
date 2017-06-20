@@ -12,7 +12,7 @@ ROOT_ID = 1
 class TestTasks(BaseTestCase):
     def test_single_task(self):
         with app.app_context():
-            task = Tasks(ROOT_ID, datetime.utcnow())
+            task = Tasks(ROOT_ID, datetime.now())
             db.session.add(task)
             db.session.commit()
 
@@ -22,8 +22,8 @@ class TestTasks(BaseTestCase):
 
     def test_double_task(self):
         with app.app_context():
-            task = Tasks(ROOT_ID, datetime.utcnow())
-            task2 = Tasks(ROOT_ID, datetime.utcnow())
+            task = Tasks(ROOT_ID, datetime.now())
+            task2 = Tasks(ROOT_ID, datetime.now())
             db.session.add(task)
             db.session.add(task2)
             db.session.commit()
@@ -43,16 +43,16 @@ class TestSubTasks(BaseTestCase):
         with app.app_context():
             with self.assertRaises(IntegrityError):
                 # 0 is never valid task_id, given SQL starts to increment at 1
-                subtask = SubTasks(0, "somefile.js", datetime.utcnow())
+                subtask = SubTasks(0, "somefile.js", datetime.now())
                 db.session.add(subtask)
                 db.session.commit()
 
     def test_single_subtask(self):
         with app.app_context():
-            task = Tasks(ROOT_ID, datetime.utcnow())
+            task = Tasks(ROOT_ID, datetime.now())
             db.session.add(task)
             db.session.flush()
-            subtask = SubTasks(task.task_id, "somefile.js", datetime.utcnow())
+            subtask = SubTasks(task.task_id, "somefile.js", datetime.now())
             db.session.add(subtask)
             db.session.commit()
 
@@ -62,11 +62,11 @@ class TestSubTasks(BaseTestCase):
 
     def test_double_subtask(self):
         with app.app_context():
-            task = Tasks(ROOT_ID, datetime.utcnow())
+            task = Tasks(ROOT_ID, datetime.now())
             db.session.add(task)
             db.session.flush()
-            subtask = SubTasks(task.task_id, "randomfile1.js", datetime.utcnow())
-            subtask2 = SubTasks(task.task_id, "randomfile2.js", datetime.utcnow())
+            subtask = SubTasks(task.task_id, "randomfile1.js", datetime.now())
+            subtask2 = SubTasks(task.task_id, "randomfile2.js", datetime.now())
             db.session.add(subtask)
             db.session.add(subtask2)
             db.session.commit()

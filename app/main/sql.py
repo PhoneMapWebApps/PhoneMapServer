@@ -41,7 +41,7 @@ def get_user_tasks(user_id, task_id=ALL_TASKS):
 
 def add_to_db(user_id, js_file, zip_file, task_name, task_desc, task_pic=None):
     """ Creates a task and all its subtasks given the data"""
-    task = Tasks(user_id, datetime.utcnow(), task_name, task_desc)
+    task = Tasks(user_id, datetime.now(), task_name, task_desc)
 
     db.session.add(task)
 
@@ -72,7 +72,7 @@ def create_subtasks(task_id):
     directory = os.path.join(app.config['ZIP_FOLDER'], str(task_id))
     # TODO: NO SUBDIRECTORIES (YET?)
     for filename in os.listdir(directory):
-        subtask = SubTasks(task_id, filename, datetime.utcnow())
+        subtask = SubTasks(task_id, filename, datetime.now())
         db.session.add(subtask)
 
 
@@ -228,8 +228,8 @@ def start_task(android_id):
     task.in_progress = True
     subtask.in_progress = True
     if not task.time_started:
-        task.time_started = datetime.utcnow()
-    subtask.time_started = datetime.utcnow()
+        task.time_started = datetime.now()
+    subtask.time_started = datetime.now()
 
     db.session.commit()
     if stats.incworkers(task.task_id, android_id):
@@ -272,7 +272,7 @@ def execution_complete(android_id, result):
             task_id = subtask.task_id
             task = Tasks.query.get(task_id)
 
-            time = datetime.utcnow()
+            time = datetime.now()
 
             phone.is_processing = False
             subtask.in_progress = False
