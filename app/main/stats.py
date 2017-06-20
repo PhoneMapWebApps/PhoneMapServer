@@ -51,6 +51,9 @@ class StatsManager:
         flag_modified(all_tasks, "worker_stats")
 
     def incworkers(self, task_id, android_id):
+        #if self.dict_phoneids[task_id] == android_id:
+        #    return
+
         time = datetime.utcnow()
         time_str = strftime(self.TIME_FORMAT, time.timetuple())
 
@@ -72,8 +75,8 @@ class StatsManager:
         db.session.commit()
 
     def decworkers(self, task_id, android_id):
-        if self.dict_phoneids[task_id] == android_id:
-            return
+        #if self.dict_phoneids[task_id] == android_id:
+        #    return
 
         if self.dict_numworkers[task_id] <= 0:
             return
