@@ -218,7 +218,7 @@ def start_task(android_id):
     subtask.time_started = datetime.utcnow()
 
     db.session.commit()
-    stats.incworkers(task.task_id)
+    stats.incworkers(task.task_id, android_id)
     update_task_list(task.task_id)
     return True
 
@@ -242,7 +242,7 @@ def stop_execution(android_id):
             task.in_progress = False
             task.time_started = None
         db.session.commit()
-        stats.decworkers(task.task_id)
+        stats.finish(task.task_id)
         update_task_list(task.task_id)
 
 
@@ -272,10 +272,14 @@ def execution_complete(android_id, result):
                 compl_sub_tasks = SubTasks.query.filter_by(task_id=task_id).all()
 
                 create_res(app.config["RES_FOLDER"], task_id, compl_sub_tasks)
+                db.session.commit()
 
-            db.session.commit()
-            stats.decworkers(task.task_id)
-            update_task_list(task.task_id)
+                stats.finish(task.task_id)
+                update_task_list(task.task_id)
+            else:
+                db.session.commit()
+                stats.decworkers(task.task_id, android_id)
+                update_task_list(task.task_id)
 
 
 def disconnected(session_id):
