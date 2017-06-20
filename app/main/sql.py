@@ -308,9 +308,10 @@ def disconnected(session_id):
 
         subtaskID = phone.subtask_id
         if subtaskID:
-            taskID = SubTasks.query.get(subtaskID).task_id
-            stats.decworkers(taskID, phone.android_id)
-            update_task_list(taskID)
+            subtask = SubTasks.query.get(subtaskID)
+            if subtask:
+                stats.decworkers(subtask.task_id, phone.android_id)
+                update_task_list(subtask.task_id)
 
 
 # USERS
