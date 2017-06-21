@@ -83,12 +83,24 @@ LiquidCore.on('onDestroy', function(force_stop) {});
       <li>The onDestroy listener is passed one parameter, it is a boolean value
  specifying whether the onDestroy was called by the system.</li>
   </ul>
-{#<br>#}
-{# - The onStart listener is passed one parameter, this are the contents of one#}
-{# data file.#}
-{#<br>#}
-{# - The onDestroy listener is passed one parameter, it is a boolean value#}
-{# specifying whether the onDestroy was called by the system.#}
+
+The code also has to emit a 'ready' message at the end of the code to indicate
+that the code has successfully laoded and the environment has been initialized.
+      <br></br>
+
+Example:
+LiquidCore.emit('ready');
+      <br></br>
+
+The code should also contain a 'return' emit with paramaters. If return is not
+called then the server will assume execution failed.
+      <br></br>
+
+Example:
+LiquidCore.emit('return', payload);
+      <br></br>
+
+All other code can be the same as normal Javascript.
 
   </p>
   </div>
