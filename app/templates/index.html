@@ -157,10 +157,10 @@
                         '      <form class="form-inline" id="update_data" action="tasks/' + task.task_id +'" method="POST" enctype="multipart/form-data">' +
                         '          <b>Amend uploaded code or data:</b>' +
                         '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement JS code <input type="file" name="JS_FILE" accept="application/javascript" style="display: none;">' +
+                        '             <div id="jsfile' + task.task_id + '">Select replacement JS code</div> <input type="file" name="JS_FILE" class="jsfile" id="jsfile' + task.task_id + '" accept="application/javascript" style="display: none;">' +
                         '          </label>' +
                         '          <label class="btn btn-default btn-file">' +
-                        '              Select replacement data archive <input type="file" name="ZIP_FILE" accept="application/zip" style="display: none;">' +
+                        '              <div id="zipfile' + task.task_id + '">Select replacement data archive</div><input type="file" name="ZIP_FILE" class="zipfile" id="zipfile' + task.task_id + '" accept="application/zip" style="display: none;">' +
                         '          </label>&nbsp;&nbsp;' +
                         '          <label class="btn btn-primary btn-file">' +
                         '              Reupload Files <input type="submit" value="Reupload files" style="display: none;">' +
@@ -173,7 +173,7 @@
                 if(replace) {
                     task_entries[String(task.task_id)].replaceWith(task_table_entry_str);
                     $('#task' + String(task.task_id)).replaceWith(task_table_entry_str);
-                    if(task_contents[String(task.task_id)].find('div').is(":visible"))
+                    if(task_contents[String(task.task_id)].find('div:first').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
                 } else {
@@ -184,7 +184,7 @@
 
                 var task_canvas = $('<canvas width="1000px" height="250px" id="chart' + task.task_id + '"></canvas>');
                 //$(chart_container).insertAfter($(task_expanded_entry_str).find('div'));
-                $(task_expanded_entry_str).find('div').append($(task_canvas));
+                $(task_expanded_entry_str).find('div:first').append($(task_canvas));
 
 
                 task_contents[String(task.task_id)] = $(task_expanded_entry_str);
@@ -228,9 +228,9 @@
                 //} else {
                    $(task_contents[String(task.task_id)]).insertAfter($('#tasklist > tbody').find('#task'+task.task_id));
                    if(shouldShow) {
-                          task_contents[String(task.task_id)].find("div").show();
+                          task_contents[String(task.task_id)].find("div:first").show();
                    } else {
-                          task_contents[String(task.task_id)].find("div").hide();
+                          task_contents[String(task.task_id)].find("div:first").hide();
                    }
                 //}
             }
@@ -281,13 +281,34 @@
 
             $(document).on("click", ".expand_btn", function(event) {
               event.preventDefault();
-              task_contents[$(this).attr('id').substr(7)].find("div").slideToggle();
+              task_contents[$(this).attr('id').substr(7)].find("div:first").slideToggle();
             //  task_contents[$(this).attr('id').substr(7)].find("div.chart-container").toggle();
             });
 
             $(document).on("click", ".retry", function(event) {
               browsersocket.emit('retry_failed', {failed_task_id: $(this).attr('id').substr(5)});
               $(this).remove();
+            });
+
+            $(document).on('change', '.jsfile', function() {
+              targetID = $(this).attr('id');
+              if(($(this).value !== "")) {
+                $('#'+targetID).html("JavaScript code selected&nbsp<i class=\"fa fa-check\" aria-hidden=\"true\"></i>");
+              }
+            });
+
+            $(document).on('change', '.zipfile', function() {
+              targetID = $(this).attr('id');
+              if(($(this).value !== "")) {
+                $('#'+targetID).html("Data archive selected&nbsp<i class=\"fa fa-check\" aria-hidden=\"true\"></i>");
+              }
+            });
+
+            $(document).on('change', '.picfile', function() {
+              targetID = $(this).attr('id');
+              if(($(this).value !== "")) {
+                $('#'+targetID).html("Task picture selected&nbsp<i class=\"fa fa-check\" aria-hidden=\"true\"></i>");
+              }
             });
 
             $( '.fileinput').change(function(){
@@ -338,13 +359,13 @@
                 <input class="form-control" id="taskdesc" type="text" name="TASK_DESC" value="">
               </div>
               <label class="btn btn-default btn-file">
-                  Select JavaScript code <input type="file" name="JS_FILE" accept="application/javascript" style="display: none;">
+                 <div id="jsfiletxt">Select JavaScript code</div><input type="file" name="JS_FILE" class="jsfile" id="jsfiletxt" accept="application/javascript" style="display: none;">
               </label>
               <label class="btn btn-default btn-file">
-                  Select data archive <input type="file" name="ZIP_FILE" accept="application/zip" style="display: none;">
+                  <div id="zipfiletxt">Select data archive</div><input type="file" name="ZIP_FILE" class="zipfile" id="zipfiletxt" accept="application/zip" style="display: none;">
               </label>
               <label class="btn btn-default btn-file">
-                  Select task picture <input type="file" name="TASK_PIC" accept="image/*" style="display: none;">
+                  <div id="picfiletxt">Select task picture</div><input type="file" name="TASK_PIC" class="picfile" id="picfiletxt" accept="image/*" style="display: none;">
               </label>
               <label class="btn btn-primary btn-file">
                   Upload Files <input type="submit" value="Upload files" style="display: none;">
