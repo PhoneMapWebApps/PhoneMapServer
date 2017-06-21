@@ -100,6 +100,15 @@
                 }
             });
 
+            browsersocket.on('progbar', function(data) {
+                var task = data['task_id'];
+                var value = data['value'];
+                if(data['task_id'] in task_entries) {
+                    $('#progbar' + task).val(value);
+                    $('#perc' + task).text(parseInt(value*100));
+                }
+            });
+
             var task_entries = {};
             var task_contents = {};
             var task_charts = {};
@@ -114,13 +123,16 @@
                 }
 
                 var task_status_str = '';
+                var percentage = parseInt((task.completed_subtasks / task.total_subtasks) * 100);
 
                 if(task.is_complete)
                     task_status_str = '<td>Complete!</td>';
                 else if(task.some_failed)
                     task_status_str = '<td><div class="text-danger">Error!</div></td>';
                 else if(task.in_progress)
-                    task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
+                    task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning, ' +
+                        '<div style="display: inline" id="perc'+task.task_id+'">' +
+                        percentage+ '</div>% complete . . .</td>';
                 else
                     task_status_str = '<td>Ready</td>';
 
@@ -176,6 +188,7 @@
                     if(task_contents[String(task.task_id)].find('div:first').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
+                    $('#progbar' + String(task.task_id)).remove();
                 } else {
                     task_entries[String(task.task_id)] = $(task_table_entry_str).appendTo($('#tasklist'));
                 }
@@ -186,6 +199,13 @@
                 //$(chart_container).insertAfter($(task_expanded_entry_str).find('div'));
                 $(task_expanded_entry_str).find('div:first').append($(task_canvas));
 
+                var progress_bar = (
+                    '<progress id=\"progbar' + task.task_id +
+                    '\" max=\"1\" value=\"'+task.completed_subtasks / task.total_subtasks+
+                    '\" style=\"width: 1000px\"></progress>'
+                );
+
+                $(task_expanded_entry_str).find('div:first').append($(progress_bar));
 
                 task_contents[String(task.task_id)] = $(task_expanded_entry_str);
 
@@ -237,6 +257,7 @@
 
             browsersocket.on('del_task', function(data) {
                     $("#task" + data["task_id"]).remove();
+                    $('#progbar' + String(task.task_id)).remove();
                     task_entries[String(data["task_id"])].find('tr').remove();
                     task_contents[String(data["task_id"])].remove();
                     task_charts[String(data["task_id"])].destroy();

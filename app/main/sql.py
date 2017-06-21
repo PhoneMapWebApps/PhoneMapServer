@@ -9,7 +9,7 @@ from app.main.files import save_and_extract_files, save_and_extract_js, save_and
     remove_task_files, create_res, save_pic
 from app.main.logger import log
 from app.main.models import Tasks, SubTasks, AndroidIDs, Users, TaskStats
-from app.main.sockets import update_task_list
+from app.main.sockets import update_task_list, update_progbar
 from app.main.stats import ALL_TASKS
 
 
@@ -295,6 +295,7 @@ def execution_complete(android_id, result):
                 update_task_list(task.task_id)
             else:
                 db.session.commit()
+                update_progbar(task.task_id)
 
 
 def disconnected(session_id):

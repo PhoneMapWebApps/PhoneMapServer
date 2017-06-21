@@ -45,6 +45,19 @@ def update_task_list(task_id):
     if current_user.user_id != ROOT_ID:
         emit("new_tasks", {'task_id': task_id}, namespace="/browser", room=ROOT_ID)
 
+def update_progbar(task_id):
+    task = sql.get_task(task_id).to_json()
+    value = task['completed_subtasks'] / task['total_subtasks']
+
+    if not current_user.is_authenticated:
+        emit("progbar", {'task_id': task_id, 'value':value}, namespace="/browser", broadcast=True)
+        return
+
+    # client gets new task list
+    emit("progbar", {'task_id': task_id, 'value':value}, namespace="/browser", room=current_user.user_id)
+    if current_user.user_id != ROOT_ID:
+        emit("progbar", {'task_id': task_id, 'value':value}, namespace="/browser", room=ROOT_ID)
+
 
 def delete_task(taskid):
     if not current_user.is_authenticated:
