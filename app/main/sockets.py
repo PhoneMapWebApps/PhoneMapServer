@@ -45,6 +45,7 @@ def update_task_list(task_id):
     if current_user.user_id != ROOT_ID:
         emit("new_tasks", {'task_id': task_id}, namespace="/browser", room=ROOT_ID)
 
+
 def update_progbar(task_id):
     task = sql.get_task(task_id).to_json()
     value = task['completed_subtasks'] / task['total_subtasks']
@@ -158,6 +159,7 @@ class BrowserSpace(MainSpace):
     @staticmethod
     def on_retry_failed(message):
         sql.restart_failed_tasks(int(message["failed_task_id"]))
+        code_available()
 
 
 class PhoneSpace(MainSpace):
