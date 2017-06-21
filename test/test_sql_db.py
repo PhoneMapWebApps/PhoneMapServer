@@ -101,19 +101,19 @@ class TestGetCodeFail(BaseTestCase):
 
     def test_get_next_fail(self):
         with app.app_context():
-            data_file, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
+            data_file_path, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
 
-        self.assertIsNone(data_file)
+        self.assertIsNone(data_file_path)
         self.assertIsNone(task_id)
         self.assertIsNone(task_name)
 
     def test_get_by_task_id_fail(self):
         with app.app_context():
             # task 0 is never present
-            data_file, task_id, task_name = sql.get_subtask_by_task_id("TestPhone",
+            data_file_path, task_id, task_name = sql.get_subtask_by_task_id("TestPhone",
                                                                        "TestSessionID", 1)
 
-        self.assertIsNone(data_file)
+        self.assertIsNone(data_file_path)
         self.assertIsNone(task_id)
         self.assertIsNone(task_name)
 
@@ -135,9 +135,9 @@ class TestGetCode(BaseTestCase):
                     # test.zip has 3 files = 3 subtasks -> 6 subtasks total (numbered 1-6)
                     sql.add_to_db(ROOT_ID, js_file, zip_file, "A Task", "some stuff")
                     sql.add_to_db(ROOT_ID, js_file, zip_file, "Another Task", "more stuff")
-            data_file, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
+            data_file_path, task_id, task_name = sql.get_next_subtask("TestPhone", "TestSessionID")
 
-        self.assertIsNotNone(data_file)
+        self.assertIsNotNone(data_file_path)
         self.assertIsNotNone(task_id)
         self.assertIsNotNone(task_name)
         self.assertEqual(task_id, 1)
@@ -150,13 +150,13 @@ class TestGetCode(BaseTestCase):
                     # test.zip has 3 files = 3 subtasks -> 6 subtasks total (numbered 1-6)
                     sql.add_to_db(ROOT_ID, js_file, zip_file, "A Task", "some stuff")
                     sql.add_to_db(ROOT_ID, js_file, zip_file, "Another Task", "more stuff")
-            data_file, task_id, task_name = sql.get_subtask_by_task_id("TestPhone",
+            data_file_path, task_id, task_name = sql.get_subtask_by_task_id("TestPhone",
                                                                        "TestSessionID", 1)
-            data_file_2, task_id_2, task_name_2 = sql.get_subtask_by_task_id("TestPhone",
+            data_file_path_2, task_id_2, task_name_2 = sql.get_subtask_by_task_id("TestPhone",
                                                                              "TestSessionID", 2)
 
-        self.assertIsNotNone(data_file)
-        self.assertIsNotNone(data_file_2)
+        self.assertIsNotNone(data_file_path)
+        self.assertIsNotNone(data_file_path_2)
         self.assertIsNotNone(task_id)
         self.assertIsNotNone(task_id_2)
         self.assertIsNotNone(task_name)

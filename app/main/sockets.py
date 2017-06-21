@@ -76,8 +76,8 @@ def log_and_emit(data, broadcast):
     log(data)
 
 
-def send_code(data_file_name, task_id, task_name):
-    if not (data_file_name and task_id and task_name):
+def send_code(data_file_path, task_id, task_name):
+    if not (data_file_path and task_id and task_name):
         emit('no_tasks')
         log_and_emit(BrowserSpace.SERVER_NO_TASKS, True)
         return
@@ -85,7 +85,7 @@ def send_code(data_file_name, task_id, task_name):
     js_file_path = os.path.join(app.config['JS_FOLDER'], str(task_id) + ".js")
     with open(js_file_path, "r") as js_file:
         js_data = js_file.read()
-    zip_file_path = os.path.join(app.config['ZIP_FOLDER'], str(task_id), data_file_name)
+    zip_file_path = os.path.join(data_file_path)
     with open(zip_file_path, "r") as data_file:
         data = data_file.read()
     emit('set_code', {'code': js_data, 'data': data, 'task_name': task_name})
@@ -200,8 +200,8 @@ class PhoneSpace(MainSpace):
         phone_id = message["id"]
         log_and_emit(BrowserSpace.CLIENT_GET_CODE + phone_id, True)
 
-        data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
-        send_code(data_file, task_id, task_name)
+        data_file_path, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
+        send_code(data_file_path, task_id, task_name)
 
     @staticmethod
     def on_get_code_by_id(message):
@@ -215,17 +215,17 @@ class PhoneSpace(MainSpace):
         #           this task is preferred
         force_task = message.get("force_task", False)
 
-        data_file, task_id, task_name = sql.get_subtask_by_task_id(phone_id,
+        data_file_path, task_id, task_name = sql.get_subtask_by_task_id(phone_id,
                                                                    request.sid,
                                                                    requested_task_id)
 
         if force_task:
-            send_code(data_file, task_id, task_name)
+            send_code(data_file_path, task_id, task_name)
 
-        elif not (data_file and task_id and task_name):
-            data_file, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
+        elif not (data_file_path and task_id and task_name):
+            data_file_path, task_id, task_name = sql.get_next_subtask(phone_id, request.sid)
 
-        send_code(data_file, task_id, task_name)
+        send_code(data_file_path, task_id, task_name)
 
     @staticmethod
     def on_start_code(message):

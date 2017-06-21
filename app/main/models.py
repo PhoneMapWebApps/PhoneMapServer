@@ -85,7 +85,7 @@ class SubTasks(db.Model):
                                 onupdate="CASCADE",
                                 ondelete="CASCADE"),
                      index=True)
-    data_file = Column(String(255), nullable=False)
+    data_file_path = Column(String(255), nullable=False)
     time_submitted = Column(DateTime, nullable=False)
     time_started = Column(DateTime)
     time_completed = Column(DateTime)
@@ -95,9 +95,9 @@ class SubTasks(db.Model):
     result = Column(Text)
 
     # subtask_id is autoincremented
-    def __init__(self, task_id, data_file, time_submitted):
+    def __init__(self, task_id, data_file_path, time_submitted):
         self.task_id = task_id
-        self.data_file = data_file
+        self.data_file_path = data_file_path
         self.time_submitted = time_submitted
         self.time_started = None
         self.time_completed = None

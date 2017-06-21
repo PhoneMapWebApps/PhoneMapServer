@@ -71,9 +71,12 @@ def create_subtasks(task_id):
     """ Creates individual subtasks given a parent task_id """
     directory = os.path.join(app.config['ZIP_FOLDER'], str(task_id))
     # TODO: NO SUBDIRECTORIES (YET?)
-    for filename in os.listdir(directory):
-        subtask = SubTasks(task_id, filename, datetime.now())
-        db.session.add(subtask)
+
+    for root, dir, files in os.walk(directory):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            subtask = SubTasks(task_id, file_path, datetime.now())
+            db.session.add(subtask)
 
 
 def remove_from_db(task_id):
@@ -150,7 +153,7 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
 
         if curr_sub and not curr_sub.is_complete and not curr_sub.has_failed:
             curr_task = Tasks.query.get(curr_sub.task_id)
-            return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
+            return curr_sub.data_file_path, curr_sub.task_id, curr_task.task_name
 
     # NOTE: task query only required for the start_task func
     task = Tasks.query.get(task_id)
@@ -170,7 +173,7 @@ def get_subtask_by_task_id(android_id, session_id, task_id):
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, subtask.task_id, task.task_name
+    return subtask.data_file_path, subtask.task_id, task.task_name
 
 
 def get_next_subtask(android_id, session_id):
@@ -183,7 +186,7 @@ def get_next_subtask(android_id, session_id):
 
         if curr_sub and not curr_sub.is_complete and not curr_sub.has_failed:
             curr_task = Tasks.query.get(curr_sub.task_id)
-            return curr_sub.data_file, curr_sub.task_id, curr_task.task_name
+            return curr_sub.data_file_path, curr_sub.task_id, curr_task.task_name
 
     task = Tasks.query.filter_by(is_complete=False, some_failed=False).order_by(Tasks.task_id.asc()).first()
     if not task:
@@ -204,7 +207,7 @@ def get_next_subtask(android_id, session_id):
     phone.subtask_id = subtask.subtask_id
     db.session.commit()
 
-    return subtask.data_file, task.task_id, task.task_name
+    return subtask.data_file_path, task.task_id, task.task_name
 
 
 def start_task(android_id):
