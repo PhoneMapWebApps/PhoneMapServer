@@ -62,7 +62,7 @@
     </nav>
 
   <div class="container-fluid">
-  <section class="login-form col-sm-3 col-sm-offset-5">
+  <section class="login-form col-sm-4 col-sm-offset-4">
     <div class="login-input">
         <div class="row">
             <img style="display:block;" width="100%" height="100%" class="text-center" src="static/logo.png">
@@ -88,13 +88,15 @@
         </div>
       {% endif %}
 
-            <form action="/myaccount", method="post" enctype="multipart/form-data">
-                <img style="border: #000000 4px outset; display:block;" width="100%" height="100%" class="text-center" src="pictures/user/{{ current_user.pic_name }}">
-                <input type="hidden" name="update_type" value="picture">
-                <label class="btn btn-default btn-file">
-                      Choose another picture<input type="file" name="picture" accept="image/*" style="display: none;">
-                </label>
-                <input class="btn btn-default" type=submit value="Change user picture">
+            <form class="form-inline" action="/myaccount", method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="hidden" name="update_type" value="picture">
+                    <img style="float:left;border: #000000 4px outset; display:block;" width="128px" height="128px" src="pictures/user/{{ current_user.pic_name }}?{{ random_number }}">
+                    <label class="btn btn-default btn-file" style="margin-left: 10px;">
+                          Choose another picture<input type="file" name="picture" accept="image/*" style="display: none;">
+                    </label><br/>
+                    <input class="btn btn-default" style="margin-left: 10px;margin-top:10px;" type=submit value="Change user picture">
+                </div>
 
             </form>
         <br>

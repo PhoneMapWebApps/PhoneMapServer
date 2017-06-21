@@ -1,4 +1,5 @@
 import os
+import random
 from urllib.parse import urlparse, urljoin
 
 from flask import request, render_template, redirect, jsonify, url_for, flash, send_file, abort
@@ -110,6 +111,7 @@ def pics(pic_name):
 @login_required
 def change_user():
     user_id = current_user.user_id
+    random_number = random.randint(1, 32000)
     if request.method == "POST":
         type = request.values["update_type"]
         if type == "picture":
@@ -119,7 +121,8 @@ def change_user():
         elif type == "username":
             new_name = request.values["username"]
             if sql.does_user_exist(new_name):
-                return render_template('myaccount.html', error="Username already taken! please try again")
+                return render_template('myaccount.html', error="Username already taken! please try again",
+                                       random_number=random_number)
             sql.set_username(user_id, new_name)
 
         elif type == "fullname":
@@ -134,9 +137,9 @@ def change_user():
             new_pw = request.values["password"]
             sql.set_password(user_id, new_pw)
 
-        return render_template('myaccount.html', success="Successfully updated!")
+        return render_template('myaccount.html', success="Successfully updated!", random_number=random_number)
     else:
-        return render_template('myaccount.html')
+        return render_template('myaccount.html', random_number=random_number)
 
 
 @app.route('/tasklist')
