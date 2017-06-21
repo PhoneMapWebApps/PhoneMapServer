@@ -105,6 +105,8 @@ class StatsManager:
 
         curtask = TaskStats.query.get(task_id)
 
+        self.dict_phoneids[task_id] = []
+
         self.dict_numworkers[task_id] = 0
         curtask.worker_stats[time_str] = self.dict_numworkers[task_id]
         self.dict_worker_stats[task_id].append((time_str, self.dict_numworkers[task_id]))

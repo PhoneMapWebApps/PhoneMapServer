@@ -117,6 +117,8 @@
 
                 if(task.is_complete)
                     task_status_str = '<td>Complete!</td>';
+                else if(task.some_failed)
+                    task_status_str = '<td><div class="text-danger">Error!</div></td>';
                 else if(task.in_progress)
                     task_status_str = '<td><i class="fa fa-spinner fa-spin"></i>&nbspRunning . . .</td>';
                 else
@@ -170,6 +172,7 @@
                 var shouldShow = false;
                 if(replace) {
                     task_entries[String(task.task_id)].replaceWith(task_table_entry_str);
+                    $('#task' + String(task.task_id)).replaceWith(task_table_entry_str);
                     if(task_contents[String(task.task_id)].find('div').is(":visible"))
                         shouldShow = true;
                     task_contents[String(task.task_id)].remove();
@@ -284,6 +287,7 @@
 
             $(document).on("click", ".retry", function(event) {
               browsersocket.emit('retry_failed', {failed_task_id: $(this).attr('id').substr(5)});
+              $(this).remove();
             });
 
             $( '.fileinput').change(function(){

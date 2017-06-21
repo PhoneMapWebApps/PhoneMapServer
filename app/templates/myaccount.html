@@ -53,7 +53,7 @@
         </div>
         <ul class="nav navbar-nav">
           <li><a href="/">Task manager</a></li>
-          <li><a href="/">Server monitor</a></li>
+          <li><a href="/monitor">Server monitor</a></li>
           <li><a href="/about">About</a></li>
           <li class="active"><a href="/myaccount">My account</a></li>
           <li><a href="/logout">Logout</a></li>
@@ -91,11 +91,11 @@
             <form class="form-inline" action="/myaccount", method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="hidden" name="update_type" value="picture">
-                    <img style="float:left;border: #000000 4px outset; display:block;" width="128px" height="128px" src="pictures/user/{{ current_user.pic_name }}?{{ random_number }}">
-                    <label class="btn btn-default btn-file" style="margin-left: 10px;">
+                    <img style="float:left;border: #000000 4px outset;margin-right:10px;margin-bottom:10px; display:block;" width="128px" height="128px" src="pictures/user/{{ current_user.pic_name }}?{{ random_number }}">
+                    <label class="btn btn-default btn-file">
                           Choose another picture<input type="file" name="picture" accept="image/*" style="display: none;">
                     </label><br/>
-                    <input class="btn btn-default" style="margin-left: 10px;margin-top:10px;" type=submit value="Change user picture">
+                    <input class="btn btn-default" style="margin-top:10px;" type=submit value="Change user picture">
                 </div>
 
             </form>
